@@ -1,0 +1,11 @@
+ip addr add dev eth0 10.0.0.1/24
+ip link set dev eth0 up
+ip addr add dev eth1 10.0.1.1/24
+ip link set dev eth1 up
+
+
+#NAT for private ip's
+iptables -t nat -A POSTROUTING -s 0.0.0.0/0 -o eth2 -j MASQUERADE
+
+
+apt-get update && apt-get install pimd

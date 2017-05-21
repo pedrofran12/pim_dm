@@ -99,3 +99,11 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+
+
+
+#netkit
+*.tar.bz2
+netkit-ng/
+emulation/*.disk
