@@ -25,7 +25,7 @@ fi
 
 
 cd ../emulation/
-lstart
+lstart -p
 
 
 
