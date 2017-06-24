@@ -40,16 +40,24 @@ class Interface:
     def receive(self):
         from Main import Main
         while self.interface_enabled:
-            (raw_packet, (ip, p)) = self.socket.recvfrom(256 * 1024)
-            packet = ReceivedPacket(raw_packet, self)
-            print("packet received bytes: ", packet.bytes())
-            print("pim type received = ", packet.pim_header.msg_type)
-            print("generation id received = ", packet.pim_header.options[1].option_value)
-            Main().protocols[packet.pim_header.msg_type].receive_handle(packet)  # TODO: perceber se existe melhor maneira de fazer isto
+            try:
+                (raw_packet, (ip, p)) = self.socket.recvfrom(256 * 1024)
+                packet = ReceivedPacket(raw_packet, self)
+                #print("packet received bytes: ", packet.bytes())
+                #print("pim type received = ", packet.pim_header.msg_type)
+                #print("generation id received = ", packet.pim_header.options[1].option_value)
+                Main().protocols[packet.pim_header.msg_type].receive_handle(packet)  # TODO: perceber se existe melhor maneira de fazer isto
+            except Exception:
+                pass
 
     def send(self, data: bytes):
-        self.socket.sendto(data, (Interface.MCAST_GRP, 0))
+        if self.interface_enabled:
+            self.socket.sendto(data, (Interface.MCAST_GRP, 0))
 
     def remove(self):
         self.interface_enabled = False
+        try:
+            self.socket.shutdown(socket.SHUT_RDWR)
+        except Exception:
+            pass
         self.socket.close()

@@ -1,7 +1,5 @@
 import netifaces
-
 from prettytable import PrettyTable
-
 from Interface import Interface
 from Neighbor import Neighbor
 
@@ -17,7 +15,7 @@ class Main(object):
             if ip not in self.interfaces:
                 interface = Interface(ip)
                 self.interfaces[ip] = interface
-                #self.protocols[0].force_send_handle(interface)  # TODO force send hello packet to added interface
+                self.protocols[0].force_send(interface)
 
         # TODO: verificar melhor este metodo:
         def remove_interface(self, ip):
@@ -26,17 +24,17 @@ class Main(object):
                 for (ip_neighbor, neighbor) in list(self.neighbors.items()):
                     # TODO ver melhor este algoritmo
                     if neighbor.contact_interface == self.interfaces[ip]:
-                        self.remove_neighbor(ip_neighbor)
-                self.protocols[0].force_send_remove_handle(self.interfaces[ip])
+                        neighbor.remove()
+                self.protocols[0].force_send_remove(self.interfaces[ip])
                 self.interfaces[ip].remove()
                 del self.interfaces[ip]
-                print("removido neighbor")
+                print("removido interface")
 
         def add_neighbor(self, contact_interface, ip, random_number, keep_alive_period):
-            print("ADD NEIGHBOR")
             if ip not in self.neighbors:
+                print("ADD NEIGHBOR")
                 self.neighbors[ip] = Neighbor(contact_interface, ip, random_number, keep_alive_period)
-            print(self.neighbors.keys())
+                self.protocols[0].force_send(contact_interface)
 
         def get_neighbor(self, ip) -> Neighbor:
             if ip not in self.neighbors:
@@ -46,6 +44,7 @@ class Main(object):
         def remove_neighbor(self, ip):
             if ip in self.neighbors:
                 del self.neighbors[ip]
+                print("removido neighbor")
 
         def add_protocol(self, protocol_number, protocol_obj):
             self.protocols[protocol_number] = protocol_obj
