@@ -8,7 +8,7 @@ class Interface:
     MCAST_GRP = '224.0.0.13'
 
     # substituir ip por interface ou algo parecido
-    def __init__(self, ip_interface):
+    def __init__(self, ip_interface: str):
         s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_PIM)
 
         # allow other sockets to bind this port too
@@ -47,8 +47,9 @@ class Interface:
             print("generation id received = ", packet.pim_header.options[1].option_value)
             Main().protocols[packet.pim_header.msg_type].receive_handle(packet)  # TODO: perceber se existe melhor maneira de fazer isto
 
-    def send(self, data):
+    def send(self, data: bytes):
         self.socket.sendto(data, (Interface.MCAST_GRP, 0))
 
     def remove(self):
         self.interface_enabled = False
+        self.socket.close()

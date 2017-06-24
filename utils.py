@@ -26,7 +26,7 @@ KEEP_ALIVE_PERIOD = 160
 KEEP_ALIVE_PERIOD_TIMEOUT = 0
 
 
-def checksum(pkt):
+def checksum(pkt: bytes) -> bytes:
     if len(pkt) % 2 == 1:
         pkt += "\0"
     s = sum(array.array("H", pkt))

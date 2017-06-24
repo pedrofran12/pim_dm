@@ -1,5 +1,6 @@
 import struct
 from utils import checksum
+from Packet.PacketPimOption import PacketPimOption
 
 
 class PacketPimHeader:
@@ -10,11 +11,11 @@ class PacketPimHeader:
 
     # HELLO: type = 0
     # pim options
-    def __init__(self, msg_type):
+    def __init__(self, msg_type: int):
         self.options = []
         self.msg_type = msg_type
 
-    def add_option(self, option):
+    def add_option(self, option: PacketPimOption):
         self.options.append(option)
 
     def get_options_bytes(self):
@@ -32,7 +33,7 @@ class PacketPimHeader:
             dictionary[option.option_type] = option.option_value
         return dictionary
 
-    def bytes(self):
+    def bytes(self) -> bytes:
         # obter mensagem e criar checksum
         pim_vrs_type = (PacketPimHeader.PIM_VERSION << 4) + self.msg_type
         msg_without_chcksum = struct.pack(PacketPimHeader.PIM_HDR, pim_vrs_type, 0, 0)
