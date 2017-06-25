@@ -5,7 +5,7 @@ from Packet.ReceivedPacket import ReceivedPacket
 from Packet.PacketPimOption import PacketPimOption
 from Packet.PacketPimHeader import PacketPimHeader
 from Interface import Interface
-from Main import Main
+import Main
 from utils import KEEP_ALIVE_PERIOD_TIMEOUT
 
 
@@ -14,13 +14,13 @@ class Hello:
     TRIGGERED_HELLO_DELAY = 16  # TODO: configure via external file??
 
     def __init__(self):
-        Main().add_protocol(Hello.TYPE, self)
+        Main.add_protocol(Hello.TYPE, self)
 
         self.thread = Timer(Hello.TRIGGERED_HELLO_DELAY, self.send_handle)
         self.thread.start()
 
     def send_handle(self):
-        for (ip, interface) in list(Main().interfaces.items()):
+        for (ip, interface) in list(Main.interfaces.items()):
             self.packet_send_handle(interface)
 
         # reschedule timer
@@ -55,19 +55,18 @@ class Hello:
 
         ip = packet.ip_header.ip
         print("ip = ", ip)
-        main = Main()
         options = packet.pim_header.get_options()
-        if main.get_neighbor(ip) is None:
+        if Main.get_neighbor(ip) is None:
             # Unknown Neighbor
             if (1 in options) and (20 in options):
                 print("non neighbor and options inside")
-                main.add_neighbor(packet.interface, ip, options[20], options[1])
+                Main.add_neighbor(packet.interface, ip, options[20], options[1])
                 return
             print("non neighbor and required options not inside")
         else:
             # Already know Neighbor
             print("neighbor conhecido")
-            neighbor = main.get_neighbor(ip)
+            neighbor = Main.get_neighbor(ip)
             neighbor.heartbeat()
             if 1 in options and neighbor.keep_alive_period != options[1]:
                 print("keep alive period diferente")
@@ -75,4 +74,4 @@ class Hello:
             if 20 in options and neighbor.generation_id != options[20]:
                 print("neighbor reiniciado")
                 neighbor.remove()
-                main.add_neighbor(packet.interface, ip, options[20], options[1])
+                Main.add_neighbor(packet.interface, ip, options[20], options[1])

@@ -2,6 +2,7 @@ import socket
 import threading
 import random
 from Packet.ReceivedPacket import ReceivedPacket
+import Main
 
 class Interface:
     #IF_IP = "10.0.0.1"
@@ -38,7 +39,6 @@ class Interface:
         receive_thread.start()
 
     def receive(self):
-        from Main import Main
         while self.interface_enabled:
             try:
                 (raw_packet, (ip, p)) = self.socket.recvfrom(256 * 1024)
@@ -46,7 +46,7 @@ class Interface:
                 #print("packet received bytes: ", packet.bytes())
                 #print("pim type received = ", packet.pim_header.msg_type)
                 #print("generation id received = ", packet.pim_header.options[1].option_value)
-                Main().protocols[packet.pim_header.msg_type].receive_handle(packet)  # TODO: perceber se existe melhor maneira de fazer isto
+                Main.protocols[packet.pim_header.msg_type].receive_handle(packet)  # TODO: perceber se existe melhor maneira de fazer isto
             except Exception:
                 pass
 

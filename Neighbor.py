@@ -1,7 +1,7 @@
 from threading import Timer
 from utils import KEEP_ALIVE_PERIOD_NO_TIMEOUT, KEEP_ALIVE_PERIOD_TIMEOUT
 from Interface import Interface
-
+import Main
 
 class Neighbor:
     def __init__(self, contact_interface: Interface, ip, generation_id: int, keep_alive_period: int):
@@ -34,8 +34,7 @@ class Neighbor:
             self.neighbor_liveness_timer.start()
 
     def remove(self):
-        from Main import Main
         print('HELLO TIMER EXPIRED... remove neighbor')
         if self.neighbor_liveness_timer is not None:
             self.neighbor_liveness_timer.cancel()
-        Main().remove_neighbor(self.ip)
+        Main.remove_neighbor(self.ip)
