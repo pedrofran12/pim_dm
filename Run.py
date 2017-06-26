@@ -10,10 +10,14 @@ import argparse
 
 
 class MyDaemon(Daemon):
+    def stop(self):
+        print("stopping...")
+        # TODO: remove all interfaces
+        super(MyDaemon, self).stop()
+
     def run(self):
         Main.main()
         server_address = './uds_socket'
-
 
         # Make sure the socket does not already exist
         try:
@@ -43,10 +47,10 @@ class MyDaemon(Daemon):
                     connection.sendall(pickle.dumps(Main.list_neighbors()))
                 elif args.add_interface:
                     Main.add_interface(args.add_interface[0])
-                    connection.sendall(pickle.dumps(''))
+                    connection.shutdown(socket.SHUT_RDWR)
                 elif args.remove_interface:
                     Main.remove_interface(args.remove_interface[0])
-                    connection.sendall(pickle.dumps(''))
+                    connection.shutdown(socket.SHUT_RDWR)
             finally:
                 # Clean up the connection
                 connection.close()
@@ -54,22 +58,15 @@ class MyDaemon(Daemon):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PIM')
-    parser.add_argument("-li", "--list_interfaces", action="store_true", default=False,
-                        help="List All PIM Interfaces")
-    parser.add_argument("-ln", "--list_neighbors", action="store_true", default=False,
-                        help="List All PIM Neighbors")
-    parser.add_argument("-ai", "--add_interface", nargs=1,
-                        help="Add PIM interface")
-    parser.add_argument("-ri", "--remove_interface", nargs=1,
-                        help="Remove PIM interface")
-    parser.add_argument("-start", "--start", action="store_true", default=False,
-                        help="Start PIM")
-    parser.add_argument("-stop", "--stop", action="store_true", default=False,
-                        help="Stop PIM")
-    parser.add_argument("-restart", "--restart", action="store_true", default=False,
-                        help="Restart PIM")
-    parser.add_argument("-v", "--verbose", action="store_true", default=False,
-                        help="Verbose (print all debug messages)")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("-start", "--start", action="store_true", default=False, help="Start PIM")
+    group.add_argument("-stop", "--stop", action="store_true", default=False, help="Stop PIM")
+    group.add_argument("-restart", "--restart", action="store_true", default=False, help="Restart PIM")
+    group.add_argument("-li", "--list_interfaces", action="store_true", default=False, help="List All PIM Interfaces")
+    group.add_argument("-ln", "--list_neighbors", action="store_true", default=False, help="List All PIM Neighbors")
+    group.add_argument("-ai", "--add_interface", nargs=1, metavar='IP_INTERFACE', help="Add PIM interface")
+    group.add_argument("-ri", "--remove_interface", nargs=1, metavar='IP_INTERFACE', help="Remove PIM interface")
+    group.add_argument("-v", "--verbose", action="store_true", default=False, help="Verbose (print all debug messages)")
     args = parser.parse_args()
 
     print(parser.parse_args())
@@ -78,7 +75,6 @@ if __name__ == "__main__":
     if args.start:
         print("start")
         daemon.start()
-        print("start")
         sys.exit(0)
     elif args.stop:
         daemon.stop()
@@ -88,6 +84,10 @@ if __name__ == "__main__":
         sys.exit(0)
     elif args.verbose:
         os.system("tailf stdout")
+        sys.exit(0)
+    elif not daemon.is_running():
+        print("PIM is not running")
+        parser.print_usage()
         sys.exit(0)
 
 
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     print('connecting to %s' % server_address)
     try:
         sock.connect(server_address)
-    except (socket.error):
+    except socket.error:
         print("erro socket")
         print(sys.stderr)
         sys.exit(1)
@@ -108,8 +108,8 @@ if __name__ == "__main__":
         sock.sendall(pickle.dumps(args))
 
         data = sock.recv(1024 * 256)
-        print(pickle.loads(data))
+        if data:
+            print(pickle.loads(data))
     finally:
         print('closing socket')
         sock.close()
-

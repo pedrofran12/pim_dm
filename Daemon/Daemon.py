@@ -63,14 +63,7 @@ class Daemon:
         """Start the Daemon."""
 
         # Check for a pidfile to see if the Daemon already runs
-        try:
-            with open(self.pidfile,'r') as pf:
-
-                pid = int(pf.read().strip())
-        except IOError:
-            pid = None
-
-        if pid:
+        if self.is_running():
             message = "pidfile {0} already exist. " + \
                     "Daemon already running?\n"
             sys.stderr.write(message.format(self.pidfile))
@@ -78,7 +71,6 @@ class Daemon:
 
         # Start the Daemon
         self.daemonize()
-        print("daemonize")
         self.run()
 
     def stop(self):
@@ -86,7 +78,7 @@ class Daemon:
 
         # Get the pid from the pidfile
         try:
-            with open(self.pidfile,'r') as pf:
+            with open(self.pidfile, 'r') as pf:
                 pid = int(pf.read().strip())
         except IOError:
             pid = None
@@ -121,3 +113,18 @@ class Daemon:
 
         It will be called after the process has been daemonized by
         start() or restart()."""
+
+    def is_running(self):
+        try:
+            with open(self.pidfile, 'r') as pf:
+                pid = int(pf.read().strip())
+        except IOError:
+            return False
+
+        """ Check For the existence of a unix pid. """
+        try:
+            os.kill(pid, 0)
+        except OSError:
+            return False
+        else:
+            return True
