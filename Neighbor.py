@@ -1,4 +1,5 @@
 from threading import Timer
+import time
 from utils import KEEP_ALIVE_PERIOD_NO_TIMEOUT, KEEP_ALIVE_PERIOD_TIMEOUT
 from Interface import Interface
 import Main
@@ -10,6 +11,7 @@ class Neighbor:
         self.generation_id = generation_id
         self.neighbor_liveness_timer = None
         self.set_keep_alive_period(keep_alive_period)
+        self.time_of_last_update = time.time()
 
     def set_keep_alive_period(self, keep_alive_period: int):
         self.keep_alive_period = keep_alive_period
@@ -32,6 +34,7 @@ class Neighbor:
                 self.neighbor_liveness_timer.cancel()
             self.neighbor_liveness_timer = Timer(4 * self.keep_alive_period, self.remove)
             self.neighbor_liveness_timer.start()
+            self.time_of_last_update = time.time()
 
     def remove(self):
         print('HELLO TIMER EXPIRED... remove neighbor')

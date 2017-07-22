@@ -1,5 +1,5 @@
 import netifaces
-
+import time
 from prettytable import PrettyTable
 
 from Interface import Interface
@@ -57,11 +57,15 @@ def add_protocol(protocol_number, protocol_obj):
 
 def list_neighbors():
     global neighbors
-    t = PrettyTable(['Neighbor IP', 'KeepAlive', "Generation ID"])
+    check_time = time.time()
+    t = PrettyTable(['Neighbor IP', 'KeepAlive', "Generation ID", "Uptime"])
     for ip, neighbor in list(neighbors.items()):
         import socket, struct  # TODO atualmente conversao manual de numero para string ip
         ip = socket.inet_ntoa(struct.pack('!L', ip))
-        t.add_row([ip, neighbor.keep_alive_period, neighbor.generation_id])
+        uptime = check_time - neighbor.time_of_last_update
+        uptime = 0 if (uptime < 0) else uptime
+
+        t.add_row([ip, neighbor.keep_alive_period, neighbor.generation_id, time.strftime("%H:%M:%S", time.gmtime(uptime))])
     print(t)
     return str(t)
 
