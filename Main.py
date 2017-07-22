@@ -1,9 +1,9 @@
 import netifaces
+
 from prettytable import PrettyTable
+
 from Interface import Interface
 from Neighbor import Neighbor
-
-
 
 interfaces = {}  # interfaces with multicast routing enabled
 neighbors = {}  # multicast router neighbors
@@ -67,6 +67,20 @@ def list_neighbors():
 
 def list_enabled_interfaces():
     global interfaces
+
+    for interface in interfaces:
+        from Packet.Packet import Packet
+        from Packet.PacketPimHeader import PacketPimHeader
+        from Packet.PacketPimJoinPrune import PacketPimJoinPrune
+        from Packet.PacketPimJoinPruneMulticastGroup import PacketPimJoinPruneMulticastGroup
+
+        ph = PacketPimJoinPrune(167772173, 20)
+        ph.add_multicast_group(PacketPimJoinPruneMulticastGroup(3708422657, [3708422657], []))
+        pckt = Packet(pim_header=PacketPimHeader(ph))
+        interfaces[interface].send(pckt.bytes())
+
+
+
     t = PrettyTable(['Interface', 'IP', 'Enabled'])
     for interface in netifaces.interfaces():
         # TODO: fix same interface with multiple ips

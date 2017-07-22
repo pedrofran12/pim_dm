@@ -43,7 +43,7 @@ class Daemon:
         sys.stderr.flush()
         si = open(os.devnull, 'r')
         so = open('stdout', 'a+')
-        se = open(os.devnull, 'a+')
+        se = open('stderror', 'a+')
 
         os.dup2(si.fileno(), sys.stdin.fileno())
         os.dup2(so.fileno(), sys.stdout.fileno())

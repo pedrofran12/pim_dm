@@ -1,6 +1,5 @@
 from Packet.PacketIpHeader import PacketIpHeader
 from Packet.PacketPimHeader import PacketPimHeader
-from Packet.PacketPimOption import PacketPimOption
 
 
 class Packet:

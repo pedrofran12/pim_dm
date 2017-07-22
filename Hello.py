@@ -2,7 +2,7 @@ import random
 from threading import Timer
 from Packet.Packet import Packet
 from Packet.ReceivedPacket import ReceivedPacket
-from Packet.PacketPimOption import PacketPimOption
+from Packet.PacketPimHello import PacketPimHello
 from Packet.PacketPimHeader import PacketPimHeader
 from Interface import Interface
 import Main
@@ -28,9 +28,10 @@ class Hello:
         self.thread.start()
 
     def packet_send_handle(self, interface: Interface):
-        ph = PacketPimHeader(Hello.TYPE)
-        ph.add_option(PacketPimOption(1, Hello.TRIGGERED_HELLO_DELAY))
-        ph.add_option(PacketPimOption(20, interface.generation_id))
+        pim_payload = PacketPimHello()
+        pim_payload.add_option(1, Hello.TRIGGERED_HELLO_DELAY)
+        pim_payload.add_option(20, interface.generation_id)
+        ph = PacketPimHeader(pim_payload)
         packet = Packet(pim_header=ph)
         interface.send(packet.bytes())
 
@@ -42,9 +43,10 @@ class Hello:
 
     # TODO: ver melhor este metodo
     def force_send_remove(self, interface: Interface):
-        ph = PacketPimHeader(Hello.TYPE)
-        ph.add_option(PacketPimOption(1, KEEP_ALIVE_PERIOD_TIMEOUT))
-        ph.add_option(PacketPimOption(20, interface.generation_id))
+        pim_payload = PacketPimHello()
+        pim_payload.add_option(1, KEEP_ALIVE_PERIOD_TIMEOUT)
+        pim_payload.add_option(20, interface.generation_id)
+        ph = PacketPimHeader(pim_payload)
         packet = Packet(pim_header=ph)
         interface.send(packet.bytes())
 
@@ -55,7 +57,7 @@ class Hello:
 
         ip = packet.ip_header.ip
         print("ip = ", ip)
-        options = packet.pim_header.get_options()
+        options = packet.pim_header.payload.get_options()
         if Main.get_neighbor(ip) is None:
             # Unknown Neighbor
             if (1 in options) and (20 in options):

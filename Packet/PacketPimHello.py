@@ -25,7 +25,7 @@ class PacketPimHello:
     def bytes(self) -> bytes:
         res = b''
         for (option_type, option_value) in self.options.items():
-            option_length = self.PIM_MSG_TYPES_LENGTH[option_type]
-            type_length_hdr = struct.pack(self.PIM_HDR_OPTS, option_type, option_length)
+            option_length = PacketPimHello.PIM_MSG_TYPES_LENGTH[option_type]
+            type_length_hdr = struct.pack(PacketPimHello.PIM_HDR_OPTS, option_type, option_length)
             res += type_length_hdr + struct.pack("! " + str(option_length) + "s", option_value.to_bytes(option_length, byteorder='big'))
         return res

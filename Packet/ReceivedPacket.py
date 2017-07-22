@@ -2,14 +2,17 @@ import struct
 from Packet.Packet import Packet
 from Packet.PacketIpHeader import PacketIpHeader
 from Packet.PacketPimHeader import PacketPimHeader
-from Packet.PacketPimOption import PacketPimOption
+from Packet.PacketPimHello import PacketPimHello
+from Packet.PacketPimJoinPrune import PacketPimJoinPrune
+from Packet.PacketPimJoinPruneMulticastGroup import PacketPimJoinPruneMulticastGroup
+
 from utils import checksum
 
 
 class ReceivedPacket(Packet):
     def __init__(self, raw_packet, interface):
         self.interface = interface
-        #Parse ao packet e preencher objeto Packet
+        # Parse ao packet e preencher objeto Packet
 
         x = ReceivedPacket.parseIpHdr(raw_packet[:PacketIpHeader.IP_HDR_LEN])
         print(x["HLEN"])
@@ -24,12 +27,16 @@ class ReceivedPacket(Packet):
             print("wrong checksum")
             return  # TODO: maybe excepcao
         print(pim_hdr)
-        self.pim_header = PacketPimHeader(pim_hdr["TYPE"])
+        pim_payload = None
         if pim_hdr["TYPE"] == 0:  # hello
-            pim_options = ReceivedPacket.parsePimHdrOpts(msg_without_ip_hdr[PacketPimHeader.PIM_HDR_LEN:])
+            pim_payload = PacketPimHello()
+            pim_options = ReceivedPacket.parsePimHelloOpts(msg_without_ip_hdr[PacketPimHeader.PIM_HDR_LEN:])
             print(pim_options)
             for option in pim_options:
-                self.pim_header.add_option(PacketPimOption(option["OPTION TYPE"], option["OPTION VALUE"]))
+                pim_payload.add_option(option["OPTION TYPE"], option["OPTION VALUE"])
+        elif pim_hdr["TYPE"] == 3:  # join/prune
+            pim_payload = PacketPimJoinPrune()
+        self.pim_header = PacketPimHeader(pim_payload)
         print(self.bytes())
 
     def parseIpHdr(msg):
@@ -53,7 +60,7 @@ class ReceivedPacket(Packet):
                 }
 
     def parsePimHdr(msg):
-        #print("parsePimHdr: ", msg.encode("hex"))
+        # print("parsePimHdr: ", msg.encode("hex"))
         print("parsePimHdr: ", msg)
         (pim_ver_type, reserved, checksum) = struct.unpack(PacketPimHeader.PIM_HDR, msg)
 
@@ -64,13 +71,14 @@ class ReceivedPacket(Packet):
                 "CHECKSUM": checksum
                 }
 
-    def parsePimHdrOpts(msg):
+    def parsePimHelloOpts(msg):
         options_list = []
         # print(msg)
         while msg != b'':
-            (option_type, option_length) = struct.unpack(PacketPimOption.PIM_HDR_OPTS, msg[:PacketPimOption.PIM_HDR_OPTS_LEN])
+            (option_type, option_length) = struct.unpack(PacketPimHello.PIM_HDR_OPTS,
+                                                         msg[:PacketPimHello.PIM_HDR_OPTS_LEN])
             print(option_type, option_length)
-            msg = msg[PacketPimOption.PIM_HDR_OPTS_LEN:]
+            msg = msg[PacketPimHello.PIM_HDR_OPTS_LEN:]
             print(msg)
             (option_value,) = struct.unpack("! " + str(option_length) + "s", msg[:option_length])
             option_value_number = int.from_bytes(option_value, byteorder='big')
@@ -80,4 +88,37 @@ class ReceivedPacket(Packet):
                                  "OPTION VALUE": option_value_number
                                  })
             msg = msg[option_length:]
+        return options_list
+
+    def parsePimJoinPrune(msg):
+        (upstream_neighbor, reserved, num_groups, hold_time) = struct.unpack(PacketPimJoinPrune.PIM_HDR_JOIN_PRUNE,
+                                                                             msg[
+                                                                             :PacketPimJoinPrune.PIM_HDR_JOIN_PRUNE_LEN])
+
+        msg = msg[PacketPimJoinPrune.PIM_HDR_JOIN_PRUNE_LEN:]
+        options_list = []
+        # print(msg)
+        while msg != b'':
+            (multicast_group, num_joins, num_prunes) = struct.unpack(
+                PacketPimJoinPruneMulticastGroup.PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP,
+                msg[:PacketPimJoinPruneMulticastGroup.PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP_LEN])
+            msg = msg[PacketPimJoinPruneMulticastGroup.PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP_LEN:]
+            joined = []
+            pruned = []
+            for i in range(0, num_joins):
+                (joined_addr) = struct.unpack(
+                    PacketPimJoinPruneMulticastGroup.PIM_HDR_JOINED_PRUNED_SOURCE,
+                    msg[:PacketPimJoinPruneMulticastGroup.PIM_HDR_JOINED_PRUNED_SOURCE_LEN])
+                msg = msg[PacketPimJoinPruneMulticastGroup.PIM_HDR_JOINED_PRUNED_SOURCE_LEN:]
+                joined.append(joined_addr)
+
+            for i in range(0, num_prunes):
+                (pruned_addr) = struct.unpack(
+                    PacketPimJoinPruneMulticastGroup.PIM_HDR_JOINED_PRUNED_SOURCE,
+                    msg[:PacketPimJoinPruneMulticastGroup.PIM_HDR_JOINED_PRUNED_SOURCE_LEN])
+                msg = msg[PacketPimJoinPruneMulticastGroup.PIM_HDR_JOINED_PRUNED_SOURCE_LEN:]
+                pruned.append(pruned_addr)
+            packet_join_prune_groups = PacketPimJoinPruneMulticastGroup(multicast_group, joined, pruned)
+            options_list.append(packet_join_prune_groups)  # TODO: ver melhor
+        print(options_list)
         return options_list
