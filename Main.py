@@ -60,8 +60,6 @@ def list_neighbors():
     check_time = time.time()
     t = PrettyTable(['Neighbor IP', 'KeepAlive', "Generation ID", "Uptime"])
     for ip, neighbor in list(neighbors.items()):
-        import socket, struct  # TODO atualmente conversao manual de numero para string ip
-        ip = socket.inet_ntoa(struct.pack('!L', ip))
         uptime = check_time - neighbor.time_of_last_update
         uptime = 0 if (uptime < 0) else uptime
 
@@ -78,8 +76,8 @@ def list_enabled_interfaces():
         from Packet.PacketPimJoinPrune import PacketPimJoinPrune
         from Packet.PacketPimJoinPruneMulticastGroup import PacketPimJoinPruneMulticastGroup
 
-        ph = PacketPimJoinPrune(167772173, 20)
-        ph.add_multicast_group(PacketPimJoinPruneMulticastGroup(3708422657, [3708422657], []))
+        ph = PacketPimJoinPrune("10.0.0.13", 210)
+        ph.add_multicast_group(PacketPimJoinPruneMulticastGroup("239.123.123.123", ["1.1.1.1"], []))
         pckt = Packet(pim_header=PacketPimHeader(ph))
         interfaces[interface].send(pckt.bytes())
 

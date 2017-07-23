@@ -5,7 +5,7 @@ from Packet.PacketPimHeader import PacketPimHeader
 from Packet.PacketPimHello import PacketPimHello
 from Packet.PacketPimJoinPrune import PacketPimJoinPrune
 from Packet.PacketPimJoinPruneMulticastGroup import PacketPimJoinPruneMulticastGroup
-
+import socket
 from utils import checksum
 
 
@@ -55,8 +55,8 @@ class ReceivedPacket(Packet):
                 "TTL": ttl,
                 "PROTO": proto,
                 "CKSUM": cksum,
-                "SRC": src,
-                "DST": dst
+                "SRC": socket.inet_ntoa(src),
+                "DST": socket.inet_ntoa(dst)
                 }
 
     def parsePimHdr(msg):
