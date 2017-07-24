@@ -7,14 +7,29 @@ import socket
 import sys
 import os
 import argparse
+from argparse import Namespace
+
+def client_socket(data_to_send):
+    # Create a UDS socket
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+
+    # Connect the socket to the port where the server is listening
+    server_address = './uds_socket'
+    print('connecting to %s' % server_address)
+    try:
+        sock.connect(server_address)
+        sock.sendall(pickle.dumps(data_to_send))
+        data_rcv = sock.recv(1024 * 256)
+        if data_rcv:
+            print(pickle.loads(data_rcv))
+    except socket.error:
+        pass
+    finally:
+        print('closing socket')
+        sock.close()
 
 
 class MyDaemon(Daemon):
-    def stop(self):
-        print("stopping...")
-        # TODO: remove all interfaces
-        super(MyDaemon, self).stop()
-
     def run(self):
         Main.main()
         server_address = './uds_socket'
@@ -51,9 +66,16 @@ class MyDaemon(Daemon):
                 elif args.remove_interface:
                     Main.remove_interface(args.remove_interface[0])
                     connection.shutdown(socket.SHUT_RDWR)
+                elif args.stop:
+                    Main.remove_interface("*")
+                    connection.shutdown(socket.SHUT_RDWR)
+            except Exception:
+                connection.shutdown(socket.SHUT_RDWR)
             finally:
                 # Clean up the connection
                 connection.close()
+
+
 
 
 if __name__ == "__main__":
@@ -64,8 +86,9 @@ if __name__ == "__main__":
     group.add_argument("-restart", "--restart", action="store_true", default=False, help="Restart PIM")
     group.add_argument("-li", "--list_interfaces", action="store_true", default=False, help="List All PIM Interfaces")
     group.add_argument("-ln", "--list_neighbors", action="store_true", default=False, help="List All PIM Neighbors")
-    group.add_argument("-ai", "--add_interface", nargs=1, metavar='IP_INTERFACE', help="Add PIM interface")
-    group.add_argument("-ri", "--remove_interface", nargs=1, metavar='IP_INTERFACE', help="Remove PIM interface")
+    group.add_argument("-mr", "--multicast_routes", action="store_true", default=False, help="List Multicast Routing table")
+    group.add_argument("-ai", "--add_interface", nargs=1, metavar='INTERFACE_NAME', help="Add PIM interface")
+    group.add_argument("-ri", "--remove_interface", nargs=1, metavar='INTERFACE_NAME', help="Remove PIM interface")
     group.add_argument("-v", "--verbose", action="store_true", default=False, help="Verbose (print all debug messages)")
     args = parser.parse_args()
 
@@ -77,6 +100,7 @@ if __name__ == "__main__":
         daemon.start()
         sys.exit(0)
     elif args.stop:
+        client_socket(args)
         daemon.stop()
         sys.exit(0)
     elif args.restart:
@@ -85,31 +109,12 @@ if __name__ == "__main__":
     elif args.verbose:
         os.system("tailf stdout")
         sys.exit(0)
+    elif args.multicast_routes:
+        os.system("ip mroute show")
+        sys.exit(0)
     elif not daemon.is_running():
         print("PIM is not running")
         parser.print_usage()
         sys.exit(0)
 
-
-    # Create a UDS socket
-    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-
-    # Connect the socket to the port where the server is listening
-    server_address = './uds_socket'
-    print('connecting to %s' % server_address)
-    try:
-        sock.connect(server_address)
-    except socket.error:
-        print("erro socket")
-        print(sys.stderr)
-        sys.exit(1)
-
-    try:
-        sock.sendall(pickle.dumps(args))
-
-        data = sock.recv(1024 * 256)
-        if data:
-            print(pickle.loads(data))
-    finally:
-        print('closing socket')
-        sock.close()
+    client_socket(args)

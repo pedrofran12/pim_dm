@@ -10,33 +10,41 @@ neighbors = {}  # multicast router neighbors
 protocols = {}
 
 
-def add_interface(ip):
+def add_interface(interface_name):
     global interfaces
-    if ip not in interfaces:
-        interface = Interface(ip)
-        interfaces[ip] = interface
+    if interface_name not in interfaces:
+        interface = Interface(interface_name)
+        interfaces[interface_name] = interface
         protocols[0].force_send(interface)
 
 # TODO: verificar melhor este metodo:
-def remove_interface(ip):
+def remove_interface(interface_name):
     # TODO remover neighbors desta interface
     global interfaces
     global neighbors
-    if ip in interfaces:
-        for (ip_neighbor, neighbor) in list(neighbors.items()):
-            # TODO ver melhor este algoritmo
-            if neighbor.contact_interface == interfaces[ip]:
-                neighbor.remove()
-        protocols[0].force_send_remove(interfaces[ip])
-        interfaces[ip].remove()
-        del interfaces[ip]
+    if (interface_name in interfaces) or interface_name == "*":
+        if interface_name == "*":
+            interface_name = list(interfaces.keys())
+        else:
+            interface_name = [interface_name]
+        for if_name in interface_name:
+            protocols[0].force_send_remove(interfaces[if_name])
+            interfaces[if_name].remove()
+            del interfaces[if_name]
         print("removido interface")
 
-def add_neighbor(contact_interface, ip, random_number, keep_alive_period):
+        for (ip_neighbor, neighbor) in list(neighbors.items()):
+            # TODO ver melhor este algoritmo
+            if neighbor.contact_interface not in interfaces or interface_name == "*":
+                neighbor.remove()
+
+
+
+def add_neighbor(contact_interface, ip, random_number, hello_hold_time):
     global neighbors
     if ip not in neighbors:
         print("ADD NEIGHBOR")
-        neighbors[ip] = Neighbor(contact_interface, ip, random_number, keep_alive_period)
+        neighbors[ip] = Neighbor(contact_interface, ip, random_number, hello_hold_time)
         protocols[0].force_send(contact_interface)
 
 def get_neighbor(ip) -> Neighbor:
@@ -58,12 +66,12 @@ def add_protocol(protocol_number, protocol_obj):
 def list_neighbors():
     global neighbors
     check_time = time.time()
-    t = PrettyTable(['Neighbor IP', 'KeepAlive', "Generation ID", "Uptime"])
+    t = PrettyTable(['Neighbor IP', 'Hello Hold Time', "Generation ID", "Uptime"])
     for ip, neighbor in list(neighbors.items()):
         uptime = check_time - neighbor.time_of_last_update
         uptime = 0 if (uptime < 0) else uptime
 
-        t.add_row([ip, neighbor.keep_alive_period, neighbor.generation_id, time.strftime("%H:%M:%S", time.gmtime(uptime))])
+        t.add_row([ip, neighbor.hello_hold_time, neighbor.generation_id, time.strftime("%H:%M:%S", time.gmtime(uptime))])
     print(t)
     return str(t)
 
@@ -87,14 +95,14 @@ def list_enabled_interfaces():
     for interface in netifaces.interfaces():
         # TODO: fix same interface with multiple ips
         ip = netifaces.ifaddresses(interface)[netifaces.AF_INET][0]['addr']
-        status = ip in interfaces
+        status = interface in interfaces
         t.add_row([interface, ip, status])
     print(t)
     return str(t)
 
-def main(ip_interfaces_to_add=[]):
+def main(interfaces_to_add=[]):
     from Hello import Hello
     Hello()
 
-    for ip in ip_interfaces_to_add:
-        add_interface(ip)
+    for interface in interfaces_to_add:
+        add_interface(interface)

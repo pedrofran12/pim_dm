@@ -1,15 +1,17 @@
 import socket
 import threading
 import random
+import netifaces
 from Packet.ReceivedPacket import ReceivedPacket
 import Main
 
 class Interface:
-    #IF_IP = "10.0.0.1"
     MCAST_GRP = '224.0.0.13'
 
     # substituir ip por interface ou algo parecido
-    def __init__(self, ip_interface: str):
+    def __init__(self, interface_name: str):
+        ip_interface = netifaces.ifaddresses(interface_name)[netifaces.AF_INET][0]['addr']
+
         s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_PIM)
 
         # allow other sockets to bind this port too
@@ -41,7 +43,7 @@ class Interface:
     def receive(self):
         while self.interface_enabled:
             try:
-                (raw_packet, (ip, p)) = self.socket.recvfrom(256 * 1024)
+                (raw_packet, (ip, _)) = self.socket.recvfrom(256 * 1024)
                 if raw_packet:
                     packet = ReceivedPacket(raw_packet, self)
                     #print("packet received bytes: ", packet.bytes())

@@ -21,9 +21,9 @@ else:
         return (((s>>8)&0xff)|s<<8) & 0xffff
 '''
 
-KEEP_ALIVE_PERIOD_NO_TIMEOUT = 0xFFFF
-KEEP_ALIVE_PERIOD = 160
-KEEP_ALIVE_PERIOD_TIMEOUT = 0
+HELLO_HOLD_TIME_NO_TIMEOUT = 0xFFFF
+HELLO_HOLD_TIME = 160
+HELLO_HOLD_TIME_TIMEOUT = 0
 
 
 def checksum(pkt: bytes) -> bytes:

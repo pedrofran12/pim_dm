@@ -6,7 +6,7 @@ from Packet.PacketPimHello import PacketPimHello
 from Packet.PacketPimHeader import PacketPimHeader
 from Interface import Interface
 import Main
-from utils import KEEP_ALIVE_PERIOD_TIMEOUT
+from utils import HELLO_HOLD_TIME_TIMEOUT
 
 
 class Hello:
@@ -20,7 +20,7 @@ class Hello:
         self.thread.start()
 
     def send_handle(self):
-        for (ip, interface) in list(Main.interfaces.items()):
+        for (_, interface) in list(Main.interfaces.items()):
             self.packet_send_handle(interface)
 
         # reschedule timer
@@ -44,7 +44,7 @@ class Hello:
     # TODO: ver melhor este metodo
     def force_send_remove(self, interface: Interface):
         pim_payload = PacketPimHello()
-        pim_payload.add_option(1, KEEP_ALIVE_PERIOD_TIMEOUT)
+        pim_payload.add_option(1, HELLO_HOLD_TIME_TIMEOUT)
         pim_payload.add_option(20, interface.generation_id)
         ph = PacketPimHeader(pim_payload)
         packet = Packet(pim_header=ph)
@@ -61,8 +61,13 @@ class Hello:
         if Main.get_neighbor(ip) is None:
             # Unknown Neighbor
             if (1 in options) and (20 in options):
-                print("non neighbor and options inside")
-                Main.add_neighbor(packet.interface, ip, options[20], options[1])
+                try:
+                    Main.add_neighbor(packet.interface, ip, options[20], options[1])
+                    print("non neighbor and options inside")
+                except Exception:
+                    # Received Neighbor with Timeout
+                    print("non neighbor and options inside but neighbor timedout")
+                    pass
                 return
             print("non neighbor and required options not inside")
         else:
@@ -70,9 +75,9 @@ class Hello:
             print("neighbor conhecido")
             neighbor = Main.get_neighbor(ip)
             neighbor.heartbeat()
-            if 1 in options and neighbor.keep_alive_period != options[1]:
+            if 1 in options and neighbor.hello_hold_time != options[1]:
                 print("keep alive period diferente")
-                neighbor.set_keep_alive_period(options[1])
+                neighbor.set_hello_hold_time(options[1])
             if 20 in options and neighbor.generation_id != options[20]:
                 print("neighbor reiniciado")
                 neighbor.remove()
