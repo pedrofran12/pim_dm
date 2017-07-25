@@ -3,12 +3,13 @@ import time
 from prettytable import PrettyTable
 
 from Interface import Interface
+from Kernel import Kernel
 from Neighbor import Neighbor
 
 interfaces = {}  # interfaces with multicast routing enabled
 neighbors = {}  # multicast router neighbors
 protocols = {}
-
+kernel = None
 
 def add_interface(interface_name):
     global interfaces
@@ -108,5 +109,7 @@ def main(interfaces_to_add=[]):
     from Hello import Hello
     Hello()
 
+    global kernel
+    kernel = Kernel()
     for interface in interfaces_to_add:
         add_interface(interface)

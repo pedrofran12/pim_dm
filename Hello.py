@@ -37,7 +37,7 @@ class Hello:
 
     def force_send(self, interface: Interface):
         # When PIM is enabled on an interface or when a router first starts, the Hello Timer (HT)
-        # MUST be set to random value between 0 and Triggered_Hello_DelayHello Timer(HT)
+        # MUST be set to random value between 0 and Triggered_Hello_Delay
         hello_timer = random.uniform(0, Hello.TRIGGERED_HELLO_DELAY)
         Timer(hello_timer, self.packet_send_handle, args=[interface]).start()
 
