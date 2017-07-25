@@ -9,8 +9,15 @@ import socket
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+...
 '''
 class PacketPimEncodedUnicastAddress:
-    PIM_ENCODED_UNICAST_ADDRESS_HDR = "! BB 4s"
-    PIM_ENCODED_UNICAST_ADDRESS_HDR_LEN = struct.calcsize(PIM_ENCODED_UNICAST_ADDRESS_HDR)
+    PIM_ENCODED_UNICAST_ADDRESS_HDR = "! BB %s"
+    PIM_ENCODED_UNICAST_ADDRESS_HDR_WITHOUT_UNICAST_ADDRESS = "! BB"
+
+    IPV4_HDR = "4s"
+    IPV6_HDR = "16s"
+
+    # TODO ver melhor versao ip
+    PIM_ENCODED_UNICAST_ADDRESS_HDR_LEN = struct.calcsize(PIM_ENCODED_UNICAST_ADDRESS_HDR % IPV4_HDR)
+    PIM_ENCODED_UNICAST_ADDRESS_HDR_LEN_IPV6 = struct.calcsize(PIM_ENCODED_UNICAST_ADDRESS_HDR % IPV6_HDR)
 
     FAMILY_RESERVED = 0
     FAMILY_IPV4 = 1
@@ -24,17 +31,18 @@ class PacketPimEncodedUnicastAddress:
         self.unicast_address = unicast_address
 
     def bytes(self) -> bytes:
-        addr_family = self.get_addr_family(self.unicast_address)
-        ip = socket.inet_aton(self.unicast_address)
-        msg = struct.pack(PacketPimEncodedUnicastAddress.PIM_ENCODED_UNICAST_ADDRESS_HDR, addr_family, 0, ip)
+        (string_ip_hdr, hdr_addr_family, socket_family) = PacketPimEncodedUnicastAddress.get_ip_info(self.unicast_address)
+
+        ip = socket.inet_pton(socket_family, self.unicast_address)
+        msg = struct.pack(PacketPimEncodedUnicastAddress.PIM_ENCODED_UNICAST_ADDRESS_HDR % string_ip_hdr, hdr_addr_family, 0, ip)
         return msg
 
-    def get_addr_family(self, ip):
+    @staticmethod
+    def get_ip_info(ip):
         version = ipaddress.ip_address(ip).version
         if version == 4:
-            return PacketPimEncodedUnicastAddress.FAMILY_IPV4
+            return (PacketPimEncodedUnicastAddress.IPV4_HDR, PacketPimEncodedUnicastAddress.FAMILY_IPV4, socket.AF_INET)
         elif version == 6:
-            return PacketPimEncodedUnicastAddress.FAMILY_IPV6
+            return (PacketPimEncodedUnicastAddress.IPV6_HDR, PacketPimEncodedUnicastAddress.FAMILY_IPV6, socket.AF_INET6)
         else:
             raise Exception
-

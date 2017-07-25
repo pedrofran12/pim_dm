@@ -7,7 +7,8 @@ import socket
 import sys
 import os
 import argparse
-from argparse import Namespace
+import traceback
+
 
 def client_socket(data_to_send):
     # Create a UDS socket
@@ -71,6 +72,7 @@ class MyDaemon(Daemon):
                     connection.shutdown(socket.SHUT_RDWR)
             except Exception:
                 connection.shutdown(socket.SHUT_RDWR)
+                traceback.print_exc()
             finally:
                 # Clean up the connection
                 connection.close()

@@ -2,6 +2,7 @@ import struct
 import socket
 from Packet.PacketPimEncodedGroupAddress import PacketPimEncodedGroupAddress
 from Packet.PacketPimEncodedSourceAddress import PacketPimEncodedSourceAddress
+
 '''
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -25,15 +26,24 @@ from Packet.PacketPimEncodedSourceAddress import PacketPimEncodedSourceAddress
 |         Pruned Source Address n (Encoded Source Format)       |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 '''
+
+
 class PacketPimJoinPruneMulticastGroup:
-    PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP = "! " + str(PacketPimEncodedGroupAddress.PIM_ENCODED_GROUP_ADDRESS_HDR_LEN) + "s HH"
-    PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP_LEN = struct.calcsize(PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP)
+    PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP = "! %ss HH"
+    PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP_WITHOUT_GROUP_ADDRESS = "! HH"
 
-    PIM_HDR_JOINED_PRUNED_SOURCE = "! " + str(PacketPimEncodedSourceAddress.PIM_ENCODED_SOURCE_ADDRESS_HDR_LEN) + "s"
-    PIM_HDR_JOINED_PRUNED_SOURCE_LEN = struct.calcsize(PIM_HDR_JOINED_PRUNED_SOURCE)
+    PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP_v4_LEN_ = struct.calcsize(
+        PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP % PacketPimEncodedGroupAddress.PIM_ENCODED_GROUP_ADDRESS_HDR_LEN)
+    PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP_v6_LEN_ = struct.calcsize(
+        PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP % PacketPimEncodedGroupAddress.PIM_ENCODED_GROUP_ADDRESS_HDR_LEN_IPv6)
+    PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP_WITHOUT_GROUP_ADDRESS_LEN = struct.calcsize(
+        PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP_WITHOUT_GROUP_ADDRESS)
 
+    PIM_HDR_JOINED_PRUNED_SOURCE = "! %ss"
+    PIM_HDR_JOINED_PRUNED_SOURCE_v4_LEN = PacketPimEncodedSourceAddress.PIM_ENCODED_SOURCE_ADDRESS_HDR_LEN
+    PIM_HDR_JOINED_PRUNED_SOURCE_v6_LEN = PacketPimEncodedSourceAddress.PIM_ENCODED_SOURCE_ADDRESS_HDR_LEN_IPV6
 
-    def __init__(self, multicast_group, joined_src_addresses : list, pruned_src_addresses : list):
+    def __init__(self, multicast_group, joined_src_addresses: list, pruned_src_addresses: list):
         if type(multicast_group) not in (str, bytes):
             raise Exception
         elif type(multicast_group) is bytes:
@@ -50,13 +60,14 @@ class PacketPimJoinPruneMulticastGroup:
 
     def bytes(self) -> bytes:
         multicast_group_address = PacketPimEncodedGroupAddress(self.multicast_group).bytes()
-        msg = struct.pack(self.PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP, multicast_group_address, len(self.joined_src_addresses), len(self.pruned_src_addresses))
+        msg = multicast_group_address + struct.pack(self.PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP_WITHOUT_GROUP_ADDRESS,
+                                                    len(self.joined_src_addresses), len(self.pruned_src_addresses))
 
         for joined_src_address in self.joined_src_addresses:
             joined_src_address_bytes = PacketPimEncodedSourceAddress(joined_src_address).bytes()
-            msg += struct.pack(self.PIM_HDR_JOINED_PRUNED_SOURCE, joined_src_address_bytes)
+            msg += joined_src_address_bytes
 
         for pruned_src_address in self.pruned_src_addresses:
             pruned_src_address_bytes = PacketPimEncodedSourceAddress(pruned_src_address).bytes()
-            msg += struct.pack(self.PIM_HDR_JOINED_PRUNED_SOURCE, pruned_src_address_bytes)
+            msg += pruned_src_address_bytes
         return msg

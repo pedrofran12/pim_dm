@@ -17,9 +17,8 @@ def add_interface(interface_name):
         interfaces[interface_name] = interface
         protocols[0].force_send(interface)
 
-# TODO: verificar melhor este metodo:
+
 def remove_interface(interface_name):
-    # TODO remover neighbors desta interface
     global interfaces
     global neighbors
     if (interface_name in interfaces) or interface_name == "*":
@@ -34,10 +33,8 @@ def remove_interface(interface_name):
         print("removido interface")
 
         for (ip_neighbor, neighbor) in list(neighbors.items()):
-            # TODO ver melhor este algoritmo
-            if neighbor.contact_interface not in interfaces or interface_name == "*":
+            if neighbor.contact_interface not in interfaces:
                 neighbor.remove()
-
 
 
 def add_neighbor(contact_interface, ip, random_number, hello_hold_time):
@@ -77,7 +74,7 @@ def list_neighbors():
 
 def list_enabled_interfaces():
     global interfaces
-
+    # TESTE DE PIM JOIN/PRUNE
     for interface in interfaces:
         from Packet.Packet import Packet
         from Packet.PacketPimHeader import PacketPimHeader
@@ -85,7 +82,14 @@ def list_enabled_interfaces():
         from Packet.PacketPimJoinPruneMulticastGroup import PacketPimJoinPruneMulticastGroup
 
         ph = PacketPimJoinPrune("10.0.0.13", 210)
-        ph.add_multicast_group(PacketPimJoinPruneMulticastGroup("239.123.123.123", ["1.1.1.1"], []))
+        ph.add_multicast_group(PacketPimJoinPruneMulticastGroup("239.123.123.123", ["1.1.1.1", "10.1.1.1"], []))
+        ph.add_multicast_group(PacketPimJoinPruneMulticastGroup("239.123.123.124", ["1.1.1.2", "10.1.1.2"], []))
+        pckt = Packet(pim_header=PacketPimHeader(ph))
+        interfaces[interface].send(pckt.bytes())
+
+        ph = PacketPimJoinPrune("ff08::1", 210)
+        ph.add_multicast_group(PacketPimJoinPruneMulticastGroup("2001:1:a:b:c::1", ["1.1.1.1", "2001:1:a:b:c::2"], []))
+        ph.add_multicast_group(PacketPimJoinPruneMulticastGroup("239.123.123.123", ["1.1.1.1"], ["2001:1:a:b:c::3"]))
         pckt = Packet(pim_header=PacketPimHeader(ph))
         interfaces[interface].send(pckt.bytes())
 
