@@ -63,9 +63,6 @@ class Kernel:
             except Exception:
                 continue
 
-        #self.set_multicast_route("10.2.2.2", "224.12.12.112", 0)
-        # TODO: background thread for receiving signals
-
         # receive signals from kernel with a background thread
         handler_thread = threading.Thread(target=self.handler)
         handler_thread.daemon = True
@@ -99,9 +96,12 @@ class Kernel:
 
     def remove_virtual_interface(self, ip_interface):
         index = self.vif_dic[ip_interface]
-        return
+        struct_vifctl = struct.pack("HBBI 4s 4s", index, 0, 0, 0, socket.inet_aton("0.0.0.0"), socket.inet_aton("0.0.0.0"))
 
+        self.socket.setsockopt(socket.IPPROTO_IP, Kernel.MRT_DEL_VIF, struct_vifctl)
 
+        # TODO alterar MFC's para colocar a 0 esta interface
+        del self.vif_dic[ip_interface]
 
 
     '''
@@ -140,8 +140,11 @@ class Kernel:
         # TODO: ver melhor tabela routing
         self.routing[(socket.inet_ntoa(source_ip), socket.inet_ntoa(group_ip))] = {"inbound_interface_index":inbound_interface_index, "outbound_interfaces": outbound_interfaces}
 
-    def remove_multicast_route(self):
-        return
+    def remove_multicast_route(self, source_ip, group_ip):
+        outbound_interfaces_and_other_parameters = [0] + [0]*Kernel.MAXVIFS + [0]*4
+        struct_mfcctl = struct.pack("4s 4s H " + "B"*Kernel.MAXVIFS + " IIIi", source_ip, group_ip, *outbound_interfaces_and_other_parameters)
+
+        self.socket.setsockopt(socket.IPPROTO_IP, Kernel.MRT_DEL_MFC, struct_mfcctl)
 
     def exit(self):
         self.running = False
@@ -183,4 +186,6 @@ class Kernel:
                     self.set_multicast_route(im_src, im_dst, im_vif)
                 # TODO: handler
             except Exception:
+                import traceback
+                traceback.print_exc()
                 continue
