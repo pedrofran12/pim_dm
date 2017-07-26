@@ -7,5 +7,9 @@ ip link set dev eth1 up
 #NAT for private ip's
 iptables -t nat -A POSTROUTING -s 0.0.0.0/0 -o eth2 -j MASQUERADE
 
+# Zebra and OSPF
+/etc/init.d/quagga restart
 
-apt-get update && apt-get install pimd
+apt-get update && apt-get --assume-yes install python3 python3-pip
+
+
