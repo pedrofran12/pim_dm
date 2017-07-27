@@ -32,6 +32,9 @@ class PacketIpHeader:
         self.ip_src = ip_src
         self.ip_dst = ip_dst
 
+    def __len__(self):
+        return self.hdr_length
+
     @staticmethod
     def parse_bytes(data: bytes):
         (verhlen, tos, iplen, ipid, frag, ttl, proto, cksum, src, dst) = \

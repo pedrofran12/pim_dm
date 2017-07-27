@@ -48,6 +48,9 @@ class PacketPimHello:
             res += type_length_hdr + struct.pack("! " + str(option_length) + "s", option_value.to_bytes(option_length, byteorder='big'))
         return res
 
+    def __len__(self):
+        return len(self.bytes())
+
     @staticmethod
     def parse_bytes(data: bytes):
         pim_payload = PacketPimHello()

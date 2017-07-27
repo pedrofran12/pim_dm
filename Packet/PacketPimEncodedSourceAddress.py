@@ -59,6 +59,15 @@ class PacketPimEncodedSourceAddress:
         else:
             raise Exception
 
+    def __len__(self):
+        version = ipaddress.ip_address(self.source_address).version
+        if version == 4:
+            return self.PIM_ENCODED_SOURCE_ADDRESS_HDR_LEN
+        elif version == 6:
+            return self.PIM_ENCODED_SOURCE_ADDRESS_HDR_LEN_IPV6
+        else:
+            raise Exception
+
     @staticmethod
     def parse_bytes(data: bytes):
         data_without_source_addr = data[0:PacketPimEncodedSourceAddress.PIM_ENCODED_SOURCE_ADDRESS_HDR_WITHOUT_SOURCE_ADDRESS_LEN]

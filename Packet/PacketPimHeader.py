@@ -33,9 +33,11 @@ class PacketPimHeader:
         msg = msg_without_chcksum[0:2] + struct.pack("! H", pim_checksum) + msg_without_chcksum[4:]
         return msg
 
+    def __len__(self):
+        return len(self.bytes())
+
     @staticmethod
     def parse_bytes(data: bytes):
-        # print("parsePimHdr: ", msg.encode("hex"))
         print("parsePimHdr: ", data)
 
         pim_hdr = data[0:PacketPimHeader.PIM_HDR_LEN]

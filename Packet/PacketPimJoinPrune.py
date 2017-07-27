@@ -49,7 +49,7 @@ class PacketPimJoinPrune:
     @staticmethod
     def parse_bytes(data: bytes):
         upstream_neighbor_addr_obj = PacketPimEncodedUnicastAddress.parse_bytes(data)
-        upstream_neighbor_addr_len = len(upstream_neighbor_addr_obj.bytes())
+        upstream_neighbor_addr_len = len(upstream_neighbor_addr_obj)
         data = data[upstream_neighbor_addr_len:]
 
         (_, num_groups, hold_time) = struct.unpack(PacketPimJoinPrune.PIM_HDR_JOIN_PRUNE_WITHOUT_ADDRESS, data[:PacketPimJoinPrune.PIM_HDR_JOIN_PRUNE_WITHOUT_ADDRESS_LEN])
@@ -58,7 +58,7 @@ class PacketPimJoinPrune:
 
         for i in range(0, num_groups):
             group = PacketPimJoinPruneMulticastGroup.parse_bytes(data)
-            group_len = len(group.bytes())
+            group_len = len(group)
 
             pim_payload.add_multicast_group(group)
             data = data[group_len:]

@@ -15,7 +15,9 @@ class ReceivedPacket(Packet):
         # Parse ao packet e preencher objeto Packet
 
         packet_ip_hdr = raw_packet[:PacketIpHeader.IP_HDR_LEN]
-        self.ip_header = PacketIpHeader.parse_bytes(packet_ip_hdr)
+        ip_header = PacketIpHeader.parse_bytes(packet_ip_hdr)
 
-        packet_without_ip_hdr = raw_packet[self.ip_header.hdr_length:]
-        self.pim_header = PacketPimHeader.parse_bytes(packet_without_ip_hdr)
+        packet_without_ip_hdr = raw_packet[ip_header.hdr_length:]
+        pim_header = PacketPimHeader.parse_bytes(packet_without_ip_hdr)
+
+        super().__init__(ip_header=ip_header, pim_header=pim_header)

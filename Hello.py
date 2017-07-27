@@ -41,7 +41,6 @@ class Hello:
         hello_timer = random.uniform(0, Hello.TRIGGERED_HELLO_DELAY)
         Timer(hello_timer, self.packet_send_handle, args=[interface]).start()
 
-    # TODO: ver melhor este metodo
     def force_send_remove(self, interface: Interface):
         pim_payload = PacketPimHello()
         pim_payload.add_option(1, HELLO_HOLD_TIME_TIMEOUT)
@@ -52,9 +51,6 @@ class Hello:
 
     # receive handler
     def receive_handle(self, packet: ReceivedPacket):
-        if packet.ip_header is None:
-            return  # TODO: MAYBE EXCEPCAO??
-
         ip = packet.ip_header.ip_src
         print("ip = ", ip)
         options = packet.pim_header.payload.get_options()

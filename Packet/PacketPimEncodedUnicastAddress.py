@@ -48,6 +48,15 @@ class PacketPimEncodedUnicastAddress:
         else:
             raise Exception
 
+    def __len__(self):
+        version = ipaddress.ip_address(self.unicast_address).version
+        if version == 4:
+            return self.PIM_ENCODED_UNICAST_ADDRESS_HDR_LEN
+        elif version == 6:
+            return self.PIM_ENCODED_UNICAST_ADDRESS_HDR_LEN_IPV6
+        else:
+            raise Exception
+
     @staticmethod
     def parse_bytes(data: bytes):
         data_without_unicast_addr = data[0:PacketPimEncodedUnicastAddress.PIM_ENCODED_UNICAST_ADDRESS_HDR_WITHOUT_UNICAST_ADDRESS_LEN]
