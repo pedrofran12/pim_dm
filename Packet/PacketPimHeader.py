@@ -1,4 +1,7 @@
 import struct
+
+from Packet.PacketPimHello import PacketPimHello
+from Packet.PacketPimJoinPrune import PacketPimJoinPrune
 from utils import checksum
 
 '''
@@ -29,3 +32,42 @@ class PacketPimHeader:
         pim_checksum = checksum(msg_without_chcksum)
         msg = msg_without_chcksum[0:2] + struct.pack("! H", pim_checksum) + msg_without_chcksum[4:]
         return msg
+
+    @staticmethod
+    def parse_bytes(data: bytes):
+        # print("parsePimHdr: ", msg.encode("hex"))
+        print("parsePimHdr: ", data)
+
+        pim_hdr = data[0:PacketPimHeader.PIM_HDR_LEN]
+        (pim_ver_type, reserved, rcv_checksum) = struct.unpack(PacketPimHeader.PIM_HDR, pim_hdr)
+
+        print(pim_ver_type, reserved, rcv_checksum)
+        pim_version = (pim_ver_type & 0xF0) >> 4
+        pim_type = pim_ver_type & 0x0F
+
+        if pim_version != PacketPimHeader.PIM_VERSION:
+            print("Version of PIM packet received not known (!=2)")
+            raise Exception
+
+        msg_to_checksum = data[0:2] + b'\x00\x00' + data[4:]
+        print("checksum calculated: " + str(checksum(msg_to_checksum)))
+        if checksum(msg_to_checksum) != rcv_checksum:
+            print("wrong checksum")
+            raise Exception
+
+        pim_payload = data[PacketPimHeader.PIM_HDR_LEN:]
+        if pim_type == 0:  # hello
+            pim_payload = PacketPimHello.parse_bytes(pim_payload)
+        elif pim_type == 3:  # join/prune
+            pim_payload = PacketPimJoinPrune.parse_bytes(pim_payload)
+            print("hold_time = ", pim_payload.hold_time)
+            print("upstream_neighbor = ", pim_payload.upstream_neighbor_address)
+            for i in pim_payload.groups:
+                print(i.multicast_group)
+                print(i.joined_src_addresses)
+                print(i.pruned_src_addresses)
+
+        else:
+            raise Exception
+
+        return PacketPimHeader(pim_payload)

@@ -71,3 +71,29 @@ class PacketPimJoinPruneMulticastGroup:
             pruned_src_address_bytes = PacketPimEncodedSourceAddress(pruned_src_address).bytes()
             msg += pruned_src_address_bytes
         return msg
+
+    @staticmethod
+    def parse_bytes(data: bytes):
+        multicast_group_addr_obj = PacketPimEncodedGroupAddress.parse_bytes(data)
+        multicast_group_addr_len = len(multicast_group_addr_obj.bytes())
+        data = data[multicast_group_addr_len:]
+
+        number_join_prune_data = data[:PacketPimJoinPruneMulticastGroup.PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP_WITHOUT_GROUP_ADDRESS_LEN]
+        (number_joined_sources, number_pruned_sources) = struct.unpack(PacketPimJoinPruneMulticastGroup.PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP_WITHOUT_GROUP_ADDRESS, number_join_prune_data)
+
+        joined = []
+        pruned = []
+        data = data[PacketPimJoinPruneMulticastGroup.PIM_HDR_JOIN_PRUNE_MULTICAST_GROUP_WITHOUT_GROUP_ADDRESS_LEN:]
+        for i in range(0, number_joined_sources):
+            joined_obj = PacketPimEncodedSourceAddress.parse_bytes(data)
+            joined_obj_len = len(joined_obj.bytes())
+            data = data[joined_obj_len:]
+            joined.append(joined_obj.source_address)
+
+        for i in range(0, number_pruned_sources):
+            pruned_obj = PacketPimEncodedSourceAddress.parse_bytes(data)
+            pruned_obj_len = len(pruned_obj.bytes())
+            data = data[pruned_obj_len:]
+            pruned.append(pruned_obj.source_address)
+
+        return PacketPimJoinPruneMulticastGroup(multicast_group_addr_obj.group_address, joined, pruned)

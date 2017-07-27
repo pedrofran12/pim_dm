@@ -55,7 +55,7 @@ class Hello:
         if packet.ip_header is None:
             return  # TODO: MAYBE EXCEPCAO??
 
-        ip = packet.ip_header.ip
+        ip = packet.ip_header.ip_src
         print("ip = ", ip)
         options = packet.pim_header.payload.get_options()
         if Main.get_neighbor(ip) is None:

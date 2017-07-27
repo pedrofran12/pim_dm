@@ -19,6 +19,7 @@ class PacketPimEncodedSourceAddress:
     IPV6_HDR = "16s"
 
     # TODO ver melhor versao ip
+    PIM_ENCODED_SOURCE_ADDRESS_HDR_WITHOUT_SOURCE_ADDRESS_LEN = struct.calcsize(PIM_ENCODED_SOURCE_ADDRESS_HDR_WITHOUT_SOURCE_ADDRESS)
     PIM_ENCODED_SOURCE_ADDRESS_HDR_LEN = struct.calcsize(PIM_ENCODED_SOURCE_ADDRESS_HDR % IPV4_HDR)
     PIM_ENCODED_SOURCE_ADDRESS_HDR_LEN_IPV6 = struct.calcsize(PIM_ENCODED_SOURCE_ADDRESS_HDR % IPV6_HDR)
 
@@ -39,7 +40,8 @@ class PacketPimEncodedSourceAddress:
     def bytes(self) -> bytes:
         (string_ip_hdr, hdr_addr_family, socket_family) = PacketPimEncodedSourceAddress.get_ip_info(self.source_address)
 
-        if self.mask_len is None:
+        mask_len = self.mask_len
+        if mask_len is None:
             mask_len = 8 * struct.calcsize(string_ip_hdr)
         ip = socket.inet_pton(socket_family, self.source_address)
 
@@ -56,3 +58,23 @@ class PacketPimEncodedSourceAddress:
             return (PacketPimEncodedSourceAddress.IPV6_HDR, PacketPimEncodedSourceAddress.FAMILY_IPV6, socket.AF_INET6)
         else:
             raise Exception
+
+    @staticmethod
+    def parse_bytes(data: bytes):
+        data_without_source_addr = data[0:PacketPimEncodedSourceAddress.PIM_ENCODED_SOURCE_ADDRESS_HDR_WITHOUT_SOURCE_ADDRESS_LEN]
+        (addr_family, encoding, _, mask_len) = struct.unpack(PacketPimEncodedSourceAddress.PIM_ENCODED_SOURCE_ADDRESS_HDR_WITHOUT_SOURCE_ADDRESS, data_without_source_addr)
+
+        data_source_addr = data[PacketPimEncodedSourceAddress.PIM_ENCODED_SOURCE_ADDRESS_HDR_WITHOUT_SOURCE_ADDRESS_LEN:]
+        ip = None
+        if addr_family == PacketPimEncodedSourceAddress.FAMILY_IPV4:
+            (ip,) = struct.unpack("! " + PacketPimEncodedSourceAddress.IPV4_HDR, data_source_addr[:4])
+            ip = socket.inet_ntop(socket.AF_INET, ip)
+        elif addr_family == PacketPimEncodedSourceAddress.FAMILY_IPV6:
+            (ip,) = struct.unpack("! " + PacketPimEncodedSourceAddress.IPV6_HDR, data_source_addr[:16])
+            ip = socket.inet_ntop(socket.AF_INET6, ip)
+
+        if encoding != 0:
+            print("unknown encoding")
+            raise Exception
+
+        return PacketPimEncodedSourceAddress(ip, mask_len)

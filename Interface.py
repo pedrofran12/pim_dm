@@ -4,6 +4,7 @@ import random
 import netifaces
 from Packet.ReceivedPacket import ReceivedPacket
 import Main
+import traceback
 
 class Interface:
     MCAST_GRP = '224.0.0.13'
@@ -51,7 +52,8 @@ class Interface:
                     #print("options received = ", packet.pim_header.payload.options)
                     Main.protocols[packet.pim_header.get_pim_type()].receive_handle(packet)  # TODO: perceber se existe melhor maneira de fazer isto
             except Exception:
-                pass
+                traceback.print_exc()
+                continue
 
     def send(self, data: bytes):
         if self.interface_enabled and data:

@@ -18,6 +18,7 @@ class PacketPimEncodedGroupAddress:
     IPV6_HDR = "16s"
 
     # TODO ver melhor versao ip
+    PIM_ENCODED_GROUP_ADDRESS_HDR_WITHOUT_GROUP_ADDRESS_LEN = struct.calcsize(PIM_ENCODED_GROUP_ADDRESS_HDR_WITHOUT_GROUP_MULTICAST_ADDRESS)
     PIM_ENCODED_GROUP_ADDRESS_HDR_LEN = struct.calcsize(PIM_ENCODED_GROUP_ADDRESS_HDR % IPV4_HDR)
     PIM_ENCODED_GROUP_ADDRESS_HDR_LEN_IPv6 = struct.calcsize(PIM_ENCODED_GROUP_ADDRESS_HDR % IPV6_HDR)
 
@@ -37,7 +38,8 @@ class PacketPimEncodedGroupAddress:
 
     def bytes(self) -> bytes:
         (string_ip_hdr, hdr_addr_family, socket_family) = PacketPimEncodedGroupAddress.get_ip_info(self.group_address)
-        if self.mask_len is None:
+        mask_len = self.mask_len
+        if mask_len is None:
             mask_len = 8 * struct.calcsize(string_ip_hdr)
         ip = socket.inet_pton(socket_family, self.group_address)
 
@@ -54,3 +56,23 @@ class PacketPimEncodedGroupAddress:
             return (PacketPimEncodedGroupAddress.IPV6_HDR, PacketPimEncodedGroupAddress.FAMILY_IPV6, socket.AF_INET6)
         else:
             raise Exception
+
+    @staticmethod
+    def parse_bytes(data: bytes):
+        data_without_group_addr = data[0:PacketPimEncodedGroupAddress.PIM_ENCODED_GROUP_ADDRESS_HDR_WITHOUT_GROUP_ADDRESS_LEN]
+        (addr_family, encoding, _, mask_len) = struct.unpack(PacketPimEncodedGroupAddress.PIM_ENCODED_GROUP_ADDRESS_HDR_WITHOUT_GROUP_MULTICAST_ADDRESS, data_without_group_addr)
+
+        data_group_addr = data[PacketPimEncodedGroupAddress.PIM_ENCODED_GROUP_ADDRESS_HDR_WITHOUT_GROUP_ADDRESS_LEN:]
+        ip = None
+        if addr_family == PacketPimEncodedGroupAddress.FAMILY_IPV4:
+            (ip,) = struct.unpack("! " + PacketPimEncodedGroupAddress.IPV4_HDR, data_group_addr[:4])
+            ip = socket.inet_ntop(socket.AF_INET, ip)
+        elif addr_family == PacketPimEncodedGroupAddress.FAMILY_IPV6:
+            (ip,) = struct.unpack("! " + PacketPimEncodedGroupAddress.IPV6_HDR, data_group_addr[:16])
+            ip = socket.inet_ntop(socket.AF_INET6, ip)
+
+        if encoding != 0:
+            print("unknown encoding")
+            raise Exception
+
+        return PacketPimEncodedGroupAddress(ip, mask_len)
