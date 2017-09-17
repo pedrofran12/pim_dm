@@ -29,10 +29,10 @@ class Hello:
 
     def packet_send_handle(self, interface: Interface):
         pim_payload = PacketPimHello()
-        pim_payload.add_option(1, Hello.TRIGGERED_HELLO_DELAY)
+        pim_payload.add_option(1, 3.5 * Hello.TRIGGERED_HELLO_DELAY)
         pim_payload.add_option(20, interface.generation_id)
         ph = PacketPimHeader(pim_payload)
-        packet = Packet(pim_header=ph)
+        packet = Packet(payload=ph)
         interface.send(packet.bytes())
 
     def force_send(self, interface: Interface):
@@ -46,14 +46,14 @@ class Hello:
         pim_payload.add_option(1, HELLO_HOLD_TIME_TIMEOUT)
         pim_payload.add_option(20, interface.generation_id)
         ph = PacketPimHeader(pim_payload)
-        packet = Packet(pim_header=ph)
+        packet = Packet(payload=ph)
         interface.send(packet.bytes())
 
     # receive handler
     def receive_handle(self, packet: ReceivedPacket):
         ip = packet.ip_header.ip_src
         print("ip = ", ip)
-        options = packet.pim_header.payload.get_options()
+        options = packet.payload.payload.get_options()
         if Main.get_neighbor(ip) is None:
             # Unknown Neighbor
             if (1 in options) and (20 in options):

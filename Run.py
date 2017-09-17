@@ -16,7 +16,7 @@ def client_socket(data_to_send):
 
     # Connect the socket to the port where the server is listening
     server_address = './uds_socket'
-    print('connecting to %s' % server_address)
+    #print('connecting to %s' % server_address)
     try:
         sock.connect(server_address)
         sock.sendall(pickle.dumps(data_to_send))
@@ -26,7 +26,7 @@ def client_socket(data_to_send):
     except socket.error:
         pass
     finally:
-        print('closing socket')
+        #print('closing socket')
         sock.close()
 
 
@@ -61,14 +61,22 @@ class MyDaemon(Daemon):
                     connection.sendall(pickle.dumps(Main.list_enabled_interfaces()))
                 elif args.list_neighbors:
                     connection.sendall(pickle.dumps(Main.list_neighbors()))
+                elif args.list_state:
+                    connection.sendall(pickle.dumps(Main.list_igmp_state()))
                 elif args.add_interface:
-                    Main.add_interface(args.add_interface[0])
+                    Main.add_interface(args.add_interface[0], pim=True)
+                    connection.shutdown(socket.SHUT_RDWR)
+                elif args.add_interface_igmp:
+                    Main.add_interface(args.add_interface_igmp[0], igmp=True)
                     connection.shutdown(socket.SHUT_RDWR)
                 elif args.remove_interface:
-                    Main.remove_interface(args.remove_interface[0])
+                    Main.remove_interface(args.remove_interface[0], pim=True)
+                    connection.shutdown(socket.SHUT_RDWR)
+                elif args.remove_interface_igmp:
+                    Main.remove_interface(args.remove_interface_igmp[0], igmp=True)
                     connection.shutdown(socket.SHUT_RDWR)
                 elif args.stop:
-                    Main.remove_interface("*")
+                    Main.remove_interface("*", pim=True, igmp=True)
                     connection.shutdown(socket.SHUT_RDWR)
             except Exception:
                 connection.shutdown(socket.SHUT_RDWR)
@@ -88,9 +96,12 @@ if __name__ == "__main__":
     group.add_argument("-restart", "--restart", action="store_true", default=False, help="Restart PIM")
     group.add_argument("-li", "--list_interfaces", action="store_true", default=False, help="List All PIM Interfaces")
     group.add_argument("-ln", "--list_neighbors", action="store_true", default=False, help="List All PIM Neighbors")
+    group.add_argument("-ls", "--list_state", action="store_true", default=False, help="List state of IGMP")
     group.add_argument("-mr", "--multicast_routes", action="store_true", default=False, help="List Multicast Routing table")
     group.add_argument("-ai", "--add_interface", nargs=1, metavar='INTERFACE_NAME', help="Add PIM interface")
+    group.add_argument("-aiigmp", "--add_interface_igmp", nargs=1, metavar='INTERFACE_NAME', help="Add IGMP interface")
     group.add_argument("-ri", "--remove_interface", nargs=1, metavar='INTERFACE_NAME', help="Remove PIM interface")
+    group.add_argument("-riigmp", "--remove_interface_igmp", nargs=1, metavar='INTERFACE_NAME', help="Remove IGMP interface")
     group.add_argument("-v", "--verbose", action="store_true", default=False, help="Verbose (print all debug messages)")
     args = parser.parse_args()
 

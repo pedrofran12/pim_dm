@@ -26,15 +26,18 @@ class PacketPimHello:
 
     PIM_MSG_TYPES_LENGTH = {1: 2,
                             20: 4,
+                            21: 4,
                             }
+    # todo: pensar melhor na implementacao state refresh capable option...
 
     def __init__(self):
         self.options = {}
 
-    def add_option(self, option_type: int, option_value: int):
-        if option_value is None:
-            del self.options[option_type]
-            return
+    def add_option(self, option_type: int, option_value: int or float):
+        option_value = int(option_value)
+        # if option_value requires more bits than the bits available for that field: option value will have all field bits = 1
+        if option_type in self.PIM_MSG_TYPES_LENGTH and self.PIM_MSG_TYPES_LENGTH[option_type] * 8 < option_value.bit_length():
+            option_value = (1 << (self.PIM_MSG_TYPES_LENGTH[option_type] * 8)) - 1
         self.options[option_type] = option_value
 
     def get_options(self):

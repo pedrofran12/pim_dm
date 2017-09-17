@@ -2,6 +2,90 @@ import socket
 import struct
 import netifaces
 import threading
+import traceback
+from RWLock.RWLock import RWLockWrite
+import Main
+
+from tree.root_interface import *
+from tree.non_root_interface import *
+from tree.KernelEntry import KernelEntry
+
+"""
+class KernelEntry:
+    def __init__(self, source_ip: str, group_ip: str, inbound_interface_index: int):
+        self.source_ip = source_ip
+        self.group_ip = group_ip
+
+        # decide inbound interface based on rpf check
+        self.inbound_interface_index = Main.kernel.vif_dic[self.check_rpf()]
+
+        # all other interfaces = outbound
+        #self.outbound_interfaces = [1] * Kernel.MAXVIFS
+        #self.outbound_interfaces[self.inbound_interface_index] = 0
+
+        self._lock = threading.Lock()
+
+        # todo
+        self.state = {}  # type: Dict[int, SFRMTreeInterface]
+        for i in range(Kernel.MAXVIFS):
+            if i == self.inbound_interface_index:
+                self.state[i] = SFRMRootInterface(self, i, False)
+            else:
+                self.state[i] = SFRMNonRootInterface(self, i)
+
+    def lock(self):
+        self._lock.acquire()
+
+    def unlock(self):
+        self._lock.release()
+
+    def get_inbound_interface_index(self):
+        return self.inbound_interface_index
+
+    def get_outbound_interfaces_indexes(self):
+        # todo check state of outbound interfaces
+        outbound_indexes = [0]*Kernel.MAXVIFS
+        for (index, state) in self.state.items():
+            outbound_indexes[index] = state.is_forwarding()
+        return outbound_indexes
+
+    def check_rpf(self):
+        from pyroute2 import IPRoute
+        # from utils import if_indextoname
+
+        ipr = IPRoute()
+        # obter index da interface
+        # rpf_interface_index = ipr.get_routes(family=socket.AF_INET, dst=ip)[0]['attrs'][2][1]
+        # interface_name = if_indextoname(rpf_interface_index)
+        # return interface_name
+
+        # obter ip da interface de saida
+        rpf_interface_source = ipr.get_routes(family=socket.AF_INET, dst=socket.inet_ntoa(self.source_ip))[0]['attrs'][3][1]
+        return rpf_interface_source
+
+    def recv_data_msg(self, index):
+        self.state[index].recv_data_msg()
+
+    def recv_assert_msg(self, index, packet):
+        self.state[index].recv_assert_msg(packet, None)
+
+    def recv_prune_msg(self, index, packet):
+        self.state[index].recv_prune_msg(None, None)
+
+    def recv_join_msg(self, index, packet):
+        self.state[index].recv_join_msg(None, None)
+
+
+
+    def change(self):
+        # todo: changes on unicast routing or multicast routing...
+
+        Main.kernel.set_multicast_route(self)
+
+    def delete(self):
+        Main.kernel.remove_multicast_route(self)
+
+"""
 
 class Kernel:
     # MRT
@@ -27,7 +111,7 @@ class Kernel:
     # SIGNAL MSG TYPE
     IGMPMSG_NOCACHE = 1
     IGMPMSG_WRONGVIF = 2
-    IGMPMSG_WHOLEPKT = 3
+    IGMPMSG_WHOLEPKT = 3  # NOT USED ON PIM-DM
 
 
     def __init__(self):
@@ -36,8 +120,10 @@ class Kernel:
 
         # KEY : interface_ip, VALUE : vif_index
         self.vif_dic = {}
+        self.vif_index_to_name_dic = {}
+        self.vif_name_to_index_dic = {}
 
-        # KEY : (source_ip, group_ip), VALUE : ???? TODO
+        # KEY : (source_ip, group_ip), VALUE : KernelEntry ???? TODO
         self.routing = {}
 
         s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IGMP)
@@ -46,20 +132,22 @@ class Kernel:
         s.setsockopt(socket.IPPROTO_IP, Kernel.MRT_INIT, 1)
 
         # MRT PIM
-        s.setsockopt(socket.IPPROTO_IP, Kernel.MRT_PIM, 1)
+        s.setsockopt(socket.IPPROTO_IP, Kernel.MRT_PIM, 0)
 
         self.socket = s
+        self.rwlock = RWLockWrite()
+
 
         # Create virtual interfaces
         interfaces = netifaces.interfaces()
         for interface in interfaces:
-            #ignore localhost interface
-            if interface == 'lo':
-                continue
-            addrs = netifaces.ifaddresses(interface)
-            addr = addrs[netifaces.AF_INET][0]['addr']
             try:
-                self.create_virtual_interface(addr)
+                # ignore localhost interface
+                if interface == 'lo':
+                    continue
+                addrs = netifaces.ifaddresses(interface)
+                addr = addrs[netifaces.AF_INET][0]['addr']
+                self.create_virtual_interface(ip_interface=addr, interface_name=interface)
             except Exception:
                 continue
 
@@ -82,10 +170,8 @@ class Kernel:
         struct in_addr vifc_rmt_addr;	/* IPIP tunnel addr */
     };
     '''
-    def create_virtual_interface(self, ip_interface, index=None, flags=0x0):
-        if (type(ip_interface) is not bytes) and (type(ip_interface) is not str):
-            raise Exception
-        elif type(ip_interface) is str:
+    def create_virtual_interface(self, ip_interface: str or bytes, interface_name: str, index: int = None, flags=0x0):
+        if type(ip_interface) is str:
             ip_interface = socket.inet_aton(ip_interface)
 
         if index is None:
@@ -93,6 +179,8 @@ class Kernel:
         struct_mrt_add_vif = struct.pack("HBBI 4s 4s", index, flags, 1, 0, ip_interface, socket.inet_aton("0.0.0.0"))
         self.socket.setsockopt(socket.IPPROTO_IP, Kernel.MRT_ADD_VIF, struct_mrt_add_vif)
         self.vif_dic[socket.inet_ntoa(ip_interface)] = index
+        self.vif_index_to_name_dic[index] = interface_name
+        self.vif_name_to_index_dic[interface_name] = index
 
     def remove_virtual_interface(self, ip_interface):
         index = self.vif_dic[ip_interface]
@@ -100,8 +188,10 @@ class Kernel:
 
         self.socket.setsockopt(socket.IPPROTO_IP, Kernel.MRT_DEL_VIF, struct_vifctl)
 
-        # TODO alterar MFC's para colocar a 0 esta interface
         del self.vif_dic[ip_interface]
+        del self.vif_name_to_index_dic[self.vif_index_to_name_dic[index]]
+        del self.vif_index_to_name_dic[index]
+        # TODO alterar MFC's para colocar a 0 esta interface
 
 
     '''
@@ -117,31 +207,43 @@ class Kernel:
         int mfcc_expire;
     };
     '''
-    def set_multicast_route(self, source_ip, group_ip, inbound_interface_index, outbound_interfaces=None):
-        if (type(source_ip) not in (bytes, str)) or (type(group_ip) not in (bytes, str)):
-            raise Exception
-        if type(source_ip) is str:
-            source_ip = socket.inet_aton(source_ip)
-        if type(group_ip) is str:
-            group_ip = socket.inet_aton(group_ip)
+    def set_multicast_route(self, kernel_entry: KernelEntry):
+        source_ip = socket.inet_aton(kernel_entry.source_ip)
+        group_ip = socket.inet_aton(kernel_entry.group_ip)
 
-        if outbound_interfaces is None:
-            outbound_interfaces = [1]*Kernel.MAXVIFS
-            outbound_interfaces[inbound_interface_index] = 0
-        elif len(outbound_interfaces) != Kernel.MAXVIFS:
+        outbound_interfaces = kernel_entry.get_outbound_interfaces_indexes()
+        if len(outbound_interfaces) != Kernel.MAXVIFS:
             raise Exception
 
-        outbound_interfaces_and_other_parameters = list(outbound_interfaces) + [0]*4
+        #outbound_interfaces_and_other_parameters = list(kernel_entry.outbound_interfaces) + [0]*4
+        outbound_interfaces_and_other_parameters = outbound_interfaces + [0]*4
+
         #outbound_interfaces, 0, 0, 0, 0 <- only works with python>=3.5
         #struct_mfcctl = struct.pack("4s 4s H " + "B"*Kernel.MAXVIFS + " IIIi", source_ip, group_ip, inbound_interface_index, *outbound_interfaces, 0, 0, 0, 0)
-        struct_mfcctl = struct.pack("4s 4s H " + "B"*Kernel.MAXVIFS + " IIIi", source_ip, group_ip, inbound_interface_index, *outbound_interfaces_and_other_parameters)
+        struct_mfcctl = struct.pack("4s 4s H " + "B"*Kernel.MAXVIFS + " IIIi", source_ip, group_ip, kernel_entry.inbound_interface_index, *outbound_interfaces_and_other_parameters)
         self.socket.setsockopt(socket.IPPROTO_IP, Kernel.MRT_ADD_MFC, struct_mfcctl)
 
         # TODO: ver melhor tabela routing
-        self.routing[(socket.inet_ntoa(source_ip), socket.inet_ntoa(group_ip))] = {"inbound_interface_index":inbound_interface_index, "outbound_interfaces": outbound_interfaces}
+        #self.routing[(socket.inet_ntoa(source_ip), socket.inet_ntoa(group_ip))] = {"inbound_interface_index": inbound_interface_index, "outbound_interfaces": outbound_interfaces}
 
-    def remove_multicast_route(self, source_ip, group_ip):
+    def flood(self, ip_src, ip_dst, iif):
+        source_ip = socket.inet_aton(ip_src)
+        group_ip = socket.inet_aton(ip_dst)
+
+        outbound_interfaces = [1]*Kernel.MAXVIFS
+        outbound_interfaces[iif] = 0
+        outbound_interfaces_and_other_parameters = outbound_interfaces + [0]*4
+
+        #outbound_interfaces, 0, 0, 0, 0 <- only works with python>=3.5
+        #struct_mfcctl = struct.pack("4s 4s H " + "B"*Kernel.MAXVIFS + " IIIi", source_ip, group_ip, inbound_interface_index, *outbound_interfaces, 0, 0, 0, 0)
+        struct_mfcctl = struct.pack("4s 4s H " + "B"*Kernel.MAXVIFS + " IIIi", source_ip, group_ip, iif, *outbound_interfaces_and_other_parameters)
+        self.socket.setsockopt(socket.IPPROTO_IP, Kernel.MRT_ADD_MFC, struct_mfcctl)
+
+    def remove_multicast_route(self, kernel_entry: KernelEntry):
+        source_ip = socket.inet_aton(kernel_entry.source_ip)
+        group_ip = socket.inet_aton(kernel_entry.group_ip)
         outbound_interfaces_and_other_parameters = [0] + [0]*Kernel.MAXVIFS + [0]*4
+
         struct_mfcctl = struct.pack("4s 4s H " + "B"*Kernel.MAXVIFS + " IIIi", source_ip, group_ip, *outbound_interfaces_and_other_parameters)
 
         self.socket.setsockopt(socket.IPPROTO_IP, Kernel.MRT_DEL_MFC, struct_mfcctl)
@@ -172,20 +274,47 @@ class Kernel:
             try:
                 msg = self.socket.recv(5000)
                 print(len(msg))
-                (_, _, im_msgtype, im_mbz, im_vif, _, im_src, im_dst, _) = struct.unpack("II B B B B 4s 4s    8s", msg)
+                (_, _, im_msgtype, im_mbz, im_vif, _, im_src, im_dst) = struct.unpack("II B B B B 4s 4s", msg[:20])
                 print(im_msgtype)
                 print(im_mbz)
                 print(im_vif)
                 print(socket.inet_ntoa(im_src))
                 print(socket.inet_ntoa(im_dst))
-                print(struct.unpack("II B B B B 4s 4s 8s", msg))
+                print(struct.unpack("II B B B B 4s 4s", msg[:20]))
                 if im_mbz != 0:
                     continue
+
+                ip_src = socket.inet_ntoa(im_src)
+                ip_dst = socket.inet_ntoa(im_dst)
+
                 if im_msgtype == Kernel.IGMPMSG_NOCACHE:
                     print("IGMP NO CACHE")
-                    self.set_multicast_route(im_src, im_dst, im_vif)
-                # TODO: handler
+                    self.igmpmsg_nocache_handler(ip_src, ip_dst, im_vif)
+                elif im_msgtype == Kernel.IGMPMSG_WRONGVIF:
+                    self.igmpmsg_wrongvif_handler(ip_src, ip_dst, im_vif)
+                else:
+                    raise Exception
             except Exception:
-                import traceback
                 traceback.print_exc()
                 continue
+
+    # receive multicast (S,G) packet and multicast routing table has no (S,G) entry
+    def igmpmsg_nocache_handler(self, ip_src, ip_dst, iif):
+        source_group_pair = (ip_src, ip_dst)
+        with self.rwlock.genWlock():
+            if source_group_pair in self.routing:
+                return
+
+            kernel_entry = KernelEntry(ip_src, ip_dst, iif)
+            self.routing[(ip_src, ip_dst)] = kernel_entry
+            self.set_multicast_route(kernel_entry)
+
+    # receive multicast (S,G) packet in a outbound_interface
+    def igmpmsg_wrongvif_handler(self, ip_src, ip_dst, iif):
+        #kernel_entry = self.routing[(ip_src, ip_dst)]
+        kernel_entry = self.get_routing_entry((ip_src, ip_dst))
+        kernel_entry.recv_data_msg(iif)
+
+    def get_routing_entry(self, source_group: tuple):
+        with self.rwlock.genRlock():
+            return self.routing[source_group]

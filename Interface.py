@@ -6,12 +6,14 @@ from Packet.ReceivedPacket import ReceivedPacket
 import Main
 import traceback
 
-class Interface:
+class Interface(object):
     MCAST_GRP = '224.0.0.13'
 
     # substituir ip por interface ou algo parecido
     def __init__(self, interface_name: str):
+        self.interface_name = interface_name
         ip_interface = netifaces.ifaddresses(interface_name)[netifaces.AF_INET][0]['addr']
+        self.ip_interface = ip_interface
 
         s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_PIM)
 
@@ -36,6 +38,9 @@ class Interface:
         # generation id
         self.generation_id = random.getrandbits(32)
 
+        # todo neighbors
+        self.neighbors = {}
+
         # run receive method in background
         receive_thread = threading.Thread(target=self.receive)
         receive_thread.daemon = True
@@ -47,10 +52,7 @@ class Interface:
                 (raw_packet, (ip, _)) = self.socket.recvfrom(256 * 1024)
                 if raw_packet:
                     packet = ReceivedPacket(raw_packet, self)
-                    #print("packet received bytes: ", packet.bytes())
-                    #print("pim type received = ", packet.pim_header.msg_type)
-                    #print("options received = ", packet.pim_header.payload.options)
-                    Main.protocols[packet.pim_header.get_pim_type()].receive_handle(packet)  # TODO: perceber se existe melhor maneira de fazer isto
+                    Main.protocols[packet.payload.get_pim_type()].receive_handle(packet)  # TODO: perceber se existe melhor maneira de fazer isto
             except Exception:
                 traceback.print_exc()
                 continue

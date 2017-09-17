@@ -124,7 +124,6 @@ class Daemon:
         """ Check For the existence of a unix pid. """
         try:
             os.kill(pid, 0)
+            return True
         except OSError:
             return False
-        else:
-            return True

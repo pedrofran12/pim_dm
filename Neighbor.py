@@ -4,6 +4,7 @@ from utils import HELLO_HOLD_TIME_NO_TIMEOUT, HELLO_HOLD_TIME_TIMEOUT
 from Interface import Interface
 import Main
 
+
 class Neighbor:
     def __init__(self, contact_interface: Interface, ip, generation_id: int, hello_hold_time: int):
         if hello_hold_time == HELLO_HOLD_TIME_TIMEOUT:
@@ -24,7 +25,7 @@ class Neighbor:
         if hello_hold_time == HELLO_HOLD_TIME_TIMEOUT:
             self.remove()
         elif hello_hold_time != HELLO_HOLD_TIME_NO_TIMEOUT:
-            self.neighbor_liveness_timer = Timer(4 * hello_hold_time, self.remove)
+            self.neighbor_liveness_timer = Timer(hello_hold_time, self.remove)
             self.neighbor_liveness_timer.start()
         else:
             self.neighbor_liveness_timer = None
@@ -35,7 +36,7 @@ class Neighbor:
             print("HEARTBEAT")
             if self.neighbor_liveness_timer is not None:
                 self.neighbor_liveness_timer.cancel()
-            self.neighbor_liveness_timer = Timer(4 * self.hello_hold_time, self.remove)
+            self.neighbor_liveness_timer = Timer(self.hello_hold_time, self.remove)
             self.neighbor_liveness_timer.start()
             self.time_of_last_update = time.time()
 

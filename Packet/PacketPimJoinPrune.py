@@ -46,6 +46,9 @@ class PacketPimJoinPrune:
 
         return msg
 
+    def __len__(self):
+        return len(self.bytes())
+
     @staticmethod
     def parse_bytes(data: bytes):
         upstream_neighbor_addr_obj = PacketPimEncodedUnicastAddress.parse_bytes(data)

@@ -1,18 +1,11 @@
-from Packet.PacketIpHeader import PacketIpHeader
-from Packet.PacketPimHeader import PacketPimHeader
+from .PacketIpHeader import PacketIpHeader
+from .PacketPayload import PacketPayload
 
 
-class Packet:
-    # ter ip header
-    # pim header
-    # pim options
-    def __init__(self, ip_header: PacketIpHeader = None, pim_header: PacketPimHeader = None):
+class Packet(object):
+    def __init__(self, ip_header: PacketIpHeader = None, payload: PacketPayload = None):
         self.ip_header = ip_header
-        self.pim_header = pim_header
+        self.payload = payload
 
-    # maybe remover
-    '''def add_option(self, option: PacketPimOption):
-        self.pim_header.add_option(option)
-    '''
-    def bytes(self):
-        return self.pim_header.bytes()
+    def bytes(self) -> bytes:
+        return self.payload.bytes()

@@ -43,11 +43,11 @@ class PacketPimJoinPruneMulticastGroup:
     PIM_HDR_JOINED_PRUNED_SOURCE_v4_LEN = PacketPimEncodedSourceAddress.PIM_ENCODED_SOURCE_ADDRESS_HDR_LEN
     PIM_HDR_JOINED_PRUNED_SOURCE_v6_LEN = PacketPimEncodedSourceAddress.PIM_ENCODED_SOURCE_ADDRESS_HDR_LEN_IPV6
 
-    def __init__(self, multicast_group, joined_src_addresses: list, pruned_src_addresses: list):
+    def __init__(self, multicast_group: str or bytes, joined_src_addresses: list=[], pruned_src_addresses: list=[]):
         if type(multicast_group) not in (str, bytes):
             raise Exception
         elif type(multicast_group) is bytes:
-            self.multicast_group = socket.inet_ntoa(self.multicast_group)
+            multicast_group = socket.inet_ntoa(multicast_group)
 
         if type(joined_src_addresses) is not list:
             raise Exception
