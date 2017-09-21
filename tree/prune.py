@@ -52,7 +52,7 @@ class SFMRDownstreamInterested(SFMRPruneStateABC):
         @type interface: SFRMNonRootInterface
         '''
 
-        if len(interface.get_interface().neighbors) == 1:
+        if len(interface.get_interface().neighbors) <= 1:
             print('recv_prune, DI -> NDI (only 1 nbr)')
             interface._set_prune_state(SFMRPruneState.NDI)
 
@@ -110,13 +110,13 @@ class SFMRDownstreamInterestedPending(SFMRPruneStateABC):
         @type interface: SFRMNonRootInterface
         '''
         # TODO foi alterado pelo Pedro... necessita de verificacao se esta OK...
-        print('recv_prune, DIP -> DIP')
-        if len(interface.get_interface().neighbors) == 1:
-            print('recv_prune, DIP -> DI (only 1 nbr)')
-        else:
-            print('recv_prune, DIP -> NDI')
+        #print('recv_prune, DIP -> DIP')
+        if len(interface.get_interface().neighbors) <= 1:
+            print('recv_prune, DIP -> NDI (only 1 nbr)')
             interface._set_prune_state(SFMRPruneState.NDI)
             interface.clear_dipt_timer()
+        else:
+            print('recv_prune, DIP -> DIP')
 
     @staticmethod
     def recv_join(interface):
@@ -145,7 +145,8 @@ class SFMRDownstreamInterestedPending(SFMRPruneStateABC):
         print('is_now_root, DIP -> DI')
 
         interface._set_prune_state(SFMRPruneState.DI)
-        interface._get_dipt().stop()
+        #interface._get_dipt().stop()
+        interface.clear_dipt_timer()
 
     @staticmethod
     def new_nbr(interface):

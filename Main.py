@@ -2,24 +2,20 @@ import netifaces
 import time
 from prettytable import PrettyTable
 
-from Interface import Interface
+from InterfacePIM import InterfacePim
 from InterfaceIGMP import InterfaceIGMP
 from Kernel import Kernel
-from Neighbor import Neighbor
 from threading import Lock
 
 interfaces = {}  # interfaces with multicast routing enabled
 igmp_interfaces = {}  # igmp interfaces
-neighbors = {}  # multicast router neighbors
-neighbors_lock = Lock()
 protocols = {}
 kernel = None
 igmp = None
 
 def add_interface(interface_name, pim=False, igmp=False):
-    global interfaces
     if pim is True and interface_name not in interfaces:
-        interface = Interface(interface_name)
+        interface = InterfacePim(interface_name)
         interfaces[interface_name] = interface
         protocols[0].force_send(interface)
     if igmp is True and interface_name not in igmp_interfaces:
@@ -27,35 +23,29 @@ def add_interface(interface_name, pim=False, igmp=False):
         igmp_interfaces[interface_name] = interface
 
 def remove_interface(interface_name, pim=False, igmp=False):
-    global interfaces
-    global neighbors
     if pim is True and ((interface_name in interfaces) or interface_name == "*"):
         if interface_name == "*":
-            interface_name = list(interfaces.keys())
+            interface_name_list = list(interfaces.keys())
         else:
-            interface_name = [interface_name]
-        for if_name in interface_name:
+            interface_name_list = [interface_name]
+        for if_name in interface_name_list:
             protocols[0].force_send_remove(interfaces[if_name])
             interfaces[if_name].remove()
             del interfaces[if_name]
         print("removido interface")
 
-        for (ip_neighbor, neighbor) in list(neighbors.items()):
-            if neighbor.contact_interface not in interfaces:
-                neighbor.remove()
-
     if igmp is True and ((interface_name in igmp_interfaces) or interface_name == "*"):
         if interface_name == "*":
-            interface_name = list(igmp_interfaces.keys())
+            interface_name_list = list(igmp_interfaces.keys())
         else:
-            interface_name = [interface_name]
-        for if_name in interface_name:
+            interface_name_list = [interface_name]
+        for if_name in interface_name_list:
             igmp_interfaces[if_name].remove()
             del igmp_interfaces[if_name]
         print("removido interface")
 
 
-
+"""
 def add_neighbor(contact_interface, ip, random_number, hello_hold_time):
     global neighbors
     with neighbors_lock:
@@ -81,20 +71,23 @@ def remove_neighbor(ip):
         if ip in neighbors:
             del neighbors[ip]
             print("removido neighbor")
+"""
 
 def add_protocol(protocol_number, protocol_obj):
     global protocols
     protocols[protocol_number] = protocol_obj
 
 def list_neighbors():
-    global neighbors
+    interfaces_list = interfaces.values()
+    t = PrettyTable(['Interface', 'Neighbor IP', 'Hello Hold Time', "Generation ID", "Uptime"])
     check_time = time.time()
-    t = PrettyTable(['Neighbor IP', 'Hello Hold Time', "Generation ID", "Uptime"])
-    for ip, neighbor in list(neighbors.items()):
-        uptime = check_time - neighbor.time_of_last_update
-        uptime = 0 if (uptime < 0) else uptime
+    for interface in interfaces_list:
+        for neighbor in interface.get_neighbors():
+            uptime = check_time - neighbor.time_of_last_update
+            uptime = 0 if (uptime < 0) else uptime
 
-        t.add_row([ip, neighbor.hello_hold_time, neighbor.generation_id, time.strftime("%H:%M:%S", time.gmtime(uptime))])
+            t.add_row(
+                [interface.interface_name, neighbor.ip, neighbor.hello_hold_time, neighbor.generation_id, time.strftime("%H:%M:%S", time.gmtime(uptime))])
     print(t)
     return str(t)
 
@@ -126,7 +119,7 @@ def list_enabled_interfaces():
 
 
         from Packet.PacketPimGraft import PacketPimGraft
-        ph = PacketPimGraft("10.0.0.13", 210)
+        ph = PacketPimGraft("10.0.0.13")
         ph.add_multicast_group(PacketPimJoinPruneMulticastGroup("239.123.123.124", ["1.1.1.2", "10.1.1.2"], []))
         pckt = Packet(payload=PacketPimHeader(ph))
         interfaces[interface].send(pckt.bytes())
@@ -163,6 +156,29 @@ def list_igmp_state():
             print(group_addr)
             group_state_txt = group_state.print_state()
             t.add_row([interface_name, state_txt, group_addr, group_state_txt])
+    return str(t)
+
+def list_routing_state():
+    routing_entries = kernel.routing.values()
+    vif_indexes = kernel.vif_index_to_name_dic.keys()
+
+    t = PrettyTable(['SourceIP', 'GroupIP', 'Interface', 'PruneState', 'AssertState', "Is Forwarding?"])
+    for entry in routing_entries:
+        ip = entry.source_ip
+        group = entry.group_ip
+
+        for index in vif_indexes:
+            interface_state = entry.interface_state[index]
+            interface_name = kernel.vif_index_to_name_dic[index]
+            is_forwarding = interface_state.is_forwarding()
+            try:
+                prune_state = type(interface_state._prune_state).__name__
+                assert_state = type(interface_state._assert_state).__name__
+            except:
+                prune_state = "-"
+                assert_state = "-"
+
+            t.add_row([ip, group, interface_name, prune_state, assert_state, is_forwarding])
     return str(t)
 
 

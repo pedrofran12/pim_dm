@@ -21,20 +21,20 @@ def retransmit_timeout(group_state: 'GroupState'):
 
 
 def receive_v1_membership_report(group_state: 'GroupState'):
-    group_ip = group_state.group_ip
-    # TODO NOTIFY ROUTING + !!!!
-
     group_state.set_timer()
     group_state.set_v1_host_timer()
     group_state.state = Version1MembersPresent
 
+    # NOTIFY ROUTING + !!!!
+    group_state.notify_routing_add()
+
 
 def receive_v2_membership_report(group_state: 'GroupState'):
-    group_ip = group_state.group_ip
-    # TODO NOTIFY ROUTING + !!!!
-
     group_state.set_timer()
     group_state.state = MembersPresent
+
+    # NOTIFY ROUTING + !!!!
+    group_state.notify_routing_add()
 
 
 def receive_leave_group(group_state: 'GroupState'):

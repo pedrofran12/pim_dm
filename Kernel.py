@@ -273,16 +273,18 @@ class Kernel:
         while self.running:
             try:
                 msg = self.socket.recv(5000)
-                print(len(msg))
+                #print(len(msg))
                 (_, _, im_msgtype, im_mbz, im_vif, _, im_src, im_dst) = struct.unpack("II B B B B 4s 4s", msg[:20])
+
+                if im_mbz != 0:
+                    continue
+
                 print(im_msgtype)
                 print(im_mbz)
                 print(im_vif)
                 print(socket.inet_ntoa(im_src))
                 print(socket.inet_ntoa(im_dst))
                 print(struct.unpack("II B B B B 4s 4s", msg[:20]))
-                if im_mbz != 0:
-                    continue
 
                 ip_src = socket.inet_ntoa(im_src)
                 ip_dst = socket.inet_ntoa(im_dst)
@@ -301,20 +303,58 @@ class Kernel:
     # receive multicast (S,G) packet and multicast routing table has no (S,G) entry
     def igmpmsg_nocache_handler(self, ip_src, ip_dst, iif):
         source_group_pair = (ip_src, ip_dst)
+        """
         with self.rwlock.genWlock():
             if source_group_pair in self.routing:
-                return
+                kernel_entry = self.routing[(ip_src, ip_dst)]
+            else:
+                kernel_entry = KernelEntry(ip_src, ip_dst, iif)
+                self.routing[(ip_src, ip_dst)] = kernel_entry
+                self.set_multicast_route(kernel_entry)
+            kernel_entry.recv_data_msg(iif)
+        """
+        """
+        with self.rwlock.genRlock():
+            if source_group_pair in self.routing:
+                kernel_entry = self.routing[(ip_src, ip_dst)]
 
-            kernel_entry = KernelEntry(ip_src, ip_dst, iif)
-            self.routing[(ip_src, ip_dst)] = kernel_entry
-            self.set_multicast_route(kernel_entry)
+        with self.rwlock.genWlock():
+            if source_group_pair in self.routing:
+                kernel_entry = self.routing[(ip_src, ip_dst)]
+            else:
+                kernel_entry = KernelEntry(ip_src, ip_dst, iif)
+                self.routing[(ip_src, ip_dst)] = kernel_entry
+                self.set_multicast_route(kernel_entry)
+
+            kernel_entry.recv_data_msg(iif)
+        """
+        self.get_routing_entry(source_group_pair, create_if_not_existent=True).recv_data_msg(iif)
 
     # receive multicast (S,G) packet in a outbound_interface
     def igmpmsg_wrongvif_handler(self, ip_src, ip_dst, iif):
         #kernel_entry = self.routing[(ip_src, ip_dst)]
-        kernel_entry = self.get_routing_entry((ip_src, ip_dst))
-        kernel_entry.recv_data_msg(iif)
+        self.get_routing_entry((ip_src, ip_dst), create_if_not_existent=True).recv_data_msg(iif)
+        #kernel_entry.recv_data_msg(iif)
 
+    """
     def get_routing_entry(self, source_group: tuple):
         with self.rwlock.genRlock():
             return self.routing[source_group]
+    """
+    def get_routing_entry(self, source_group: tuple, create_if_not_existent=False):
+        ip_src = source_group[0]
+        ip_dst = source_group[1]
+        with self.rwlock.genRlock():
+            if source_group in self.routing:
+                return self.routing[(ip_src, ip_dst)]
+
+        with self.rwlock.genWlock():
+            if source_group in self.routing:
+                return self.routing[(ip_src, ip_dst)]
+            elif create_if_not_existent:
+                kernel_entry = KernelEntry(ip_src, ip_dst, 0)
+                self.routing[source_group] = kernel_entry
+                #self.set_multicast_route(kernel_entry)
+                return kernel_entry
+            else:
+                return None

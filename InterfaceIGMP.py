@@ -60,11 +60,11 @@ class InterfaceIGMP(object):
                     from Packet.PacketIpHeader import PacketIpHeader
                     (verhlen, tos, iplen, ipid, frag, ttl, proto, cksum, src, dst) = \
                         struct.unpack(PacketIpHeader.IP_HDR, raw_packet[:PacketIpHeader.IP_HDR_LEN])
-                    print(proto)
+                    #print(proto)
 
                     if proto != socket.IPPROTO_IGMP:
                         continue
-                    print((raw_packet, x))
+                    #print((raw_packet, x))
                     packet = ReceivedPacket(raw_packet, self)
                     Main.igmp.receive_handle(packet)
             except Exception:

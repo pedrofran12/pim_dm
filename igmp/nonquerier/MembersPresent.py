@@ -7,9 +7,10 @@ if TYPE_CHECKING:
 
 
 def group_membership_timeout(group_state: 'GroupState'):
-    group_ip = group_state.group_ip
-    # TODO NOTIFY ROUTING - !!!!
     group_state.state = NoMembersPresent
+
+    # NOTIFY ROUTING - !!!!
+    group_state.notify_routing_remove()
 
 
 def group_membership_v1_timeout(group_state: 'GroupState'):

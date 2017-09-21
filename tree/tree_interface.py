@@ -5,13 +5,16 @@ Created on Jul 16, 2015
 '''
 from abc import ABCMeta, abstractmethod
 import Main
+from threading import Lock, RLock
+import traceback
+
 #from convergence import Convergence
 #from sfmr.messages.prune import SFMRPruneMsg
 #from .router_interface import SFMRInterface
 
 
 class SFRMTreeInterface(metaclass=ABCMeta):
-    def __init__(self, kernel_entry, interface_id, evaluate_ig_cb):
+    def __init__(self, kernel_entry, interface_id):
         '''
         @type interface: SFMRInterface
         @type node: Node
@@ -24,10 +27,20 @@ class SFRMTreeInterface(metaclass=ABCMeta):
         #self._node = node
         #self._tree_id = tree_id
         #self._cost = cost
-        self._evaluate_ig = evaluate_ig_cb
+        #self._evaluate_ig = evaluate_ig_cb
+
+        try:
+            interface_name = Main.kernel.vif_index_to_name_dic[interface_id]
+            igmp_interface = Main.igmp_interfaces[interface_name]  # type: InterfaceIGMP
+            group_state = igmp_interface.interface_state.get_group_state(kernel_entry.group_ip)
+            self._igmp_has_members = group_state.add_multicast_routing_entry(self)
+        except:
+            #traceback.print_exc()
+            self._igmp_has_members = False
+
+        self._igmp_lock = RLock()
 
         #self.rprint('new ' + self.__class__.__name__)
-        #Convergence.mark_change()
 
     def recv_data_msg(self, msg, sender):
         pass
@@ -40,19 +53,15 @@ class SFRMTreeInterface(metaclass=ABCMeta):
         pass
 
     def recv_prune_msg(self, msg, sender, in_group):
-        print("SUPER PRUNE")
         pass
 
     def recv_join_msg(self, msg, sender, in_group):
-        print("SUPER JOIN")
-        pass
-
-    @abstractmethod
-    def forward_data_msg(self, msg):
         pass
 
     def forward_state_reset_msg(self, msg):
-        self._interface.send_mcast(msg)
+        #self._interface.send_mcast(msg)
+        # todo
+        raise NotImplemented
 
     def send_prune(self):
         try:
@@ -91,8 +100,20 @@ class SFRMTreeInterface(metaclass=ABCMeta):
         print('Tree Interface deleted')
 
     def evaluate_ingroup(self):
-        # todo help self._evaluate_ig()
-        return
+        self._kernel_entry.evaluate_ingroup()
+
+    def notify_igmp(self, has_members: bool):
+        with self.get_state_lock():
+            with self._igmp_lock:
+                if has_members != self._igmp_has_members:
+                    self._igmp_has_members = has_members
+                    self.change_tree()
+                    self.evaluate_ingroup()
+
+
+    def igmp_has_members(self):
+        with self._igmp_lock:
+            return self._igmp_has_members
 
     '''
     def rprint(self, msg, *entrys):
@@ -107,10 +128,10 @@ class SFRMTreeInterface(metaclass=ABCMeta):
         return '{}<{}>'.format(self.__class__, self._interface.get_link())
 
     def get_link(self):
+        # todo
         return self._interface.get_link()
 
     def get_interface(self):
-        import Main
         kernel = Main.kernel
         interface_name = kernel.vif_index_to_name_dic[self._interface_id]
         interface = Main.interfaces[interface_name]
@@ -121,20 +142,20 @@ class SFRMTreeInterface(metaclass=ABCMeta):
         return self.get_ip()
 
     def get_ip(self):
-        import Main
-        kernel = Main.kernel
-        interface_name = kernel.vif_index_to_name_dic[self._interface_id]
-        import netifaces
-        netifaces.ifaddresses(interface_name)
-        ip = netifaces.ifaddresses(interface_name)[netifaces.AF_INET][0]['addr']
+        #kernel = Main.kernel
+        #interface_name = kernel.vif_index_to_name_dic[self._interface_id]
+        #import netifaces
+        #netifaces.ifaddresses(interface_name)
+        #ip = netifaces.ifaddresses(interface_name)[netifaces.AF_INET][0]['addr']
+        ip = self.get_interface().get_ip()
         return ip
 
     def get_tree_id(self):
-        #return self._tree_id
         return (self._kernel_entry.source_ip, self._kernel_entry.group_ip)
 
     def get_cost(self):
         #return self._cost
+        # todo
         return 10
 
     def set_cost(self, value):
@@ -142,3 +163,6 @@ class SFRMTreeInterface(metaclass=ABCMeta):
 
     def change_tree(self):
         self._kernel_entry.change()
+
+    def get_state_lock(self):
+        return self._kernel_entry.CHANGE_STATE_LOCK

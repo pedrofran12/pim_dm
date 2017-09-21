@@ -43,6 +43,12 @@ class JoinPrune:
                     #Main.kernel.routing[source_group].recv_join_msg(interface_index, packet)
                     Main.kernel.get_routing_entry(source_group).recv_join_msg(interface_index, packet)
                 except:
+                    try:
+                        #import time
+                        #time.sleep(2)
+                        Main.kernel.get_routing_entry(source_group).recv_join_msg(interface_index, packet)
+                    except:
+                        pass
                     # todo o que fazer quando n existe arvore para (s,g) ???
                     traceback.print_exc()
                     print("ATENCAO!!!!")
@@ -55,6 +61,12 @@ class JoinPrune:
                     #Main.kernel.routing[source_group].recv_prune_msg(interface_index, packet)
                     Main.kernel.get_routing_entry(source_group).recv_prune_msg(interface_index, packet)
                 except:
+                    try:
+                        #import time
+                        #time.sleep(2)
+                        Main.kernel.get_routing_entry(source_group).recv_prune_msg(interface_index, packet)
+                    except:
+                        pass
                     # todo o que fazer quando n existe arvore para (s,g) ???
                     traceback.print_exc()
                     print("ATENCAO!!!!")

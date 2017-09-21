@@ -18,6 +18,10 @@ class GroupState(object):
         # lock
         self.lock = Lock()
 
+        # KernelEntry's instances to notify change of igmp state
+        self.multicast_interface_state = []
+        self.multicast_interface_state_lock = Lock()
+
     def print_state(self):
         return self.state.print_state()
 
@@ -99,3 +103,30 @@ class GroupState(object):
     def receive_group_specific_query(self, max_response_time: int):
         with self.lock:
             self.get_interface_group_state().receive_group_specific_query(self, max_response_time)
+
+    ###########################################
+    # Notify Routing
+    ###########################################
+    def notify_routing_add(self):
+        with self.multicast_interface_state_lock:
+            print("notify+", self.multicast_interface_state)
+            for interface_state in self.multicast_interface_state:
+                interface_state.notify_igmp(has_members=True)
+
+    def notify_routing_remove(self):
+        with self.multicast_interface_state_lock:
+            print("notify-", self.multicast_interface_state)
+            for interface_state in self.multicast_interface_state:
+                interface_state.notify_igmp(has_members=False)
+
+    def add_multicast_routing_entry(self, kernel_entry):
+        with self.multicast_interface_state_lock:
+            self.multicast_interface_state.append(kernel_entry)
+            return self.has_members()
+
+    def remove_multicast_routing_entry(self, kernel_entry):
+        with self.multicast_interface_state_lock:
+            self.multicast_interface_state.remove(kernel_entry)
+
+    def has_members(self):
+        return self.state is not NoMembersPresent

@@ -74,7 +74,7 @@ class SFMRAssertWinner(SFMRAssertABC):
         '''
         @type interface: SFRMNonRootInterface
         '''
-        interface.rprint('data_arrival, W -> W')
+        print('data_arrival, W -> W')
         interface.send_assert()
 
     @staticmethod
@@ -83,7 +83,7 @@ class SFMRAssertWinner(SFMRAssertABC):
         @type interface: SFRMNonRootInterface
         @type metric: SFMRAssertMetric
         '''
-        interface.rprint('recv_better_metric, W -> L')
+        print('recv_better_metric, W -> L')
 
         interface._set_assert_state(AssertState.Looser)
         interface._set_winner_metric(metric)
@@ -94,7 +94,7 @@ class SFMRAssertWinner(SFMRAssertABC):
         @type interface: SFRMNonRootInterface
         @type metric: SFMRAssertMetric
         '''
-        interface.rprint('recv_worse_metric, W -> W')
+        print('recv_worse_metric, W -> W')
 
         interface.send_assert()
 
@@ -118,14 +118,14 @@ class SFMRAssertWinner(SFMRAssertABC):
         @type interface: SFRMNonRootInterface
         '''
         interface.send_reset()
-        interface.rprint('aw_rpc_worsens, W -> W')
+        print('aw_rpc_worsens, W -> W')
 
     @staticmethod
     def is_now_root(interface):
         '''
         @type interface: SFRMNonRootInterface
         '''
-        interface.rprint('is_now_root, W -> W')
+        print('is_now_root, W -> W')
 
         interface.send_reset()
 
@@ -134,14 +134,14 @@ class SFMRAssertWinner(SFMRAssertABC):
         '''
         @type interface: SFRMNonRootInterface
         '''
-        interface.rprint('recv_reset, W -> W')
+        print('recv_reset, W -> W')
 
     @staticmethod
     def is_now_pruned(interface):
         '''
         @type interface: SFRMNonRootInterface
         '''
-        interface.rprint('is_now_pruned, W -> W')
+        print('is_now_pruned, W -> W')
 
 
 class SFMRAssertLooser(SFMRAssertABC):
@@ -150,7 +150,7 @@ class SFMRAssertLooser(SFMRAssertABC):
         '''
         @type interface: SFRMNonRootInterface
         '''
-        interface.rprint('data_arrival, L -> L')
+        print('data_arrival, L -> L')
 
     @staticmethod
     def recv_better_metric(interface, metric):
@@ -158,7 +158,7 @@ class SFMRAssertLooser(SFMRAssertABC):
         @type interface: SFRMNonRootInterface
         @type metric: SFMRAssertMetric
         '''
-        interface.rprint('recv_better_metric, L -> L')
+        print('recv_better_metric, L -> L')
 
         interface._set_winner_metric(metric)
 
@@ -168,7 +168,7 @@ class SFMRAssertLooser(SFMRAssertABC):
         @type interface: SFRMNonRootInterface
         @type metric: SFMRAssertMetric
         '''
-        interface.rprint('recv_worse_metric, L -> W')
+        print('recv_worse_metric, L -> W')
 
         interface.send_assert()
         interface._set_assert_state(AssertState.Winner)
@@ -179,7 +179,7 @@ class SFMRAssertLooser(SFMRAssertABC):
         '''
         @type interface: SFRMNonRootInterface
         '''
-        interface.rprint('aw_failure, L -> W')
+        print('aw_failure, L -> W')
 
         interface._set_assert_state(AssertState.Winner)
         interface._set_winner_metric(None)
@@ -190,7 +190,7 @@ class SFMRAssertLooser(SFMRAssertABC):
         '''
         @type interface: SFRMNonRootInterface
         '''
-        interface.rprint('al_rpc_improves, L -> W')
+        print('al_rpc_improves, L -> W')
 
         interface._set_assert_state(AssertState.Winner)
         interface._set_winner_metric(None)
@@ -209,14 +209,14 @@ class SFMRAssertLooser(SFMRAssertABC):
         '''
         @type interface: SFRMNonRootInterface
         '''
-        interface.rprint('is_now_root, L -> L')
+        print('is_now_root, L -> L')
 
     @staticmethod
     def recv_reset(interface):
         '''
         @type interface: SFRMNonRootInterface
         '''
-        interface.rprint('recv_reset, L -> W')
+        print('recv_reset, L -> W')
 
         interface._set_assert_state(AssertState.Winner)
         interface._set_winner_metric(None)
@@ -227,7 +227,7 @@ class SFMRAssertLooser(SFMRAssertABC):
         '''
         @type interface: SFRMNonRootInterface
         '''
-        interface.rprint('is_now_pruned, L -> W')
+        print('is_now_pruned, L -> W')
 
         interface._set_assert_state(AssertState.Winner)
         interface._set_winner_metric(None)

@@ -21,8 +21,15 @@ class SFRMRootInterface(SFRMTreeInterface):
         evaluate_ig_cb,
         is_originater: bool, ):
         '''
-        SFRMTreeInterface.__init__(self, kernel_entry, interface_id, None)
+        SFRMTreeInterface.__init__(self, kernel_entry, interface_id)
         self._is_originater = is_originater
+
+    def recv_data_msg(self, msg, sender):
+        #with self.CHANGE_STATE_LOCK:
+        #    self._kernel_entry.evaluate_ingroup()
+        #if not self._kernel_entry.is_in_group():
+        #    self.send_prune()
+        return
 
     #Override
     #def recv_assert_msg(self, msg: SFMRAssertMsg, sender: Addr):
@@ -33,14 +40,12 @@ class SFRMRootInterface(SFRMTreeInterface):
     def recv_prune_msg(self, msg, sender, in_group):
         super().recv_prune_msg(msg, sender, in_group)
 
-        if in_group:
-            print("I WILL SEND JOIN")
-            self.send_join()
-            print("I SENT JOIN")
-
-
-    def forward_data_msg(self, msg):
-        pass
+        #if in_group:
+        with self._kernel_entry._lock_test2:
+            if self._kernel_entry._was_in_group:
+                print("I WILL SEND JOIN")
+                self.send_join()
+                print("I SENT JOIN")
 
     def send_join(self):
         # Originaters dont need to send prunes or joins

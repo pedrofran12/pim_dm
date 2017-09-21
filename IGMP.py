@@ -10,7 +10,7 @@ class IGMP:
         interface = packet.interface
         ip_src = packet.ip_header.ip_src
         ip_dst = packet.ip_header.ip_dst
-        print("ip = ", ip_src)
+        #print("ip = ", ip_src)
         igmp_hdr = packet.payload
 
         igmp_type = igmp_hdr.type

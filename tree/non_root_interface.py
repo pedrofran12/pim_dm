@@ -15,22 +15,22 @@ from .prune import SFMRPruneState, SFMRPruneStateABC
 from .tree_interface import SFRMTreeInterface
 from Packet.ReceivedPacket import ReceivedPacket
 from Packet.PacketPimAssert import PacketPimAssert
+from threading import Lock
 
 class SFRMNonRootInterface(SFRMTreeInterface):
     DIPT_TIME = 3.0
 
     def __init__(self, kernel_entry, interface_id):
-        SFRMTreeInterface.__init__(self, kernel_entry, interface_id, None)
+        SFRMTreeInterface.__init__(self, kernel_entry, interface_id)
 
         self._assert_state = AssertState.Winner
         self._assert_metric = None
 
         self._prune_state = SFMRPruneState.DIP
-        #self._dipt = Timer(SFRMNonRootInterface.DIPT_TIME, self.__dipt_expires)
-        #self._dipt.start()
         self._dipt = None
         self.set_dipt_timer()
         self.send_prune()
+
 
     # Override
     def recv_data_msg(self, msg=None, sender=None):
@@ -50,9 +50,6 @@ class SFRMNonRootInterface(SFRMTreeInterface):
             winner_metric = self._get_winner_metric()
         else:
             winner_metric = self.get_metric()
-
-
-
 
         ip_sender = msg.ip_header.ip_src
         pkt_assert = msg.payload.payload  # type: PacketPimAssert
@@ -74,20 +71,14 @@ class SFRMNonRootInterface(SFRMTreeInterface):
     # Override
     def recv_prune_msg(self, msg, sender, in_group):
         super().recv_prune_msg(msg, sender, in_group)
-
+        #with self.prune_lock:
         self._prune_state.recv_prune(self)
 
     # Override
     def recv_join_msg(self, msg, sender, in_group):
         super().recv_join_msg(msg, sender, in_group)
-
+        #with self.prune_lock:
         self._prune_state.recv_join(self)
-
-    def forward_data_msg(self, msg):
-        pass
-    #def forward_data_msg(self, msg):
-    #    if self.is_forwarding():
-    #        self._interface.send_mcast(msg)
 
     def send_assert(self):
         (source, group) = self.get_tree_id()
@@ -111,17 +102,17 @@ class SFRMNonRootInterface(SFRMTreeInterface):
     def send_prune(self):
         SFRMTreeInterface.send_prune(self)
 
-        #if self._dipt.is_ticking():
-        if self._dipt.is_alive():
-            self._dipt.cancel()
-
     # Override
     def is_forwarding(self):
         return self._assert_state == AssertState.Winner \
-            and self._prune_state != SFMRPruneState.NDI
+            and (self.igmp_has_members() or not self.is_pruned())
+
+    def is_pruned(self):
+        return self._prune_state == SFMRPruneState.NDI
 
     # Override
     def nbr_died(self, node):
+        # todo
         if self._get_winner_metric() is not None \
                 and self._get_winner_metric().get_ip_address() == node\
                 and self._prune_state != SFMRPruneState.NDI:
@@ -146,21 +137,19 @@ class SFRMNonRootInterface(SFRMTreeInterface):
 
     def __dipt_expires(self):
         print('DIPT expired')
-
         self._prune_state.dipt_expires(self)
 
     def get_metric(self):
         return SFMRAssertMetric.spt_assert_metric(self)
 
-    def _set_assert_state(self, value):
-        assert isinstance(value, SFMRAssertABC)
+    def _set_assert_state(self, value: SFMRAssertABC):
+        with self.get_state_lock():
+            if value != self._assert_state:
+                self._assert_state = value
 
-        if value != self._assert_state:
-            self._assert_state = value
-
-            self.evaluate_ingroup()
-            #Convergence.mark_change()
-            self.change_tree()
+                self.change_tree()
+                self.evaluate_ingroup()
+                #Convergence.mark_change()
 
     def _get_winner_metric(self):
         '''
@@ -170,11 +159,13 @@ class SFRMNonRootInterface(SFRMTreeInterface):
 
     def _set_winner_metric(self, value):
         assert isinstance(value, SFMRAssertMetric) or value is None
-
+        # todo
         self._assert_metric = value
 
     # Override
     def set_cost(self, value):
+        # todo
+        """
         if value != self._cost and self._prune_state != SFMRPruneState.NDI:
             if self.is_forwarding() and value > self._cost:
                 SFRMTreeInterface.set_cost(self, value)
@@ -189,19 +180,19 @@ class SFRMNonRootInterface(SFRMTreeInterface):
                 SFRMTreeInterface.set_cost(self, value)
         else:
             SFRMTreeInterface.set_cost(self, value)
+        """
+        raise NotImplemented
 
-    def _set_prune_state(self, value):
-        assert isinstance(value, SFMRPruneStateABC)
+    def _set_prune_state(self, value: SFMRPruneStateABC):
+        with self.get_state_lock():
+            if value != self._prune_state:
+                self._prune_state = value
 
-        if value != self._prune_state:
-            self._prune_state = value
+                self.change_tree()
+                self.evaluate_ingroup()
 
-            self.evaluate_ingroup()
-            #Convergence.mark_change()
-            self.change_tree()
-
-            if value == SFMRPruneState.NDI:
-                self._assert_state.is_now_pruned(self)
+                if value == SFMRPruneState.NDI:
+                    self._assert_state.is_now_pruned(self)
 
 
     def _get_dipt(self):

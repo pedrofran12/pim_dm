@@ -60,18 +60,18 @@ class PacketIGMPHeader(PacketPayload):
 
     @staticmethod
     def parse_bytes(data: bytes):
-        print("parseIGMPHdr: ", data)
+        #print("parseIGMPHdr: ", data)
 
         igmp_hdr = data[0:PacketIGMPHeader.IGMP_HDR_LEN]
         (type, max_resp_time, rcv_checksum, group_address) = struct.unpack(PacketIGMPHeader.IGMP_HDR, igmp_hdr)
 
-        print(type, max_resp_time, rcv_checksum, group_address)
+        #print(type, max_resp_time, rcv_checksum, group_address)
 
 
         msg_to_checksum = data[0:2] + b'\x00\x00' + data[4:]
-        print("checksum calculated: " + str(checksum(msg_to_checksum)))
+        #print("checksum calculated: " + str(checksum(msg_to_checksum)))
         if checksum(msg_to_checksum) != rcv_checksum:
-            print("wrong checksum")
+            #print("wrong checksum")
             raise Exception("wrong checksum")
 
         igmp_hdr = igmp_hdr[PacketIGMPHeader.IGMP_HDR_LEN:]

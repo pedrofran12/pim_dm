@@ -3,6 +3,7 @@ import time
 from utils import HELLO_HOLD_TIME_NO_TIMEOUT, HELLO_HOLD_TIME_TIMEOUT
 from Interface import Interface
 import Main
+from threading import Lock
 
 
 class Neighbor:
@@ -16,6 +17,10 @@ class Neighbor:
         self.hello_hold_time = None
         self.set_hello_hold_time(hello_hold_time)
         self.time_of_last_update = time.time()
+        self.neighbor_lock = Lock()
+
+        # todo
+        Main.protocols[0].force_send(contact_interface)
 
     def set_hello_hold_time(self, hello_hold_time: int):
         self.hello_hold_time = hello_hold_time
@@ -29,6 +34,14 @@ class Neighbor:
             self.neighbor_liveness_timer.start()
         else:
             self.neighbor_liveness_timer = None
+
+    def set_generation_id(self, generation_id):
+        if self.generation_id is None:
+            self.generation_id = generation_id
+        elif self.generation_id != generation_id:
+            self.generation_id = generation_id
+            self.set_hello_hold_time(self.hello_hold_time)
+            self.time_of_last_update = time.time()
 
     def heartbeat(self):
         if (self.hello_hold_time != HELLO_HOLD_TIME_TIMEOUT) and \
@@ -44,4 +57,5 @@ class Neighbor:
         print('HELLO TIMER EXPIRED... remove neighbor')
         if self.neighbor_liveness_timer is not None:
             self.neighbor_liveness_timer.cancel()
-        Main.remove_neighbor(self.ip)
+        #Main.remove_neighbor(self.ip)
+        del self.contact_interface.neighbors[self.ip]

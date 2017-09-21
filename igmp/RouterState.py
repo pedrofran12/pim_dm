@@ -5,7 +5,7 @@ from utils import Membership_Query, QueryResponseInterval, QueryInterval, OtherQ
 from .querier.Querier import Querier
 from .nonquerier.NonQuerier import NonQuerier
 from .GroupState import GroupState
-
+from RWLock.RWLock import RWLockWrite
 
 if TYPE_CHECKING:
     from InterfaceIGMP import InterfaceIGMP
@@ -22,6 +22,7 @@ class RouterState(object):
         # state of each group
         # Key: GroupIPAddress, Value: GroupState object
         self.group_state = {}
+        self.group_state_lock = RWLockWrite()
 
         # send general query
         packet = PacketIGMPHeader(type=Membership_Query, max_resp_time=QueryResponseInterval*10)
@@ -80,24 +81,40 @@ class RouterState(object):
     ############################################
     # group state methods
     ############################################
+    def get_group_state(self, group_ip):
+        with self.group_state_lock.genRlock():
+            if group_ip in self.group_state:
+                return self.group_state[group_ip]
+
+        with self.group_state_lock.genWlock():
+            if group_ip in self.group_state:
+                group_state = self.group_state[group_ip]
+            else:
+                group_state = GroupState(self, group_ip)
+                self.group_state[group_ip] = group_state
+            return group_state
+
     def receive_v1_membership_report(self, packet: ReceivedPacket):
         igmp_group = packet.payload.group_address
-        if igmp_group not in self.group_state:
-            self.group_state[igmp_group] = GroupState(self, igmp_group)
+        #if igmp_group not in self.group_state:
+        #    self.group_state[igmp_group] = GroupState(self, igmp_group)
 
-        self.group_state[igmp_group].receive_v1_membership_report()
+        #self.group_state[igmp_group].receive_v1_membership_report()
+        self.get_group_state(igmp_group).receive_v1_membership_report()
 
     def receive_v2_membership_report(self, packet: ReceivedPacket):
         igmp_group = packet.payload.group_address
-        if igmp_group not in self.group_state:
-            self.group_state[igmp_group] = GroupState(self, igmp_group)
+        #if igmp_group not in self.group_state:
+        #    self.group_state[igmp_group] = GroupState(self, igmp_group)
 
-        self.group_state[igmp_group].receive_v2_membership_report()
+        #self.group_state[igmp_group].receive_v2_membership_report()
+        self.get_group_state(igmp_group).receive_v2_membership_report()
 
     def receive_leave_group(self, packet: ReceivedPacket):
         igmp_group = packet.payload.group_address
-        if igmp_group in self.group_state:
-            self.group_state[igmp_group].receive_leave_group()
+        #if igmp_group in self.group_state:
+        #    self.group_state[igmp_group].receive_leave_group()
+        self.get_group_state(igmp_group).receive_leave_group()
 
     def receive_query(self, packet: ReceivedPacket):
         self.interface_state.receive_query(self, packet)
@@ -105,5 +122,7 @@ class RouterState(object):
 
         # process group specific query
         if igmp_group != "0.0.0.0" and igmp_group in self.group_state:
+        #if igmp_group != "0.0.0.0":
             max_response_time = packet.payload.max_resp_time
-            self.group_state[igmp_group].receive_group_specific_query(max_response_time)
+            #self.group_state[igmp_group].receive_group_specific_query(max_response_time)
+            self.get_group_state(igmp_group).receive_group_specific_query(max_response_time)

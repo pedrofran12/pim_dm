@@ -43,5 +43,5 @@ from Packet.PacketPimJoinPrune import PacketPimJoinPrune
 class PacketPimGraft(PacketPimJoinPrune):
     PIM_TYPE = 6
 
-    def __init__(self, upstream_neighbor_address, hold_time):
-        super().__init__(upstream_neighbor_address, hold_time)
+    def __init__(self, upstream_neighbor_address):
+        super().__init__(upstream_neighbor_address=upstream_neighbor_address, hold_time=0)
