@@ -1,0 +1,13 @@
+ip link set dev eth0 up
+ip link set dev eth1 up
+ip link set dev eth2 up
+brctl addbr br0
+brctl addif br0 eth0
+brctl addif br0 eth1
+brctl addif br0 eth2
+ip link set dev br0 up
+
+
+# identify ports with routers (they need to receive all multicast traffic!)
+echo "2" > /sys/devices/virtual/net/br0/brif/eth0/multicast_router
+echo "2" > /sys/devices/virtual/net/br0/brif/eth1/multicast_router
