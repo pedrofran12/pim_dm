@@ -111,11 +111,10 @@ class SFRMNonRootInterface(SFRMTreeInterface):
 
     # Override
     def is_forwarding(self):
-        return self._assert_state == AssertState.Winner \
-            and (self.igmp_has_members() or not self.is_pruned())
+        return self._assert_state == AssertState.Winner and not self.is_pruned()
 
     def is_pruned(self):
-        return self._prune_state == SFMRPruneState.NDI
+        return not self.igmp_has_members() and self._prune_state == SFMRPruneState.NDI
 
     # Override
     def nbr_died(self, neighbor_ip):
