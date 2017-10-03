@@ -62,7 +62,7 @@ class MyDaemon(Daemon):
                 elif args.list_neighbors:
                     connection.sendall(pickle.dumps(Main.list_neighbors()))
                 elif args.list_state:
-                    connection.sendall(pickle.dumps(Main.list_igmp_state() + "\n\n\n\n\n\n" + Main.list_routing_state()))
+                    connection.sendall(pickle.dumps(Main.list_state()))
                 elif args.add_interface:
                     Main.add_interface(args.add_interface[0], pim=True)
                     connection.shutdown(socket.SHUT_RDWR)
@@ -76,7 +76,7 @@ class MyDaemon(Daemon):
                     Main.remove_interface(args.remove_interface_igmp[0], igmp=True)
                     connection.shutdown(socket.SHUT_RDWR)
                 elif args.stop:
-                    Main.remove_interface("*", pim=True, igmp=True)
+                    Main.stop()
                     connection.shutdown(socket.SHUT_RDWR)
             except Exception:
                 connection.shutdown(socket.SHUT_RDWR)

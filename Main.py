@@ -6,6 +6,7 @@ from InterfacePIM import InterfacePim
 from InterfaceIGMP import InterfaceIGMP
 from Kernel import Kernel
 from threading import Lock
+import UnicastRouting
 
 interfaces = {}  # interfaces with multicast routing enabled
 igmp_interfaces = {}  # igmp interfaces
@@ -13,14 +14,15 @@ protocols = {}
 kernel = None
 igmp = None
 
+
 def add_interface(interface_name, pim=False, igmp=False):
     if pim is True and interface_name not in interfaces:
         interface = InterfacePim(interface_name)
         interfaces[interface_name] = interface
-        protocols[0].force_send(interface)
     if igmp is True and interface_name not in igmp_interfaces:
         interface = InterfaceIGMP(interface_name)
         igmp_interfaces[interface_name] = interface
+
 
 def remove_interface(interface_name, pim=False, igmp=False):
     if pim is True and ((interface_name in interfaces) or interface_name == "*"):
@@ -29,10 +31,12 @@ def remove_interface(interface_name, pim=False, igmp=False):
         else:
             interface_name_list = [interface_name]
         for if_name in interface_name_list:
-            protocols[0].force_send_remove(interfaces[if_name])
-            interfaces[if_name].remove()
-            del interfaces[if_name]
+            interface_obj = interfaces.pop(if_name)
+            interface_obj.remove()
+            #interfaces[if_name].remove()
+            #del interfaces[if_name]
         print("removido interface")
+        print(interfaces)
 
     if igmp is True and ((interface_name in igmp_interfaces) or interface_name == "*"):
         if interface_name == "*":
@@ -43,6 +47,7 @@ def remove_interface(interface_name, pim=False, igmp=False):
             igmp_interfaces[if_name].remove()
             del igmp_interfaces[if_name]
         print("removido interface")
+        print(igmp_interfaces)
 
 
 """
@@ -126,7 +131,7 @@ def list_enabled_interfaces():
 
 
 
-    t = PrettyTable(['Interface', 'IP', 'PIM/IMGP Enabled', 'IGMP State'])
+    t = PrettyTable(['Interface', 'IP', 'PIM/IGMP Enabled', 'IGMP State'])
     for interface in netifaces.interfaces():
         try:
             # TODO: fix same interface with multiple ips
@@ -145,6 +150,11 @@ def list_enabled_interfaces():
     return str(t)
 
 
+def list_state():
+    state_text = "IGMP State:\n" + list_igmp_state() + "\n\n\n\n" + "Multicast Routing State:\n" + list_routing_state()
+    return state_text
+
+
 def list_igmp_state():
     t = PrettyTable(['Interface', 'RouterState', 'Group Adress', 'GroupState'])
     for (interface_name, interface_obj) in list(igmp_interfaces.items()):
@@ -157,6 +167,7 @@ def list_igmp_state():
             group_state_txt = group_state.print_state()
             t.add_row([interface_name, state_txt, group_addr, group_state_txt])
     return str(t)
+
 
 def list_routing_state():
     routing_entries = kernel.routing.values()
@@ -182,7 +193,13 @@ def list_routing_state():
     return str(t)
 
 
-def main(interfaces_to_add=[]):
+def stop():
+    remove_interface("*", pim=True, igmp=True)
+    kernel.exit()
+    UnicastRouting.stop()
+
+
+def main():
     from Hello import Hello
     from IGMP import IGMP
     from Assert import Assert
@@ -196,5 +213,3 @@ def main(interfaces_to_add=[]):
 
     global igmp
     igmp = IGMP()
-    for interface in interfaces_to_add:
-        add_interface(interface)

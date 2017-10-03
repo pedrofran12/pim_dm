@@ -1,9 +1,9 @@
 import Main
 import socket
-import netifaces
 from tree.root_interface import SFRMRootInterface
 from tree.non_root_interface import SFRMNonRootInterface
 from threading import Timer, Lock
+import UnicastRouting
 
 class KernelEntry:
     TREE_TIMEOUT = 180
@@ -64,18 +64,7 @@ class KernelEntry:
         return outbound_indexes
 
     def check_rpf(self):
-        from pyroute2 import IPRoute
-        # from utils import if_indextoname
-
-        ipr = IPRoute()
-        # obter index da interface
-        # rpf_interface_index = ipr.get_routes(family=socket.AF_INET, dst=ip)[0]['attrs'][2][1]
-        # interface_name = if_indextoname(rpf_interface_index)
-        # return interface_name
-
-        # obter ip da interface de saida
-        rpf_interface_source = ipr.get_routes(family=socket.AF_INET, dst=self.source_ip)[0]['attrs'][3][1]
-        return rpf_interface_source
+        return UnicastRouting.check_rpf(self.source_ip)
 
     def recv_data_msg(self, index):
         if self.is_originater():
@@ -130,18 +119,15 @@ class KernelEntry:
         # todo
         return
 
+    def nbr_died(self, index, neighbor_ip):
+        # todo
+        self.interface_state[index].nbr_died(neighbor_ip)
+
     def is_in_group(self):
         # todo
         #if self.get_has_members():
         #if True:
         #    return True
-
-        """
-        for index in Main.kernel.vif_index_to_name_dic.keys():
-            if self.interface_state[index].is_forwarding():
-                return True
-        return False
-        """
 
         for interface in self.interface_state.values():
             if interface.is_forwarding():
@@ -175,16 +161,6 @@ class KernelEntry:
 
     def get_group(self):
         return self.group_ip
-
-    def get_has_members(self):
-        #return self._has_members
-        return True
-
-    def set_has_members(self, value):
-        assert isinstance(value, bool)
-
-        self._has_members = value
-        self.evaluate_ingroup()
 
     def change(self):
         # todo: changes on unicast routing or multicast routing...

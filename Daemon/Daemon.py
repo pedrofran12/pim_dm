@@ -92,6 +92,7 @@ class Daemon:
         # Try killing the Daemon process
         try:
             while 1:
+                #os.killpg(os.getpgid(pid), signal.SIGTERM)
                 os.kill(pid, signal.SIGTERM)
                 time.sleep(0.1)
         except OSError as err:
@@ -100,7 +101,7 @@ class Daemon:
                 if os.path.exists(self.pidfile):
                     os.remove(self.pidfile)
             else:
-                print (str(err.args))
+                print(str(err.args))
                 sys.exit(1)
 
     def restart(self):
@@ -125,5 +126,5 @@ class Daemon:
         try:
             os.kill(pid, 0)
             return True
-        except OSError:
+        except:
             return False

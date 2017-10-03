@@ -166,8 +166,8 @@ class SFMRDownstreamInterestedPending(SFMRPruneStateABC):
         '''
         print('lost_nbr, DIP -> DIP')
         #todo alterado pelo Pedro... necessita de verificar se esta OK...
-        interface.send_prune()
-        interface.set_dipt_timer()
+        #interface.send_prune()
+        #interface.set_dipt_timer()
 
 
 class SFMRNoDownstreamInterested(SFMRPruneStateABC):

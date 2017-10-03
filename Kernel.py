@@ -133,6 +133,7 @@ class Kernel:
 
         # MRT PIM
         s.setsockopt(socket.IPPROTO_IP, Kernel.MRT_PIM, 0)
+        s.setsockopt(socket.IPPROTO_IP, Kernel.MRT_ASSERT, 1)
 
         self.socket = s
         self.rwlock = RWLockWrite()
@@ -275,6 +276,7 @@ class Kernel:
                 msg = self.socket.recv(5000)
                 #print(len(msg))
                 (_, _, im_msgtype, im_mbz, im_vif, _, im_src, im_dst) = struct.unpack("II B B B B 4s 4s", msg[:20])
+                print((im_msgtype, im_mbz, socket.inet_ntoa(im_src), socket.inet_ntoa(im_dst)))
 
                 if im_mbz != 0:
                     continue
@@ -284,7 +286,7 @@ class Kernel:
                 print(im_vif)
                 print(socket.inet_ntoa(im_src))
                 print(socket.inet_ntoa(im_dst))
-                print(struct.unpack("II B B B B 4s 4s", msg[:20]))
+                #print((im_msgtype, im_mbz, socket.inet_ntoa(im_src), socket.inet_ntoa(im_dst)))
 
                 ip_src = socket.inet_ntoa(im_src)
                 ip_dst = socket.inet_ntoa(im_dst)
@@ -293,6 +295,7 @@ class Kernel:
                     print("IGMP NO CACHE")
                     self.igmpmsg_nocache_handler(ip_src, ip_dst, im_vif)
                 elif im_msgtype == Kernel.IGMPMSG_WRONGVIF:
+                    print("WRONG VIF HANDLER")
                     self.igmpmsg_wrongvif_handler(ip_src, ip_dst, im_vif)
                 else:
                     raise Exception
@@ -333,7 +336,8 @@ class Kernel:
     # receive multicast (S,G) packet in a outbound_interface
     def igmpmsg_wrongvif_handler(self, ip_src, ip_dst, iif):
         #kernel_entry = self.routing[(ip_src, ip_dst)]
-        self.get_routing_entry((ip_src, ip_dst), create_if_not_existent=True).recv_data_msg(iif)
+        source_group_pair = (ip_src, ip_dst)
+        self.get_routing_entry(source_group_pair, create_if_not_existent=True).recv_data_msg(iif)
         #kernel_entry.recv_data_msg(iif)
 
     """
@@ -358,3 +362,18 @@ class Kernel:
                 return kernel_entry
             else:
                 return None
+
+
+    def neighbor_removed(self, interface_name, neighbor_ip):
+        # todo
+        interface_index = self.vif_name_to_index_dic[interface_name]
+
+        with self.rwlock.genRlock():
+            for routing_entry in self.routing.values():
+                routing_entry.nbr_died(interface_index, neighbor_ip)
+
+
+
+
+
+

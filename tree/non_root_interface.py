@@ -34,8 +34,10 @@ class SFRMNonRootInterface(SFRMTreeInterface):
 
     # Override
     def recv_data_msg(self, msg=None, sender=None):
-        if self._prune_state != SFMRPruneState.NDI:
-            self._assert_state.data_arrival(self)
+        # todo perguntar ao prof
+        #if self._prune_state != SFMRPruneState.NDI:
+        #    self._assert_state.data_arrival(self)
+        self._assert_state.data_arrival(self)
 
     # Override
     def recv_assert_msg(self, msg: ReceivedPacket, sender=None):
@@ -43,8 +45,9 @@ class SFRMNonRootInterface(SFRMTreeInterface):
         @type msg: SFMRAssertMsg
         @type sender: Addr
         '''
-        if self._prune_state == SFMRPruneState.NDI:
-            return
+        # todo perguntar ao prof
+        #if self._prune_state == SFMRPruneState.NDI:
+        #    return
 
         if self._assert_state == AssertState.Looser:
             winner_metric = self._get_winner_metric()
@@ -55,8 +58,10 @@ class SFRMNonRootInterface(SFRMTreeInterface):
         pkt_assert = msg.payload.payload  # type: PacketPimAssert
         msg_metric = SFMRAssertMetric(metric_preference=pkt_assert.metric_preference, route_metric=pkt_assert.metric, ip_address=ip_sender)
         if winner_metric.is_worse_than(msg_metric):
+            print("ASSERT BETTER")
             self._assert_state.recv_better_metric(self, msg_metric)
         else:
+            print("ASSERT WORSE")
             self._assert_state.recv_worse_metric(self, msg_metric)
 
     # Override
@@ -85,7 +90,9 @@ class SFRMNonRootInterface(SFRMTreeInterface):
         from Packet.Packet import Packet
         from Packet.PacketPimHeader import PacketPimHeader
         from Packet.PacketPimAssert import PacketPimAssert
-        ph = PacketPimAssert(multicast_group_address=group, source_address=source, metric_preference=10, metric=2)
+        import UnicastRouting
+        (metric_preference, metric) = UnicastRouting.get_metric(source)
+        ph = PacketPimAssert(multicast_group_address=group, source_address=source, metric_preference=metric_preference, metric=metric)
         pckt = Packet(payload=PacketPimHeader(ph))
         self.get_interface().send(pckt.bytes())
         print('sent assert msg')
@@ -111,11 +118,22 @@ class SFRMNonRootInterface(SFRMTreeInterface):
         return self._prune_state == SFMRPruneState.NDI
 
     # Override
-    def nbr_died(self, node):
+    def nbr_died(self, neighbor_ip):
+        import ipaddress
+        neighbor_ip = ipaddress.ip_address(neighbor_ip)
         # todo
+        #if self._get_winner_metric() is not None \
+        #        and self._get_winner_metric().get_ip_address() == node\
+        #        and self._prune_state != SFMRPruneState.NDI:
+        #    self._assert_state.aw_failure(self)
+        winner_metric = self._get_winner_metric()
+        print(winner_metric.get_ip_address())
+        print(neighbor_ip)
+        print(winner_metric.get_route_metric())
+        print(winner_metric.get_metric_preference())
+
         if self._get_winner_metric() is not None \
-                and self._get_winner_metric().get_ip_address() == node\
-                and self._prune_state != SFMRPruneState.NDI:
+                and self._get_winner_metric().get_ip_address() == neighbor_ip:
             self._assert_state.aw_failure(self)
 
         self._prune_state.lost_nbr(self)

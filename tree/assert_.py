@@ -183,7 +183,7 @@ class SFMRAssertLooser(SFMRAssertABC):
 
         interface._set_assert_state(AssertState.Winner)
         interface._set_winner_metric(None)
-
+        interface.send_assert()
 
     @staticmethod
     def al_rpc_better_than_aw(interface):

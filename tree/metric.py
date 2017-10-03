@@ -58,10 +58,13 @@ class SFMRAssertMetric(object):
         #metric._node = tree_if.get_node()
 
 
-        metric_preference = 10 # todo check how to get metric preference
-        route_metric = tree_if.get_cost()
-        ip = tree_if.get_ip()
-        metric = SFMRAssertMetric(metric_preference=metric_preference, route_metric=route_metric, ip_address=ip)
+        #metric_preference = 10 # todo check how to get metric preference
+        #route_metric = tree_if.get_cost()
+        import UnicastRouting
+        (source, group) = tree_if.get_tree_id()
+        (metric_prefernce, metric) = UnicastRouting.get_metric(source)
+        interface_ip = tree_if.get_ip()
+        metric = SFMRAssertMetric(metric_preference=metric_prefernce, route_metric=metric, ip_address=interface_ip)
 
         return metric
 
