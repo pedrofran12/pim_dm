@@ -1,0 +1,4 @@
+PrettyTable
+netifaces
+ipaddress
+pyroute2
