@@ -7,6 +7,7 @@ Created on Jul 16, 2015
 #from convergence import Convergence
 #from des.event.timer import Timer
 from threading import Timer
+from CustomTimer.RemainingTimer import RemainingTimer
 from .assert_ import AssertState, AssertStateABC
 #from .messages.assert_msg import SFMRAssertMsg
 #from .messages.reset import SFMResetMsg
@@ -22,18 +23,18 @@ class TreeInterfaceDownstream(TreeInterface):
         TreeInterface.__init__(self, kernel_entry, interface_id)
 
         # State
-        self._local_membership_state = None # todo NoInfo or Include
+        #self._local_membership_state = None # todo NoInfo or Include
 
         # Prune State
-        self._prune_state = DownstreamState.NoInfo
-        self._prune_pending_timer = None
-        self._prune_timer = None
+        #self._prune_state = DownstreamState.NoInfo
+        #self._prune_pending_timer = None
+        #self._prune_timer = None
 
         # Assert Winner State
-        self._assert_state = AssertState.Winner
-        self._assert_timer = None
-        self._assert_winner_ip = None
-        self._assert_winner_metric = None
+        #self._assert_state = AssertState.NoInfo
+        #self._assert_timer = None
+        #self._assert_winner_ip = None
+        #self._assert_winner_metric = None
 
         #self.set_dipt_timer()
         #self.send_prune()
@@ -58,6 +59,9 @@ class TreeInterfaceDownstream(TreeInterface):
     def is_prune_timer_running(self):
         return self._prune_timer is not None and self._prune_timer.is_alive()
 
+    def remaining_prune_timer(self):
+        return 0 if not self._prune_timer else self._prune_timer.time_remaining()
+
     ##########################################
     # Set timers
     ##########################################
@@ -72,7 +76,8 @@ class TreeInterfaceDownstream(TreeInterface):
 
     def set_prune_timer(self, time):
         self.clear_prune_timer()
-        self._prune_timer = Timer(time, self.prune_timeout)
+        #self._prune_timer = Timer(time, self.prune_timeout)
+        self._prune_timer = RemainingTimer(time, self.prune_timeout)
         self._prune_timer.start()
 
     def clear_prune_timer(self):
@@ -88,24 +93,29 @@ class TreeInterfaceDownstream(TreeInterface):
     def prune_timeout(self):
         self._prune_state.PTexpires(self)
 
-
     ###########################################
     # Recv packets
     ###########################################
-    # Override
-    def recv_prune_msg(self):
-        self._prune_state.receivedPrune(self, 0)
+    def recv_data_msg(self):
+        self._assert_state.receivedDataFromDownstreamIf(self)
 
     # Override
-    def recv_join_msg(self):
+    def recv_prune_msg(self, upstream_neighbor_address, holdtime):
+        super().recv_prune_msg(upstream_neighbor_address, holdtime)
+
+        # set here???
+        self.set_receceived_prune_holdtime(holdtime)
+        self._prune_state.receivedPrune(self, holdtime)
+
+    # Override
+    def recv_join_msg(self, upstream_neighbor_address):
+        super().recv_join_msg(upstream_neighbor_address)
         self._prune_state.receivedJoin(self)
 
     # Override
-    def recv_graft_msg(self):
+    def recv_graft_msg(self, upstream_neighbor_address):
+        super().recv_graft_msg(upstream_neighbor_address)
         self._prune_state.receivedGraft(self)
-
-
-
 
 
 
@@ -132,15 +142,6 @@ class TreeInterfaceDownstream(TreeInterface):
 
     def get_metric(self):
         return AssertMetric.spt_assert_metric(self)
-
-    def _set_assert_state(self, value: AssertStateABC):
-        with self.get_state_lock():
-            if value != self._assert_state:
-                self._assert_state = value
-
-                self.change_tree()
-                self.evaluate_ingroup()
-                #Convergence.mark_change()
 
     def _get_winner_metric(self):
         '''

@@ -24,6 +24,9 @@ class TreeInterfaceUpstream(TreeInterface):
 
         self._originator_state = None
 
+        if self.is_S_directly_conn():
+            self._graft_prune_state.sourceIsNowDirectConnect(self)
+
     ##########################################
     # Set state
     ##########################################
@@ -95,7 +98,7 @@ class TreeInterfaceUpstream(TreeInterface):
     ###########################################
     def recv_data_msg(self):
         # todo check olist
-        if self.is_olist_null() and not self.is_prune_limit_timer_running():
+        if self.is_olist_null() and not self.is_prune_limit_timer_running() and not self.is_S_directly_conn():
             self._graft_prune_state.dataArrivesRPFinterface_OListNull_PLTstoped(self)
 
     def recv_state_refresh_msg(self, prune_indicator: int):
@@ -105,11 +108,13 @@ class TreeInterfaceUpstream(TreeInterface):
         elif prune_indicator == 0 and not self.is_prune_limit_timer_running():
             self._graft_prune_state.stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped(self)
 
-    def recv_join_msg(self):
+    def recv_join_msg(self, upstream_neighbor_address):
+        super().recv_join_msg(upstream_neighbor_address)
         # todo check rpf nbr
         self._graft_prune_state.seeJoinToRPFnbr(self)
 
-    def recv_prune_msg(self):
+    def recv_prune_msg(self, upstream_neighbor_address, holdtime):
+        super().recv_prune_msg(upstream_neighbor_address, holdtime)
         self._graft_prune_state.seePrune(self)
 
     def recv_graft_ack_msg(self):
@@ -128,8 +133,11 @@ class TreeInterfaceUpstream(TreeInterface):
     ###########################################
     # Changes on Unicast Routing Table
     ###########################################
-    # todo
-
+    def change_rpf(self, olist_is_null):
+        if olist_is_null:
+            self._graft_prune_state.RPFnbrChanges_olistIsNull()
+        else:
+            self._graft_prune_state.RPFnbrChanges_olistIsNotNull()
 
     #Override
     def is_forwarding(self):
@@ -149,5 +157,5 @@ class TreeInterfaceUpstream(TreeInterface):
 
     @property
     def t_override(self):
-        oi = self.get_interface()._override_internal
+        oi = self.get_interface()._override_interval
         return random.uniform(0, oi)

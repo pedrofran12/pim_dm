@@ -65,9 +65,10 @@ class PacketPimHeader(PacketPayload):
             raise Exception
 
         msg_to_checksum = data[0:2] + b'\x00\x00' + data[4:]
-        print("checksum calculated: " + str(checksum(msg_to_checksum)))
         if checksum(msg_to_checksum) != rcv_checksum:
             print("wrong checksum")
+            print("checksum calculated: " + str(checksum(msg_to_checksum)))
+            print("checksum recv: " + str(rcv_checksum))
             raise Exception
 
         pim_payload = data[PacketPimHeader.PIM_HDR_LEN:]

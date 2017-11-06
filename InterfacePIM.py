@@ -125,7 +125,10 @@ class InterfacePim(Interface):
 
     def get_neighbor(self, ip):
         with self.neighbors_lock.genRlock():
-            return self.neighbors[ip]
+            if ip in self.neighbors:
+                return self.neighbors[ip]
+            else:
+                return None
 
     def remove_neighbor(self, ip):
         with self.neighbors_lock.genWlock():

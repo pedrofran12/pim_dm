@@ -173,7 +173,7 @@ def list_routing_state():
     routing_entries = kernel.routing.values()
     vif_indexes = kernel.vif_index_to_name_dic.keys()
 
-    t = PrettyTable(['SourceIP', 'GroupIP', 'Interface', 'PruneState', 'AssertState', "Is Forwarding?"])
+    t = PrettyTable(['SourceIP', 'GroupIP', 'Interface', 'PruneState', 'AssertState', 'LocalMembership', "Is Forwarding?"])
     for entry in routing_entries:
         ip = entry.source_ip
         group = entry.group_ip
@@ -182,19 +182,21 @@ def list_routing_state():
         for index in vif_indexes:
             interface_state = entry.interface_state[index]
             interface_name = kernel.vif_index_to_name_dic[index]
-            is_forwarding = interface_state.is_forwarding()
+            local_membership = type(interface_state._local_membership_state).__name__
             try:
                 if index != upstream_if_index:
                     prune_state = type(interface_state._prune_state).__name__
                     assert_state = type(interface_state._assert_state).__name__
+                    is_forwarding = interface_state.is_forwarding()
                 else:
                     prune_state = type(interface_state._graft_prune_state).__name__
                     assert_state = "-"
+                    is_forwarding = "upstream"
             except:
                 prune_state = "-"
                 assert_state = "-"
 
-            t.add_row([ip, group, interface_name, prune_state, assert_state, is_forwarding])
+            t.add_row([ip, group, interface_name, prune_state, assert_state, local_membership, is_forwarding])
     return str(t)
 
 
@@ -222,3 +224,6 @@ def main():
 
     global igmp
     igmp = IGMP()
+
+    global u
+    u = UnicastRouting.UnicastRouting()

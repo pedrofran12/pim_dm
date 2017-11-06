@@ -6,6 +6,7 @@ from tree.tree_if_upstream import TreeInterfaceUpstream
 from tree.tree_if_downstream import TreeInterfaceDownstream
 from .tree_interface import TreeInterface
 from threading import Timer, Lock, RLock
+from tree.metric import AssertMetric
 import UnicastRouting
 
 class KernelEntry:
@@ -17,7 +18,25 @@ class KernelEntry:
         self.group_ip = group_ip
 
         # ip of neighbor of the rpf
-        self._rpf_node = None
+        #next_hop = UnicastRouting.get_route(source_ip)["gateway"]
+        #self.rpf_node = source_ip if next_hop is None else next_hop
+
+        next_hop = UnicastRouting.get_route(source_ip)["gateway"]
+        multipaths = UnicastRouting.get_route(source_ip)["multipath"]
+
+        self.rpf_node = next_hop if next_hop is not None else source_ip
+        print("MUL", multipaths)
+        #self.rpf_node = multipaths[0]["gateway"]
+        for m in multipaths:
+            if m["gateway"] is None:
+                self.rpf_node = source_ip
+                break
+            else:
+                self.rpf_node = m["gateway"]
+
+        print("RPF_NODE:", UnicastRouting.get_route(source_ip))
+        print(self.rpf_node == source_ip)
+
 
         # (S,G) starts IG state
         self._was_olist_null = None
@@ -81,20 +100,29 @@ class KernelEntry:
 
     def recv_assert_msg(self, index, packet):
         print("recv assert")
-        self.interface_state[index].recv_assert_msg()
+        pkt_assert = packet.payload.payload
+        metric = pkt_assert.metric
+        metric_preference = pkt_assert.metric_preference
+        assert_sender_ip = packet.ip_header.ip_src
+
+        received_metric = AssertMetric(metric_preference=metric_preference, route_metric=metric, ip_address=assert_sender_ip)
+        self.interface_state[index].recv_assert_msg(received_metric)
 
     def recv_prune_msg(self, index, packet):
         print("recv prune msg")
-        self.interface_state[index].recv_prune_msg()
+        holdtime = packet.payload.payload.hold_time
+        upstream_neighbor_address = packet.payload.payload.upstream_neighbor_address
+        self.interface_state[index].recv_prune_msg(upstream_neighbor_address=upstream_neighbor_address, holdtime=holdtime)
 
     def recv_join_msg(self, index, packet):
         print("recv join msg")
-        print("type: ")
-        self.interface_state[index].recv_join_msg()
+        upstream_neighbor_address = packet.payload.payload.upstream_neighbor_address
+        self.interface_state[index].recv_join_msg(upstream_neighbor_address)
 
     def recv_graft_msg(self, index, packet):
         print("recv graft msg")
-        self.interface_state[index].recv_graft_msg()
+        upstream_neighbor_address = packet.payload.payload.upstream_neighbor_address
+        self.interface_state[index].recv_graft_msg(upstream_neighbor_address)
 
     def recv_graft_ack_msg(self, index, packet):
         print("recv graft ack msg")
@@ -105,13 +133,47 @@ class KernelEntry:
         prune_indicator = 1
         self.interface_state[index].recv_state_refresh_msg(prune_indicator)
 
-    def network_update(self, change, args):
-        #todo
-        return
+
+    ###############################################################
+    # Unicast Changes to RPF
+    ###############################################################
+    def network_update(self):
+        with self.CHANGE_STATE_LOCK:
+            #next_hop = UnicastRouting.get_route(self.source_ip)["gateway"]
+            #rpf_node = self.source_ip if next_hop is None else next_hop
+
+            next_hop = UnicastRouting.get_route(self.source_ip)["gateway"]
+            multipaths = UnicastRouting.get_route(self.source_ip)["multipath"]
+
+            rpf_node = next_hop
+            print("MUL", multipaths)
+            # self.rpf_node = multipaths[0]["gateway"]
+            for m in multipaths:
+                if m["gateway"] is None:
+                    rpf_node = self.source_ip
+                    break
+                else:
+                    rpf_node = m["gateway"]
+
+            print("RPF_NODE:", UnicastRouting.get_route(self.source_ip))
 
 
+            print(self.rpf_node == self.source_ip)
 
+            new_inbound_interface_index = Main.kernel.vif_dic[self.check_rpf()]
+            if new_inbound_interface_index != self.inbound_interface_index:
+                # todo: criar novo upstream e downstream interface
+                # todo: stop upstream e downstream
+                #self.interface_state[self.inbound_interface_index].stop()
+                #self.interface_state[new_inbound_interface_index].stop()
+                #Unicast routing or Assert state causes RPF'(S) to change,
+                self.interface_state[self.inbound_interface_index] = TreeInterfaceDownstream
+                self.interface_state[new_inbound_interface_index] = TreeInterfaceUpstream
+                self.inbound_interface_index = new_inbound_interface_index
 
+            if self.rpf_node != rpf_node:
+                self.rpf_node = rpf_node
+                self.interface_state[self.inbound_interface_index].change_rpf(self._was_olist_null)
 
     def update(self, caller, arg):
         #todo

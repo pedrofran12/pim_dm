@@ -133,7 +133,8 @@ class NoInfo(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-        assert False
+        #assert False
+        return
 
     @staticmethod
     def PTexpires(interface: "TreeInterfaceDownstream"):
@@ -142,7 +143,8 @@ class NoInfo(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-        assert False
+        #assert False
+        return
 
     @staticmethod
     def is_now_RPF_Interface(interface: "TreeInterfaceDownstream"):
@@ -230,7 +232,8 @@ class PrunePending(DownstreamStateABS):
 
         #pt = interface.get_pt()
         #pt.start(interface.get_lpht() - pim_globals.JT_OVERRIDE_INTERVAL)
-        interface.set_prune_timer(prune_holdtime - pim_globals.JT_OVERRIDE_INTERVAL)
+        #interface.set_prune_timer(prune_holdtime - pim_globals.JT_OVERRIDE_INTERVAL)
+        interface.set_prune_timer(interface.get_received_prune_holdtime() - pim_globals.JT_OVERRIDE_INTERVAL)
 
 
         interface.send_pruneecho()
@@ -245,7 +248,8 @@ class PrunePending(DownstreamStateABS):
         @type interface: TreeInterfaceDownstreamDownstream
         """
 
-        assert False
+        #assert False
+        return
 
     @staticmethod
     def is_now_RPF_Interface(interface: "TreeInterfaceDownstream"):
@@ -258,6 +262,8 @@ class PrunePending(DownstreamStateABS):
         # todo understand better
         #interface.get_ppt().stop()
         interface.clear_prune_pending_timer()
+
+        interface.set_prune_state(DownstreamState.NoInfo)
 
         print('is_now_RPF_Interface, PP -> NI')
 
@@ -293,7 +299,8 @@ class Pruned(DownstreamStateABS):
         #    ppt.set_timer(interface.get_lpht())
         #    ppt.reset()
         # todo nao percebo... corrigir 0
-        if holdtime > 0:
+        #if holdtime > 0:
+        if interface.get_received_prune_holdtime() > interface.remaining_prune_timer():
             interface.set_prune_timer(holdtime)
 
         print('receivedPrune, P -> P')
@@ -334,7 +341,8 @@ class Pruned(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-        assert False
+        #assert False
+        return
 
     @staticmethod
     def PTexpires(interface: "TreeInterfaceDownstream"):
@@ -358,6 +366,7 @@ class Pruned(DownstreamStateABS):
         # todo ver melhor
         #interface.get_pt().stop()
         interface.clear_prune_timer()
+        interface.set_prune_state(DownstreamState.NoInfo)
 
         print('is_now_RPF_Interface, P -> NI')
 
@@ -372,7 +381,8 @@ class Pruned(DownstreamStateABS):
         #pt = interface.get_pt()
         #pt.set_timer(interface.get_lpht())
         #pt.reset()
-        interface.set_prune_timer(interface.get_lpht())
+        #interface.set_prune_timer(interface.get_lpht())
+        interface.set_prune_timer(interface.get_received_prune_holdtime())
 
         print('send_state_refresh, P -> P')
 

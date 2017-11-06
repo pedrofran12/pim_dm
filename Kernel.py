@@ -3,6 +3,9 @@ import struct
 import netifaces
 import threading
 import traceback
+
+import ipaddress
+
 from RWLock.RWLock import RWLockWrite
 import Main
 
@@ -364,8 +367,15 @@ class Kernel:
                 return None
 
 
-    def neighbor_removed(self, interface_name, neighbor_ip):
+    def notify_unicast_changes(self, subnet):
         # todo
+        with self.rwlock.genWlock():
+            for (source_ip, group) in self.routing.keys():
+                source_ip_obj = ipaddress.ip_address(source_ip)
+                if source_ip_obj in subnet:
+                    self.routing[(source_ip, group)].network_update()
+                    print(source_ip)
+
         pass
 
 

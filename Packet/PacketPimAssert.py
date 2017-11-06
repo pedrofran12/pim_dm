@@ -2,6 +2,7 @@ import struct
 import socket
 from Packet.PacketPimEncodedGroupAddress import PacketPimEncodedGroupAddress
 from Packet.PacketPimEncodedUnicastAddress import PacketPimEncodedUnicastAddress
+from tree.globals import ASSERT_CANCEL_METRIC
 '''
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -29,12 +30,15 @@ class PacketPimAssert:
     PIM_HDR_ASSERT_v4_LEN = struct.calcsize(PIM_HDR_ASSERT_v4)
     PIM_HDR_ASSERT_v6_LEN = struct.calcsize(PIM_HDR_ASSERT_v6)
 
-    def __init__(self, multicast_group_address: str or bytes, source_address: str or bytes, metric_preference, metric):
+    def __init__(self, multicast_group_address: str or bytes, source_address: str or bytes, metric_preference: int, metric: int or float):
         if type(multicast_group_address) is bytes:
             multicast_group_address = socket.inet_ntoa(multicast_group_address)
         if type(source_address) is bytes:
             source_address = socket.inet_ntoa(source_address)
-
+        if metric_preference > ASSERT_CANCEL_METRIC:
+            metric_preference = ASSERT_CANCEL_METRIC
+        if metric > ASSERT_CANCEL_METRIC:
+            metric = ASSERT_CANCEL_METRIC
         self.multicast_group_address = multicast_group_address
         self.source_address = source_address
         self.metric_preference = metric_preference

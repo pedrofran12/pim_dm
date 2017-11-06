@@ -15,6 +15,7 @@ class Interface(object):
     def __init__(self, interface_name: str):
         self.interface_name = interface_name
         ip_interface = netifaces.ifaddresses(interface_name)[netifaces.AF_INET][0]['addr']
+        self.ip_mask_interface = netifaces.ifaddresses(interface_name)[netifaces.AF_INET][0]['netmask']
         self.ip_interface = ip_interface
 
         s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_PIM)
