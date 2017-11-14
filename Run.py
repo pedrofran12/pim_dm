@@ -57,25 +57,25 @@ class MyDaemon(Daemon):
                 print(sys.stderr, 'sending data back to the client')
                 print(pickle.loads(data))
                 args = pickle.loads(data)
-                if args.list_interfaces:
+                if 'list_interfaces' in args and args.list_interfaces:
                     connection.sendall(pickle.dumps(Main.list_enabled_interfaces()))
-                elif args.list_neighbors:
+                elif 'list_neighbors' in args and args.list_neighbors:
                     connection.sendall(pickle.dumps(Main.list_neighbors()))
-                elif args.list_state:
+                elif 'list_state' in args and args.list_state:
                     connection.sendall(pickle.dumps(Main.list_state()))
-                elif args.add_interface:
+                elif 'add_interface' in args and args.add_interface:
                     Main.add_interface(args.add_interface[0], pim=True)
                     connection.shutdown(socket.SHUT_RDWR)
-                elif args.add_interface_igmp:
+                elif 'add_interface_igmp' in args and args.add_interface_igmp:
                     Main.add_interface(args.add_interface_igmp[0], igmp=True)
                     connection.shutdown(socket.SHUT_RDWR)
-                elif args.remove_interface:
+                elif 'remove_interface' in args and args.remove_interface:
                     Main.remove_interface(args.remove_interface[0], pim=True)
                     connection.shutdown(socket.SHUT_RDWR)
-                elif args.remove_interface_igmp:
+                elif 'remove_interface_igmp' in args and args.remove_interface_igmp:
                     Main.remove_interface(args.remove_interface_igmp[0], igmp=True)
                     connection.shutdown(socket.SHUT_RDWR)
-                elif args.stop:
+                elif 'stop' in args and args.stop:
                     Main.stop()
                     connection.shutdown(socket.SHUT_RDWR)
             except Exception:

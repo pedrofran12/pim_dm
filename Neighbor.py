@@ -72,7 +72,6 @@ class Neighbor:
         #Main.remove_neighbor(self.ip)
         interface_name = self.contact_interface.interface_name
         neighbor_ip = self.ip
-        Main.kernel.neighbor_removed(interface_name, neighbor_ip)
 
         del self.contact_interface.neighbors[self.ip]
 

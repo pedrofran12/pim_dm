@@ -50,34 +50,6 @@ def remove_interface(interface_name, pim=False, igmp=False):
         print(igmp_interfaces)
 
 
-"""
-def add_neighbor(contact_interface, ip, random_number, hello_hold_time):
-    global neighbors
-    with neighbors_lock:
-        if ip not in neighbors:
-            print("ADD NEIGHBOR")
-            n = Neighbor(contact_interface, ip, random_number, hello_hold_time)
-            neighbors[ip] = n
-            protocols[0].force_send(contact_interface)
-            # todo check neighbor in interface
-            contact_interface.neighbors[ip] = n
-
-
-def get_neighbor(ip) -> Neighbor:
-    global neighbors
-    with neighbors_lock:
-        if ip not in neighbors:
-            return None
-        return neighbors[ip]
-
-def remove_neighbor(ip):
-    global neighbors
-    with neighbors_lock:
-        if ip in neighbors:
-            del neighbors[ip]
-            print("removido neighbor")
-"""
-
 def add_protocol(protocol_number, protocol_obj):
     global protocols
     protocols[protocol_number] = protocol_obj
