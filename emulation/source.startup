@@ -1,0 +1,9 @@
+ip addr add dev eth0 10.1.1.100/24
+ip link set dev eth0 up
+
+#default route para obter conectividade internet
+ip route add 0.0.0.0/0 via 10.1.1.1
+
+apt-get update && apt-get --assume-yes install python3 python3-pip
+
+

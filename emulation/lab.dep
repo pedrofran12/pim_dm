@@ -1,5 +1,11 @@
-switch1: router1
-router2: switch1 router1
-router3: switch1 router1
-router4: switch1 router1
+source: router1
+router2: router1
+router3: router1
+router4: router1
+switch1: router2 router3 router4
+router5: switch1
+router6: switch1
+client2: switch1
+client0: router5
+client1: router6
 
