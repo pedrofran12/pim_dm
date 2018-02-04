@@ -14,7 +14,7 @@ class InterfaceIGMP(object):
 
     PACKET_MR_ALLMULTI = 2
 
-    def __init__(self, interface_name: str):
+    def __init__(self, interface_name: str, vif_index:int):
         # RECEIVE SOCKET
         rcv_s = socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.htons(InterfaceIGMP.ETH_P_IP))
 
@@ -39,6 +39,9 @@ class InterfaceIGMP(object):
         from igmp.RouterState import RouterState
         self.interface_state = RouterState(self)
 
+        # virtual interface index for the multicast routing table
+        self.vif_index = vif_index
+
         # run receive method in background
         receive_thread = threading.Thread(target=self.receive)
         receive_thread.daemon = True
@@ -46,6 +49,11 @@ class InterfaceIGMP(object):
 
     def get_ip(self):
         return netifaces.ifaddresses(self.interface_name)[netifaces.AF_INET][0]['addr']
+
+    @property
+    def ip_interface(self):
+        return self.get_ip()
+
 
     def send(self, data: bytes, address: str="224.0.0.1"):
         if self.interface_enabled:

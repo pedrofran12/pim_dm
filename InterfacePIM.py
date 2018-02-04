@@ -20,7 +20,7 @@ class InterfacePim(Interface):
     MAX_TRIGGERED_HELLO_PERIOD = 5
 
 
-    def __init__(self, interface_name: str):
+    def __init__(self, interface_name: str, vif_index:int):
         super().__init__(interface_name)
 
         # generation id
@@ -50,11 +50,17 @@ class InterfacePim(Interface):
         self.neighbors = {}
         self.neighbors_lock = RWLockWrite()
 
+        # virtual interface index for the multicast routing table
+        self.vif_index = vif_index
 
         # run receive method in background
         receive_thread = threading.Thread(target=self.receive)
         receive_thread.daemon = True
         receive_thread.start()
+
+    def create_virtual_interface(self):
+        self.vif_index = Main.kernel.create_virtual_interface(ip_interface=self.ip_interface, interface_name=self.interface_name)
+
 
     def receive(self):
         while self.is_enabled():
@@ -66,16 +72,6 @@ class InterfacePim(Interface):
                 traceback.print_exc()
                 continue
 
-        """
-        while self.interface_enabled:
-                (raw_packet, (ip, _)) = self.socket.recvfrom(256 * 1024)
-                if raw_packet:
-                    packet = ReceivedPacket(raw_packet, self)
-                    Main.protocols[packet.payload.get_pim_type()].receive_handle(packet)  # TODO: perceber se existe melhor maneira de fazer isto
-            except Exception:
-                traceback.print_exc()
-                continue
-        """
 
     def send(self, data: bytes, group_ip: str=MCAST_GRP):
         super().send(data=data, group_ip=group_ip)
@@ -107,6 +103,7 @@ class InterfacePim(Interface):
         self.send(packet.bytes())
 
         super().remove()
+        Main.kernel.remove_virtual_interface(self.ip_interface)
 
 
     def add_neighbor(self, ip, random_number, hello_hold_time):

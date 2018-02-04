@@ -39,7 +39,7 @@ class KernelEntry:
 
 
         # (S,G) starts IG state
-        self._was_olist_null = None
+        self._was_olist_null = False
 
         # todo
         #self._rpf_is_origin = False
@@ -49,7 +49,7 @@ class KernelEntry:
         self.inbound_interface_index = Main.kernel.vif_dic[self.check_rpf()]
 
 
-        Main.kernel.flood(source_ip, group_ip, self.inbound_interface_index)
+        #Main.kernel.flood(source_ip, group_ip, self.inbound_interface_index)
 
 
         self.interface_state = {}  # type: Dict[int, TreeInterface]
@@ -68,7 +68,8 @@ class KernelEntry:
         self._lock_test2 = RLock()
         self.CHANGE_STATE_LOCK = RLock()
         #self._was_olist_null = self.is_olist_null()
-
+        self.change()
+        self.evaluate_olist_change()
         print('Tree created')
         #self._liveliness_timer = None
         #if self.is_originater():
@@ -122,7 +123,8 @@ class KernelEntry:
     def recv_graft_msg(self, index, packet):
         print("recv graft msg")
         upstream_neighbor_address = packet.payload.payload.upstream_neighbor_address
-        self.interface_state[index].recv_graft_msg(upstream_neighbor_address)
+        source_ip = packet.ip_header.ip_src
+        self.interface_state[index].recv_graft_msg(upstream_neighbor_address, source_ip)
 
     def recv_graft_ack_msg(self, index, packet):
         print("recv graft ack msg")
@@ -218,3 +220,24 @@ class KernelEntry:
             state.delete()
 
         Main.kernel.remove_multicast_route(self)
+
+
+    ######################################
+    # Interface change
+    #######################################
+    def new_interface(self, index):
+        with self.CHANGE_STATE_LOCK:
+            self.interface_state[index] = TreeInterfaceDownstream(self, index)
+            self.change()
+            self.evaluate_olist_change()
+
+    def remove_interface(self, index):
+        with self.CHANGE_STATE_LOCK:
+            #check if removed interface is root interface
+            if self.inbound_interface_index == index:
+                self.delete()
+            else:
+                self.interface_state[index].delete()
+                del self.interface_state[index]
+                self.change()
+                self.evaluate_olist_change()

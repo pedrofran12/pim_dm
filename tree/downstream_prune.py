@@ -25,7 +25,7 @@ class DownstreamStateABS(metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractstaticmethod
-    def receivedGraft(interface: "TreeInterfaceDownstream"):
+    def receivedGraft(interface: "TreeInterfaceDownstream", source_ip):
         """
         Receive Graft(S,G)
 
@@ -113,7 +113,7 @@ class NoInfo(DownstreamStateABS):
         print("receivedJoin, NI -> NI")
 
     @staticmethod
-    def receivedGraft(interface: "TreeInterfaceDownstream"):
+    def receivedGraft(interface: "TreeInterfaceDownstream", source_ip):
         """
         Receive Graft(S,G)
 
@@ -122,7 +122,7 @@ class NoInfo(DownstreamStateABS):
         # todo why pt stop???!!!
         #interface.get_pt().stop()
 
-        interface.send_graft_ack()
+        interface.send_graft_ack(source_ip)
 
         print('receivedGraft, NI -> NI')
 
@@ -205,7 +205,7 @@ class PrunePending(DownstreamStateABS):
         print('receivedJoin, PP -> NI')
 
     @staticmethod
-    def receivedGraft(interface: "TreeInterfaceDownstream"):
+    def receivedGraft(interface: "TreeInterfaceDownstream", source_ip):
         """
         Receive Graft(S,G)
 
@@ -216,7 +216,7 @@ class PrunePending(DownstreamStateABS):
         interface.clear_prune_pending_timer()
 
         interface.set_prune_state(DownstreamState.NoInfo)
-        interface.send_graft_ack()
+        interface.send_graft_ack(source_ip)
 
         print('receivedGraft, PP -> NI')
 
@@ -321,7 +321,7 @@ class Pruned(DownstreamStateABS):
         print('receivedPrune, P -> NI')
 
     @staticmethod
-    def receivedGraft(interface: "TreeInterfaceDownstream"):
+    def receivedGraft(interface: "TreeInterfaceDownstream", source_ip):
         """
         Receive Graft(S,G)
 
@@ -330,7 +330,7 @@ class Pruned(DownstreamStateABS):
         #interface.get_pt().stop()
         interface.clear_prune_timer()
         interface.set_prune_state(DownstreamState.NoInfo)
-        interface.send_graft_ack()
+        interface.send_graft_ack(source_ip)
 
         print('receivedGraft, P -> NI')
 

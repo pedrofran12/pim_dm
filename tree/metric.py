@@ -74,3 +74,7 @@ class AssertMetric(object):
             value = ipaddress.ip_address(value)
 
         self._ip_address = value
+
+
+    def get_ip(self):
+        return str(self._ip_address)

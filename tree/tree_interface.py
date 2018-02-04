@@ -160,7 +160,7 @@ class TreeInterface(metaclass=ABCMeta):
         if upstream_neighbor_address == self.get_ip():
             self._assert_state.receivedPruneOrJoinOrGraft(self)
 
-    def recv_graft_msg(self, upstream_neighbor_address):
+    def recv_graft_msg(self, upstream_neighbor_address, source_ip):
         if upstream_neighbor_address == self.get_ip():
             self._assert_state.receivedPruneOrJoinOrGraft(self)
 
@@ -186,30 +186,33 @@ class TreeInterface(metaclass=ABCMeta):
             (source, group) = self.get_tree_id()
 
             # todo self.get_rpf_()
-            ph = PacketPimGraft("10.0.0.13")
+            ip_dst = self.get_neighbor_RPF()
+            ph = PacketPimGraft(ip_dst)
             ph.add_multicast_group(PacketPimJoinPruneMulticastGroup(group,  joined_src_addresses=[source]))
             pckt = Packet(payload=PacketPimHeader(ph))
-            self.get_interface().send(pckt.bytes())
+            self.get_interface().send(pckt.bytes(), ip_dst)
 
             #msg = GraftMsg(self.get_tree().tree_id, self.get_rpf_())
             #self.pim_if.send_mcast(msg)
         except:
+            traceback.print_exc()
             return
 
-    def send_graft_ack(self):
+    def send_graft_ack(self, ip_sender):
         print("send graft ack")
         try:
             (source, group) = self.get_tree_id()
 
             # todo endereco?!!
-            ph = PacketPimGraftAck("10.0.0.13")
+            ph = PacketPimGraftAck(ip_sender)
             ph.add_multicast_group(PacketPimJoinPruneMulticastGroup(group,  joined_src_addresses=[source]))
             pckt = Packet(payload=PacketPimHeader(ph))
-            self.get_interface().send(pckt.bytes())
+            self.get_interface().send(pckt.bytes(), ip_sender)
 
             #msg = GraftAckMsg(self.get_tree().tree_id, self.get_node())
             #self.pim_if.send_mcast(msg)
         except:
+            traceback.print_exc()
             return
 
 
@@ -224,13 +227,14 @@ class TreeInterface(metaclass=ABCMeta):
             (source, group) = self.get_tree_id()
             # todo help ip of ph
             #ph = PacketPimJoinPrune("123.123.123.123", 210)
-            ph = PacketPimJoinPrune("123.123.123.123", holdtime)
+            ph = PacketPimJoinPrune(self.get_neighbor_RPF(), holdtime)
             ph.add_multicast_group(PacketPimJoinPruneMulticastGroup(group, pruned_src_addresses=[source]))
             pckt = Packet(payload=PacketPimHeader(ph))
 
             self.get_interface().send(pckt.bytes())
             print('sent prune msg')
         except:
+            traceback.print_exc()
             return
 
 
@@ -246,6 +250,7 @@ class TreeInterface(metaclass=ABCMeta):
             self.get_interface().send(pckt.bytes())
             print("send prune echo")
         except:
+            traceback.print_exc()
             return
         # todo
         #msg = PruneMsg(self.get_tree().tree_id,
@@ -258,7 +263,7 @@ class TreeInterface(metaclass=ABCMeta):
         try:
             (source, group) = self.get_tree_id()
             # todo help ip of ph
-            ph = PacketPimJoinPrune("123.123.123.123", 210)
+            ph = PacketPimJoinPrune(self.get_neighbor_RPF(), 210)
             ph.add_multicast_group(PacketPimJoinPruneMulticastGroup(group, joined_src_addresses=[source]))
             pckt = Packet(payload=PacketPimHeader(ph))
 
@@ -266,6 +271,7 @@ class TreeInterface(metaclass=ABCMeta):
             #msg = JoinMsg(self.get_tree().tree_id, self.get_rpf_())
             #self.pim_if.send_mcast(msg)
         except:
+            traceback.print_exc()
             return
 
 
@@ -280,6 +286,7 @@ class TreeInterface(metaclass=ABCMeta):
 
             self.get_interface().send(pckt.bytes())
         except:
+            traceback.print_exc()
             return
 
 
@@ -295,6 +302,7 @@ class TreeInterface(metaclass=ABCMeta):
 
             self.get_interface().send(pckt.bytes())
         except:
+            traceback.print_exc()
             return
         #msg = AssertMsg.new_assert_cancel(self.tree_id)
         #self.pim_if.send_mcast(msg)
@@ -388,8 +396,8 @@ class TreeInterface(metaclass=ABCMeta):
         raise NotImplementedError()
 
 
-    def get_rpf_(self):
-        return self.get_neighbor_RPF()
+    #def get_rpf_(self):
+    #    return self.get_neighbor_RPF()
 
 
     # obtain ip of RPF'(S)
@@ -397,10 +405,13 @@ class TreeInterface(metaclass=ABCMeta):
         '''
         RPF'(S)
         '''
-        if not self.is_assert_winner():
-            return self._assert_winner_ip
+        if self.i_am_assert_loser():
+            return self._assert_winner_metric.get_ip()
         else:
             return self._kernel_entry.rpf_node
+
+    def i_am_assert_loser(self):
+        return self._assert_state == AssertState.Loser
 
     def is_assert_winner(self):
         return not self.is_downstream() and not self._assert_state == AssertState.Loser

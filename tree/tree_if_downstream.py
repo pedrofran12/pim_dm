@@ -103,26 +103,31 @@ class TreeInterfaceDownstream(TreeInterface):
     def recv_prune_msg(self, upstream_neighbor_address, holdtime):
         super().recv_prune_msg(upstream_neighbor_address, holdtime)
 
-        # set here???
-        self.set_receceived_prune_holdtime(holdtime)
-        self._prune_state.receivedPrune(self, holdtime)
+        #TODO if upstream_neighbor_address == self.get_ip():
+        if upstream_neighbor_address == self.get_ip():
+            self.set_receceived_prune_holdtime(holdtime)
+            self._prune_state.receivedPrune(self, holdtime)
 
     # Override
     def recv_join_msg(self, upstream_neighbor_address):
         super().recv_join_msg(upstream_neighbor_address)
-        self._prune_state.receivedJoin(self)
+
+        if upstream_neighbor_address == self.get_ip():
+            self._prune_state.receivedJoin(self)
 
     # Override
-    def recv_graft_msg(self, upstream_neighbor_address):
-        super().recv_graft_msg(upstream_neighbor_address)
-        self._prune_state.receivedGraft(self)
+    def recv_graft_msg(self, upstream_neighbor_address, source_ip):
+        print("GRAFT!!!")
+        super().recv_graft_msg(upstream_neighbor_address, source_ip)
+
+        if upstream_neighbor_address == self.get_ip():
+            self._prune_state.receivedGraft(self, source_ip)
 
 
 
     # Override
     def is_forwarding(self):
         return ((len(self.get_interface().neighbors) >= 1 and not self.is_pruned()) or self.igmp_has_members()) and not self.lost_assert()
-        # todo wtf is boundary??!!
         #return self._assert_state == AssertState.Winner and self.is_in_group()
 
     def is_pruned(self):
@@ -138,7 +143,9 @@ class TreeInterfaceDownstream(TreeInterface):
     # Override
     def delete(self):
         TreeInterface.delete(self)
-        #self._get_dipt().cancel()
+        self.clear_assert_timer()
+        self.clear_prune_timer()
+        self.clear_prune_pending_timer()
 
     def get_metric(self):
         return AssertMetric.spt_assert_metric(self)

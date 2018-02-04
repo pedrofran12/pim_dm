@@ -118,6 +118,7 @@ class TreeInterfaceUpstream(TreeInterface):
         self._graft_prune_state.seePrune(self)
 
     def recv_graft_ack_msg(self):
+        print("GRAFT ACK!!!")
         # todo check rpf nbr
         self._graft_prune_state.recvGraftAckFromRPFnbr(self)
 
@@ -146,6 +147,10 @@ class TreeInterfaceUpstream(TreeInterface):
     #Override
     def delete(self):
         super().delete()
+        self.clear_graft_retry_timer()
+        self.clear_assert_timer()
+        self.clear_prune_limit_timer()
+        self.clear_override_timer()
 
     def is_downstream(self):
         return False

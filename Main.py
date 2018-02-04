@@ -16,39 +16,45 @@ igmp = None
 
 
 def add_interface(interface_name, pim=False, igmp=False):
-    if pim is True and interface_name not in interfaces:
-        interface = InterfacePim(interface_name)
-        interfaces[interface_name] = interface
-    if igmp is True and interface_name not in igmp_interfaces:
-        interface = InterfaceIGMP(interface_name)
-        igmp_interfaces[interface_name] = interface
+    #if pim is True and interface_name not in interfaces:
+    #    interface = InterfacePim(interface_name)
+    #    interfaces[interface_name] = interface
+    #    interface.create_virtual_interface()
+    #if igmp is True and interface_name not in igmp_interfaces:
+    #    interface = InterfaceIGMP(interface_name)
+    #    igmp_interfaces[interface_name] = interface
+    kernel.create_interface(interface_name=interface_name, pim=pim, igmp=igmp)
+    #if pim:
+    #    interfaces[interface_name] = kernel.pim_interface[interface_name]
+    #if igmp:
+    #    igmp_interfaces[interface_name] = kernel.igmp_interface[interface_name]
 
 
 def remove_interface(interface_name, pim=False, igmp=False):
-    if pim is True and ((interface_name in interfaces) or interface_name == "*"):
-        if interface_name == "*":
-            interface_name_list = list(interfaces.keys())
-        else:
-            interface_name_list = [interface_name]
-        for if_name in interface_name_list:
-            interface_obj = interfaces.pop(if_name)
-            interface_obj.remove()
-            #interfaces[if_name].remove()
-            #del interfaces[if_name]
-        print("removido interface")
-        print(interfaces)
+    #if pim is True and ((interface_name in interfaces) or interface_name == "*"):
+    #    if interface_name == "*":
+    #        interface_name_list = list(interfaces.keys())
+    #    else:
+    #        interface_name_list = [interface_name]
+    #    for if_name in interface_name_list:
+    #        interface_obj = interfaces.pop(if_name)
+    #        interface_obj.remove()
+    #        #interfaces[if_name].remove()
+    #        #del interfaces[if_name]
+    #    print("removido interface")
+    #    print(interfaces)
 
-    if igmp is True and ((interface_name in igmp_interfaces) or interface_name == "*"):
-        if interface_name == "*":
-            interface_name_list = list(igmp_interfaces.keys())
-        else:
-            interface_name_list = [interface_name]
-        for if_name in interface_name_list:
-            igmp_interfaces[if_name].remove()
-            del igmp_interfaces[if_name]
-        print("removido interface")
-        print(igmp_interfaces)
-
+    #if igmp is True and ((interface_name in igmp_interfaces) or interface_name == "*"):
+    #    if interface_name == "*":
+    #        interface_name_list = list(igmp_interfaces.keys())
+    #    else:
+    #        interface_name_list = [interface_name]
+    #    for if_name in interface_name_list:
+    #        igmp_interfaces[if_name].remove()
+    #        del igmp_interfaces[if_name]
+    #    print("removido interface")
+    #    print(igmp_interfaces)
+    kernel.remove_interface(interface_name, pim=pim, igmp=igmp)
 
 def add_protocol(protocol_number, protocol_obj):
     global protocols
@@ -199,3 +205,8 @@ def main():
 
     global u
     u = UnicastRouting.UnicastRouting()
+
+    global interfaces
+    global igmp_interfaces
+    interfaces = kernel.pim_interface
+    igmp_interfaces = kernel.igmp_interface

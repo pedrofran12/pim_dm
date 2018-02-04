@@ -105,10 +105,9 @@ class AssertStateABC(metaclass=ABCMeta):
 
 
     def _sendAssert_setAT(interface: "TreeInterfaceDownstream"):
-        interface.send_assert()
-
         #interface.assert_timer.set_timer(pim_globals.ASSERT_TIME)
         interface.set_assert_timer(pim_globals.ASSERT_TIME)
+        interface.send_assert()
         #interface.assert_timer.reset()
 
     @staticmethod
@@ -136,11 +135,11 @@ class NoInfoState(AssertStateABC):
         """
         @type interface: TreeInterface
         """
-        NoInfoState._sendAssert_setAT(interface)
-
         interface.set_assert_state(AssertState.Winner)
-        #interface.assert_winner_metric = interface.assert_metric
         interface.set_assert_winner_metric(interface.my_assert_metric())
+
+        NoInfoState._sendAssert_setAT(interface)
+        #interface.assert_winner_metric = interface.assert_metric
 
         print('receivedDataFromDownstreamIf, NI -> W')
 
@@ -150,12 +149,12 @@ class NoInfoState(AssertStateABC):
 
     @staticmethod
     def receivedInferiorMetricFromNonWinner_couldAssertIsTrue(interface: "TreeInterfaceDownstream"):
-        NoInfoState._sendAssert_setAT(interface)
-
-        #interface.assert_state = AssertState.Winner
         interface.set_assert_state(AssertState.Winner)
-        #interface.assert_winner_metric = interface.assert_metric
         interface.set_assert_winner_metric(interface.my_assert_metric())
+
+        NoInfoState._sendAssert_setAT(interface)
+        #interface.assert_state = AssertState.Winner
+        #interface.assert_winner_metric = interface.assert_metric
 
         print(
             'receivedInferiorMetricFromNonWinner_couldAssertIsTrue, NI -> W')
@@ -174,12 +173,12 @@ class NoInfoState(AssertStateABC):
             assert_timer_value = state_refresh_interval*3
 
         interface.set_assert_timer(assert_timer_value)
+        interface.set_assert_winner_metric(better_metric)
+        interface.set_assert_state(AssertState.Loser)
         #interface.assert_timer.reset()
 
         #interface.assert_state = AssertState.Loser
-        interface.set_assert_state(AssertState.Loser)
         #interface.assert_winner_metric = better_metric
-        interface.set_assert_winner_metric(better_metric)
 
         # todo MUST also multicast a Prune(S,G) to the Assert winner <- TO THE colocar endereco do winner
         if interface.could_assert():
