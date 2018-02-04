@@ -3,6 +3,16 @@ import struct
 import sys
 import netifaces
 import traceback
+import signal
+
+is_running = True
+sock = None
+
+def exit(signal, frame):
+    is_running = False
+    sock.close()
+    sys.exit(0)
+
 
 def chooseInterface():
     interfaces = netifaces.interfaces()
@@ -23,8 +33,9 @@ def chooseInterface():
         return inputValue
 
 
+signal.signal(signal.SIGINT, exit)
+signal.signal(signal.SIGTERM, exit)
 
-#message = 'very important data'
 multicast_group = ('224.12.12.12', 10000)
 
 # Create the datagram socket
@@ -42,11 +53,10 @@ ip_interface = netifaces.ifaddresses(interface_name)[netifaces.AF_INET][0]['addr
 sock.bind((ip_interface, 10000))
 try:
     # Look for responses from all recipients
-    while True:
+    while is_running:
         input_msg = input('msg --> ')
         try:
             sock.sendto(input_msg.encode("utf-8"), multicast_group)
-
         except:
             traceback.print_exc()
             continue

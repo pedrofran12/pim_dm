@@ -2,7 +2,16 @@ import socket
 import struct
 import sys
 import netifaces
+import signal
+import sys
 
+is_running = True
+sock = None
+
+def exit(signal, frame):
+    is_running = False
+    sock.close()
+    sys.exit(0)
 
 def chooseInterface():
     interfaces = netifaces.interfaces()
@@ -24,6 +33,10 @@ def chooseInterface():
 
 if not hasattr(socket, 'SO_BINDTODEVICE'):
     socket.SO_BINDTODEVICE = 25
+
+signal.signal(signal.SIGINT, exit)
+signal.signal(signal.SIGTERM, exit)
+
 
 multicast_group = '224.12.12.12'
 server_address = ('', 10000)
@@ -50,7 +63,7 @@ sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
 
 
 # Receive/respond loop
-while True:
+while is_running:
     #print >>sys.stderr, '\nwaiting to receive message'
     data, address = sock.recvfrom(10240)
     print(data.decode("utf-8"))
