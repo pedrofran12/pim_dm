@@ -5,6 +5,6 @@ ip link set dev eth0 up
 #NAT for private ip's
 iptables -t nat -A POSTROUTING -s 0.0.0.0/0 -o eth1 -j MASQUERADE
 
-apt-get update && apt-get --assume-yes install python3 python3-pip
+#apt-get update && apt-get --assume-yes install python3 python3-pip
 
 
