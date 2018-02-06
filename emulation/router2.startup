@@ -20,5 +20,5 @@ do
 done
 
 # install python
-apt-get update && apt-get --assume-yes install python3 python3-pip
+#apt-get update && apt-get --assume-yes install python3 python3-pip
 

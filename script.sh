@@ -3,7 +3,7 @@
 if [ ! -d "netkit-ng" ]; then
   # se pasta netkit-ng nao existir descomprimir ficheiros
   wget -nc https://github.com/netkit-ng/netkit-ng-core/releases/download/3.0.4/netkit-ng-core-32-3.0.4.tar.bz2
-  wget -nc https://github.com/netkit-ng/netkit-ng-build/releases/download/0.1.3/netkit-ng-filesystem-i386-F7.0-0.1.3.tar.bz2
+  wget -nc https://web.ist.utl.pt/~ist177956/netkit/netkit-ng-filesystem-i386-F7.0-0.1.3.tar.bz2
   wget -nc https://github.com/netkit-ng/netkit-ng-build/releases/download/0.1.3/netkit-ng-kernel-i386-K3.2-0.1.3.tar.bz2
   tar -xjSf netkit-ng-core-32-3.0.4.tar.bz2
   tar -xjSf netkit-ng-filesystem-i386-F7.0-0.1.3.tar.bz2
