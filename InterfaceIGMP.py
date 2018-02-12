@@ -5,6 +5,7 @@ import netifaces
 from Packet.ReceivedPacket import ReceivedPacket
 import Main
 import traceback
+from ctypes import create_string_buffer, addressof
 if not hasattr(socket, 'SO_BINDTODEVICE'):
     socket.SO_BINDTODEVICE = 25
 
@@ -12,17 +13,32 @@ if not hasattr(socket, 'SO_BINDTODEVICE'):
 class InterfaceIGMP(object):
     ETH_P_IP = 0x0800		# Internet Protocol packet
 
+    FILTER_IGMP = [
+        struct.pack('HBBI', 0x28, 0, 0, 0x0000000c),
+        struct.pack('HBBI', 0x15, 0, 3, 0x00000800),
+        struct.pack('HBBI', 0x30, 0, 0, 0x00000017),
+        struct.pack('HBBI', 0x15, 0, 1, 0x00000002),
+        struct.pack('HBBI', 0x6, 0, 0, 0x00040000),
+        struct.pack('HBBI', 0x6, 0, 0, 0x00000000),
+    ]
+
+    SO_ATTACH_FILTER = 26
+
     PACKET_MR_ALLMULTI = 2
 
     def __init__(self, interface_name: str, vif_index:int):
         # RECEIVE SOCKET
-        rcv_s = socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.htons(InterfaceIGMP.ETH_P_IP))
+        rcv_s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(InterfaceIGMP.ETH_P_IP))
 
-        # allow all multicast packets
-        rcv_s.setsockopt(socket.SOL_SOCKET, InterfaceIGMP.PACKET_MR_ALLMULTI, struct.pack("i HH BBBBBBBB", 0, InterfaceIGMP.PACKET_MR_ALLMULTI, 0,    0,0,0,0,0,0,0,0))
+        # receive only IGMP packets by setting a BPF filter
+        filters = b''.join(InterfaceIGMP.FILTER_IGMP)
+        b = create_string_buffer(filters)
+        mem_addr_of_filters = addressof(b)
+        fprog = struct.pack('HL', len(InterfaceIGMP.FILTER_IGMP), mem_addr_of_filters)
+        rcv_s.setsockopt(socket.SOL_SOCKET, InterfaceIGMP.SO_ATTACH_FILTER, fprog)
 
         # bind to interface
-        rcv_s.bind((interface_name, 0))
+        rcv_s.bind((interface_name, 0x0800))
 
         self.recv_socket = rcv_s
 
@@ -62,17 +78,9 @@ class InterfaceIGMP(object):
     def receive(self):
         while self.interface_enabled:
             try:
-                (raw_packet, x) = self.recv_socket.recvfrom(256 * 1024)
+                (raw_packet, _) = self.recv_socket.recvfrom(256 * 1024)
                 if raw_packet:
                     raw_packet = raw_packet[14:]
-                    from Packet.PacketIpHeader import PacketIpHeader
-                    (verhlen, tos, iplen, ipid, frag, ttl, proto, cksum, src, dst) = \
-                        struct.unpack(PacketIpHeader.IP_HDR, raw_packet[:PacketIpHeader.IP_HDR_LEN])
-                    #print(proto)
-
-                    if proto != socket.IPPROTO_IGMP:
-                        continue
-                    #print((raw_packet, x))
                     packet = ReceivedPacket(raw_packet, self)
                     Main.igmp.receive_handle(packet)
             except Exception:

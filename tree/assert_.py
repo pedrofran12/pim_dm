@@ -37,12 +37,11 @@ class AssertStateABC(metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractstaticmethod
-    def receivedPreferedMetric(interface: "TreeInterfaceDownstream", assert_time, better_metric):
+    def receivedPreferedMetric(interface: "TreeInterfaceDownstream", better_metric):
         """
         Receive Preferred Assert OR State Refresh
 
         @type interface: TreeInterface
-        @type assert_time: int
         @type better_metric: AssertMetric
         """
         raise NotImplementedError()
@@ -160,11 +159,11 @@ class NoInfoState(AssertStateABC):
             'receivedInferiorMetricFromNonWinner_couldAssertIsTrue, NI -> W')
 
     @staticmethod
-    def receivedPreferedMetric(interface: "TreeInterfaceDownstream", better_metric, state_refresh_interval = None):
+    def receivedPreferedMetric(interface: "TreeInterfaceDownstream", better_metric):
         '''
         @type interface: TreeInterface
         '''
-        #interface.assert_timer.set_timer(assert_time)
+        state_refresh_interval = better_metric.state_refresh_interval
         if state_refresh_interval is None:
             # event caused by Assert Msg
             assert_timer_value = pim_globals.ASSERT_TIME
@@ -175,12 +174,8 @@ class NoInfoState(AssertStateABC):
         interface.set_assert_timer(assert_timer_value)
         interface.set_assert_winner_metric(better_metric)
         interface.set_assert_state(AssertState.Loser)
-        #interface.assert_timer.reset()
 
-        #interface.assert_state = AssertState.Loser
-        #interface.assert_winner_metric = better_metric
-
-        # todo MUST also multicast a Prune(S,G) to the Assert winner <- TO THE colocar endereco do winner
+        # MUST also multicast a Prune(S,G) to the Assert winner
         if interface.could_assert():
             interface.send_prune(holdtime=assert_timer_value)
 
@@ -240,14 +235,11 @@ class WinnerState(AssertStateABC):
             'receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W')
 
     @staticmethod
-    def receivedPreferedMetric(interface: "TreeInterfaceDownstream", better_metric, state_refresh_interval = None):
+    def receivedPreferedMetric(interface: "TreeInterfaceDownstream", better_metric):
         '''
         @type better_metric: AssertMetric
         '''
-
-        #interface.assert_timer.set_timer(assert_time)
-        #interface.assert_timer.reset()
-
+        state_refresh_interval = better_metric.state_refresh_interval
         if state_refresh_interval is None:
             # event caused by AssertMsg
             assert_timer_value = pim_globals.ASSERT_TIME
@@ -256,22 +248,15 @@ class WinnerState(AssertStateABC):
             assert_timer_value = state_refresh_interval*3
 
         interface.set_assert_timer(assert_timer_value)
-
         interface.set_assert_winner_metric(better_metric)
-
-        #interface.assert_state = AssertState.Loser
         interface.set_assert_state(AssertState.Loser)
 
-        if interface.could_assert:
-            interface.send_prune(holdtime=assert_timer_value)
-
+        interface.send_prune(holdtime=assert_timer_value)
         print('receivedPreferedMetric, W -> L')
 
     @staticmethod
     def sendStateRefresh(interface: "TreeInterfaceDownstream", state_refresh_interval):
-        #interface.assert_timer.set_timer(time)
         interface.set_assert_timer(state_refresh_interval*3)
-        #interface.assert_timer.reset()
 
     @staticmethod
     def assertTimerExpires(interface: "TreeInterfaceDownstream"):
@@ -334,12 +319,11 @@ class LoserState(AssertStateABC):
             'receivedInferiorMetricFromNonWinner_couldAssertIsTrue, L -> L')
 
     @staticmethod
-    def receivedPreferedMetric(interface: "TreeInterfaceDownstream", better_metric, state_refresh_interval = None):
+    def receivedPreferedMetric(interface: "TreeInterfaceDownstream", better_metric):
         '''
         @type better_metric: AssertMetric
         '''
-        #interface.assert_timer.set_timer(assert_time)
-        #interface.assert_timer.reset()
+        state_refresh_interval = better_metric.state_refresh_interval
         if state_refresh_interval is None:
             assert_timer_value = pim_globals.ASSERT_TIME
         else:
@@ -353,7 +337,7 @@ class LoserState(AssertStateABC):
 
         if interface.could_assert():
             # todo enviar holdtime = assert_timer_value???!
-            interface.send_prune()
+            interface.send_prune(holdtime=assert_timer_value)
 
         print('receivedPreferedMetric, L -> L')
 

@@ -4,9 +4,9 @@ from Packet.Packet import Packet
 from Packet.ReceivedPacket import ReceivedPacket
 from Packet.PacketPimHello import PacketPimHello
 from Packet.PacketPimHeader import PacketPimHeader
+from Packet.PacketPimStateRefresh import PacketPimStateRefresh
 from Interface import Interface
 import Main
-from utils import HELLO_HOLD_TIME_TIMEOUT
 
 
 class StateRefresh:
@@ -17,8 +17,27 @@ class StateRefresh:
 
     # receive handler
     def receive_handle(self, packet: ReceivedPacket):
+        #check if interface supports state refresh
+        if not packet.interface._state_refresh_capable:
+            return
         ip = packet.ip_header.ip_src
         print("ip = ", ip)
-        pkt_join_prune = packet.payload.payload
+        pkt_state_refresh = packet.payload.payload # type: PacketPimStateRefresh
         # TODO
-        raise Exception
+
+        interface_index = packet.interface.vif_index
+        source = pkt_state_refresh.source_address
+        group = pkt_state_refresh.multicast_group_adress
+        source_group = (source, group)
+
+
+        try:
+            Main.kernel.get_routing_entry(source_group).recv_state_refresh_msg(interface_index, packet)
+        except:
+            try:
+                # import time
+                # time.sleep(2)
+                Main.kernel.get_routing_entry(source_group).recv_state_refresh_msg(interface_index, packet)
+            except:
+                pass
+

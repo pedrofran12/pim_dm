@@ -34,6 +34,7 @@ class Interface(object):
 
         # set socket TTL to 1
         s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 1)
+        s.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, 1)
 
         # don't receive outgoing packets
         s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 0)
@@ -62,6 +63,7 @@ class Interface(object):
                 packet = None
             return packet
         except Exception:
+            traceback.print_exc()
             return None
 
     """

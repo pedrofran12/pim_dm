@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractstaticmethod
 from tree import globals as pim_globals
 
 class OriginatorStateABC(metaclass=ABCMeta):
+    @abstractstaticmethod
     def recvDataMsgFromSource(tree):
         pass
 
@@ -22,33 +23,32 @@ class OriginatorStateABC(metaclass=ABCMeta):
 class Originator(OriginatorStateABC):
     @staticmethod
     def recvDataMsgFromSource(tree):
-        tree.source_active_timer.reset()
+        tree.set_source_active_timer()
 
     @staticmethod
     def SRTexpires(tree):
         '''
         @type tree: Tree
         '''
-        tree.rprint('SRT expired, O to O')
+        print('SRT expired, O to O')
 
-        tree.state_refresh_timer.reset()
-        tree.send_state_refresh_msg()
+        tree.set_state_refresh_timer()
+        tree.create_state_refresh_msg()
 
     @staticmethod
     def SATexpires(tree):
-        tree.rprint('SAT expired, O to NO')
+        print('SAT expired, O to NO')
 
-        tree.source_active_timer.stop()
-        tree.state_refresh_timer.stop()
-        tree.originator_state = OriginatorState.NotOriginator
+        tree.clear_state_refresh_timer()
+        tree.set_originator_state(OriginatorState.NotOriginator)
 
     @staticmethod
     def SourceNotConnected(tree):
-        tree.rprint('Source no longer directly connected, O to NO')
+        print('Source no longer directly connected, O to NO')
 
-        tree.source_active_timer.stop()
-        tree.state_refresh_timer.stop()
-        tree.originator_state = OriginatorState.NotOriginator
+        tree.clear_state_refresh_timer()
+        tree.clear_source_active_timer()
+        tree.set_originator_state(OriginatorState.NotOriginator)
 
 
 class NotOriginator(OriginatorStateABC):
@@ -57,14 +57,12 @@ class NotOriginator(OriginatorStateABC):
         '''
         @type interface: Tree
         '''
-        tree.originator_state = OriginatorState.Originator
+        tree.set_originator_state(OriginatorState.Originator)
 
-        tree.state_refresh_timer.start()
-        tree.source_active_timer.start()
+        tree.set_state_refresh_timer()
+        tree.set_source_active_timer()
 
-        tree.rprint('new DataMsg from Source, NO to O')
-        # Since the recording of the TTL is common to both states,its registering is made on the
-        # Tree.new_state_refresh_msg(...) method
+        print('new DataMsg from Source, NO to O')
 
     @staticmethod
     def SRTexpires(tree):
@@ -76,7 +74,7 @@ class NotOriginator(OriginatorStateABC):
 
     @staticmethod
     def SourceNotConnected(tree):
-        pass
+        return
 
 
 class OriginatorState():

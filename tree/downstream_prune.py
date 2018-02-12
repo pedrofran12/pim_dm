@@ -34,7 +34,7 @@ class DownstreamStateABS(metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractstaticmethod
-    def PPTexpires(interface: "TreeInterfaceDownstream", prune_holdtime):
+    def PPTexpires(interface: "TreeInterfaceDownstream"):
         """
         PPT(S,G) Expires
 
@@ -127,7 +127,7 @@ class NoInfo(DownstreamStateABS):
         print('receivedGraft, NI -> NI')
 
     @staticmethod
-    def PPTexpires(interface: "TreeInterfaceDownstream", prune_holdtime):
+    def PPTexpires(interface: "TreeInterfaceDownstream"):
         """
         PPT(S,G) Expires
 
@@ -221,7 +221,7 @@ class PrunePending(DownstreamStateABS):
         print('receivedGraft, PP -> NI')
 
     @staticmethod
-    def PPTexpires(interface: "TreeInterfaceDownstream", prune_holdtime):
+    def PPTexpires(interface: "TreeInterfaceDownstream"):
         """
         PPT(S,G) Expires
 
@@ -335,7 +335,7 @@ class Pruned(DownstreamStateABS):
         print('receivedGraft, P -> NI')
 
     @staticmethod
-    def PPTexpires(interface: "TreeInterfaceDownstream", prune_holdtime):
+    def PPTexpires(interface: "TreeInterfaceDownstream"):
         """
         PPT(S,G) Expires
 

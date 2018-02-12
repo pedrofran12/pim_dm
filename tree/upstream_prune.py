@@ -169,8 +169,9 @@ class Forward(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
-        #interface.set_ot()
-        interface.set_override_timer()
+        # if OT is not running the router must set OT to t_override seconds
+        if not interface.is_override_timer_running():
+            interface.set_override_timer()
 
         print('stateRefreshArrivesRPFnbr_pruneIs1, F -> F')
 
@@ -332,14 +333,8 @@ class Pruned(UpstreamStateABC):
         @type interface: TreeInterfaceUpstream
         """
         if not interface.is_S_directly_conn():
-            #interface.set_state(UpstreamState.Pruned)
-
-            # todo send prune?!?!?!?!
-
-            #timer = interface._prune_limit_timer
-            #timer.set_timer(interface.t_override)
-            #timer.start()
             interface.set_prune_limit_timer()
+            interface.send_prune()
 
             print("dataArrivesRPFinterface_OListNull_PLTstoped, P -> P")
 

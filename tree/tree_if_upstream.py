@@ -12,6 +12,12 @@ from .upstream_prune import UpstreamState
 from threading import Timer
 from .globals import *
 import random
+from .metric import AssertMetric
+from .originator import OriginatorState, OriginatorStateABC
+from Packet.PacketPimStateRefresh import PacketPimStateRefresh
+import traceback
+from . import DataPacketsSocket
+import threading
 
 
 class TreeInterfaceUpstream(TreeInterface):
@@ -22,10 +28,37 @@ class TreeInterfaceUpstream(TreeInterface):
         self._override_timer = None
         self._prune_limit_timer = None
 
-        self._originator_state = None
+        self._originator_state = OriginatorState.NotOriginator
+        self._state_refresh_timer = None
+        self._source_active_timer = None
+        self._prune_now_counter = 0
 
         if self.is_S_directly_conn():
             self._graft_prune_state.sourceIsNowDirectConnect(self)
+            self._originator_state.recvDataMsgFromSource(self)
+
+
+        # TODO TESTE SOCKET RECV DATA PCKTS
+        self.socket_is_enabled = True
+        (s,g) = self.get_tree_id()
+        interface_name = self.get_interface().interface_name
+        self.socket_pkt = DataPacketsSocket.get_s_g_bpf_filter_code(s, g, interface_name)
+
+        # run receive method in background
+        receive_thread = threading.Thread(target=self.socket_recv)
+        receive_thread.daemon = True
+        receive_thread.start()
+
+
+    def socket_recv(self):
+        while self.socket_is_enabled:
+            try:
+                self.socket_pkt.recvfrom(0)
+                print("PACOTE DADOS RECEBIDO")
+                self.recv_data_msg()
+            except:
+                traceback.print_exc()
+                continue
 
     ##########################################
     # Set state
@@ -38,6 +71,9 @@ class TreeInterfaceUpstream(TreeInterface):
                 self.change_tree()
                 self.evaluate_ingroup()
 
+    def set_originator_state(self, new_state: OriginatorStateABC):
+        if new_state != self._originator_state:
+            self._originator_state = new_state
 
     ##########################################
     # Check timers
@@ -81,6 +117,26 @@ class TreeInterfaceUpstream(TreeInterface):
         if self._prune_limit_timer is not None:
             self._prune_limit_timer.cancel()
 
+    # State Refresh timers
+    def set_state_refresh_timer(self):
+        self.clear_state_refresh_timer()
+        self._state_refresh_timer = Timer(REFRESH_INTERVAL, self.state_refresh_timeout)
+        self._state_refresh_timer.start()
+
+    def clear_state_refresh_timer(self):
+        if self._state_refresh_timer is not None:
+            self._state_refresh_timer.cancel()
+
+    def set_source_active_timer(self):
+        self.clear_source_active_timer()
+        self._source_active_timer = Timer(SOURCE_LIFETIME, self.source_active_timeout)
+        self._source_active_timer.start()
+
+    def clear_source_active_timer(self):
+        if self._source_active_timer is not None:
+            self._source_active_timer.cancel()
+
+
     ###########################################
     # Timer timeout
     ###########################################
@@ -93,6 +149,13 @@ class TreeInterfaceUpstream(TreeInterface):
     def prune_limit_timeout(self):
         return
 
+    # State Refresh timers
+    def state_refresh_timeout(self):
+        self._originator_state.SRTexpires(self)
+
+    def source_active_timeout(self):
+        self._originator_state.SATexpires(self)
+
     ###########################################
     # Recv packets
     ###########################################
@@ -101,12 +164,9 @@ class TreeInterfaceUpstream(TreeInterface):
         if self.is_olist_null() and not self.is_prune_limit_timer_running() and not self.is_S_directly_conn():
             self._graft_prune_state.dataArrivesRPFinterface_OListNull_PLTstoped(self)
 
-    def recv_state_refresh_msg(self, prune_indicator: int):
-        # todo check rpf nbr
-        if prune_indicator == 1:
-            self._graft_prune_state.stateRefreshArrivesRPFnbr_pruneIs1(self)
-        elif prune_indicator == 0 and not self.is_prune_limit_timer_running():
-            self._graft_prune_state.stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped(self)
+        if self.is_S_directly_conn():
+            self._originator_state.recvDataMsgFromSource(self)
+
 
     def recv_join_msg(self, upstream_neighbor_address):
         super().recv_join_msg(upstream_neighbor_address)
@@ -121,6 +181,33 @@ class TreeInterfaceUpstream(TreeInterface):
         print("GRAFT ACK!!!")
         # todo check rpf nbr
         self._graft_prune_state.recvGraftAckFromRPFnbr(self)
+
+    def recv_state_refresh_msg(self, received_metric: AssertMetric, prune_indicator: int):
+        super().recv_state_refresh_msg(received_metric, prune_indicator)
+
+        if self.get_neighbor_RPF() != received_metric.get_ip():
+            return
+        if prune_indicator == 1:
+            self._graft_prune_state.stateRefreshArrivesRPFnbr_pruneIs1(self)
+        elif prune_indicator == 0 and not self.is_prune_limit_timer_running():
+            self._graft_prune_state.stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped(self)
+
+
+    ####################################
+    def create_state_refresh_msg(self):
+        self._prune_now_counter+=1
+        self._prune_now_counter%=3
+        (source_ip, group_ip) = self.get_tree_id()
+        ph = PacketPimStateRefresh(multicast_group_adress=group_ip,
+                                   source_address=source_ip,
+                                   originator_adress=self.get_ip(),
+                                   metric_preference=0, metric=0, mask_len=0,
+                                   ttl=256,
+                                   prune_indicator_flag=0,
+                                   prune_now_flag=(self._prune_now_counter+1)//3,
+                                   assert_override_flag=0,
+                                   interval=60)
+        self._kernel_entry.forward_state_refresh_msg(ph)
 
     ###########################################
     # Change olist
@@ -147,14 +234,20 @@ class TreeInterfaceUpstream(TreeInterface):
     #Override
     def delete(self):
         super().delete()
+        self.socket_is_enabled = False
+        self.socket_pkt.close()
         self.clear_graft_retry_timer()
         self.clear_assert_timer()
         self.clear_prune_limit_timer()
         self.clear_override_timer()
+        self.clear_state_refresh_timer()
+        self.clear_source_active_timer()
 
     def is_downstream(self):
         return False
 
+    def is_originator(self):
+        return self._originator_state == OriginatorState.Originator
 
     #-------------------------------------------------------------------------
     # Properties

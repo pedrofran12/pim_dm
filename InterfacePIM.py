@@ -5,12 +5,14 @@ from Packet.ReceivedPacket import ReceivedPacket
 import Main
 import traceback
 from RWLock.RWLock import RWLockWrite
+from Packet.PacketPimHelloOptions import *
 from Packet.PacketPimHello import PacketPimHello
 from Packet.PacketPimHeader import PacketPimHeader
 from Packet.Packet import Packet
 from Hello import Hello
 from utils import HELLO_HOLD_TIME_TIMEOUT
 from threading import Timer
+from tree.globals import REFRESH_INTERVAL
 
 class InterfacePim(Interface):
     MCAST_GRP = '224.0.0.13'
@@ -20,7 +22,7 @@ class InterfacePim(Interface):
     MAX_TRIGGERED_HELLO_PERIOD = 5
 
 
-    def __init__(self, interface_name: str, vif_index:int):
+    def __init__(self, interface_name: str, vif_index:int, state_refresh_capable:bool=False):
         super().__init__(interface_name)
 
         # generation id
@@ -33,9 +35,8 @@ class InterfacePim(Interface):
         self.hello_timer.start()
 
 
-
-        # todo: state refresh capable
-        self._state_refresh_capable = False
+        # state refresh capable
+        self._state_refresh_capable = state_refresh_capable
 
         # todo: lan delay enabled
         self._lan_delay_enabled = False
@@ -58,10 +59,6 @@ class InterfacePim(Interface):
         receive_thread.daemon = True
         receive_thread.start()
 
-    def create_virtual_interface(self):
-        self.vif_index = Main.kernel.create_virtual_interface(ip_interface=self.ip_interface, interface_name=self.interface_name)
-
-
     def receive(self):
         while self.is_enabled():
             try:
@@ -80,8 +77,15 @@ class InterfacePim(Interface):
         self.hello_timer.cancel()
 
         pim_payload = PacketPimHello()
-        pim_payload.add_option(1, 3.5 * Hello.TRIGGERED_HELLO_DELAY)
-        pim_payload.add_option(20, self.generation_id)
+        pim_payload.add_option(PacketPimHelloHoldtime(holdtime=3.5 * Hello.TRIGGERED_HELLO_DELAY))
+        pim_payload.add_option(PacketPimHelloGenerationID(self.generation_id))
+
+        # TODO implementar LANPRUNEDELAY e OVERRIDE_INTERVAL por interface e nas maquinas de estados ler valor de interface e nao do globals.py
+        #pim_payload.add_option(PacketPimHelloLANPruneDelay(lan_prune_delay=self._propagation_delay, override_interval=self._override_interval))
+
+        if self._state_refresh_capable:
+            pim_payload.add_option(PacketPimHelloStateRefreshCapable(REFRESH_INTERVAL))
+
         ph = PacketPimHeader(pim_payload)
         packet = Packet(payload=ph)
         self.send(packet.bytes())
@@ -96,8 +100,8 @@ class InterfacePim(Interface):
 
         # send pim_hello timeout message
         pim_payload = PacketPimHello()
-        pim_payload.add_option(1, HELLO_HOLD_TIME_TIMEOUT)
-        pim_payload.add_option(20, self.generation_id)
+        pim_payload.add_option(PacketPimHelloHoldtime(holdtime=HELLO_HOLD_TIME_TIMEOUT))
+        pim_payload.add_option(PacketPimHelloGenerationID(self.generation_id))
         ph = PacketPimHeader(pim_payload)
         packet = Packet(payload=ph)
         self.send(packet.bytes())
@@ -130,3 +134,7 @@ class InterfacePim(Interface):
     def remove_neighbor(self, ip):
         with self.neighbors_lock.genWlock():
             del self.neighbors[ip]
+
+
+    def is_state_refresh_enabled(self):
+        return self._state_refresh_capable

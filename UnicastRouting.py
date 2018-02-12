@@ -65,7 +65,10 @@ class UnicastRouting(object):
         unicast_routing_entry = UnicastRouting.get_route(ip_dst)
         entry_protocol = unicast_routing_entry["proto"]
         entry_cost = unicast_routing_entry["priority"]
-        return (entry_protocol, entry_cost)
+        mask = unicast_routing_entry["dst_len"]
+        if entry_cost is None:
+            entry_cost = 0
+        return (entry_protocol, entry_cost, mask)
 
     """
     def get_rpf(ip_dst: str):

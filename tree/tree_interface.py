@@ -44,6 +44,7 @@ class TreeInterface(metaclass=ABCMeta):
         #self._cost = cost
         #self._evaluate_ig = evaluate_ig_cb
 
+        # Local Membership State
         try:
             interface_name = Main.kernel.vif_index_to_name_dic[interface_id]
             igmp_interface = Main.igmp_interfaces[interface_name]  # type: InterfaceIGMP
@@ -55,9 +56,6 @@ class TreeInterface(metaclass=ABCMeta):
             #traceback.print_exc()
             self._local_membership_state = LocalMembership.NoInfo
 
-
-        # Local Membership State
-        #self._local_membership_state = None # todo NoInfo or Include
 
         # Prune State
         self._prune_state = DownstreamState.NoInfo
@@ -134,7 +132,7 @@ class TreeInterface(metaclass=ABCMeta):
         pass
 
     def recv_assert_msg(self, received_metric: AssertMetric):
-        if self._assert_winner_metric.is_better_than(received_metric):
+        if self.my_assert_metric().is_better_than(received_metric):
             # received inferior assert
             if self._assert_winner_metric.ip_address == received_metric.ip_address:
                 # received from assert winner
@@ -142,15 +140,9 @@ class TreeInterface(metaclass=ABCMeta):
             elif self.could_assert():
                 # received from non assert winner and could_assert
                 self._assert_state.receivedInferiorMetricFromNonWinner_couldAssertIsTrue(self)
-        else:
+        elif received_metric.is_better_than(self._assert_winner_metric):
             #received preferred assert
             self._assert_state.receivedPreferedMetric(self, received_metric)
-
-
-
-
-    def recv_reset_msg(self):
-        pass
 
     def recv_prune_msg(self, upstream_neighbor_address, holdtime):
         if upstream_neighbor_address == self.get_ip():
@@ -167,14 +159,8 @@ class TreeInterface(metaclass=ABCMeta):
     def recv_graft_ack_msg(self):
         pass
 
-    def recv_state_refresh_msg(self, prune_indicator):
-        pass
-
-
-
-
-    def forward_state_reset_msg(self):
-        raise NotImplemented
+    def recv_state_refresh_msg(self, received_metric: AssertMetric, prune_indicator):
+        self.recv_assert_msg(received_metric)
 
 
     ######################################
@@ -185,48 +171,37 @@ class TreeInterface(metaclass=ABCMeta):
         try:
             (source, group) = self.get_tree_id()
 
-            # todo self.get_rpf_()
             ip_dst = self.get_neighbor_RPF()
             ph = PacketPimGraft(ip_dst)
             ph.add_multicast_group(PacketPimJoinPruneMulticastGroup(group,  joined_src_addresses=[source]))
             pckt = Packet(payload=PacketPimHeader(ph))
             self.get_interface().send(pckt.bytes(), ip_dst)
-
-            #msg = GraftMsg(self.get_tree().tree_id, self.get_rpf_())
-            #self.pim_if.send_mcast(msg)
         except:
             traceback.print_exc()
             return
+
 
     def send_graft_ack(self, ip_sender):
         print("send graft ack")
         try:
             (source, group) = self.get_tree_id()
 
-            # todo endereco?!!
             ph = PacketPimGraftAck(ip_sender)
             ph.add_multicast_group(PacketPimJoinPruneMulticastGroup(group,  joined_src_addresses=[source]))
             pckt = Packet(payload=PacketPimHeader(ph))
             self.get_interface().send(pckt.bytes(), ip_sender)
-
-            #msg = GraftAckMsg(self.get_tree().tree_id, self.get_node())
-            #self.pim_if.send_mcast(msg)
         except:
             traceback.print_exc()
             return
-
 
 
     def send_prune(self, holdtime=None):
         if holdtime is None:
             holdtime = T_LIMIT
 
-
         print("send prune")
         try:
             (source, group) = self.get_tree_id()
-            # todo help ip of ph
-            #ph = PacketPimJoinPrune("123.123.123.123", 210)
             ph = PacketPimJoinPrune(self.get_neighbor_RPF(), holdtime)
             ph.add_multicast_group(PacketPimJoinPruneMulticastGroup(group, pruned_src_addresses=[source]))
             pckt = Packet(payload=PacketPimHeader(ph))
@@ -242,7 +217,6 @@ class TreeInterface(metaclass=ABCMeta):
         holdtime = T_LIMIT
         try:
             (source, group) = self.get_tree_id()
-            # todo help ip of ph
             ph = PacketPimJoinPrune(self.get_ip(), holdtime)
             ph.add_multicast_group(PacketPimJoinPruneMulticastGroup(group, pruned_src_addresses=[source]))
             pckt = Packet(payload=PacketPimHeader(ph))
@@ -252,24 +226,18 @@ class TreeInterface(metaclass=ABCMeta):
         except:
             traceback.print_exc()
             return
-        # todo
-        #msg = PruneMsg(self.get_tree().tree_id,
-        #               self.get_node(), self._assert_timer.time_left())
-        #self.pim_if.send_mcast(msg)
+
 
     def send_join(self):
         print("send join")
 
         try:
             (source, group) = self.get_tree_id()
-            # todo help ip of ph
             ph = PacketPimJoinPrune(self.get_neighbor_RPF(), 210)
             ph.add_multicast_group(PacketPimJoinPruneMulticastGroup(group, joined_src_addresses=[source]))
             pckt = Packet(payload=PacketPimHeader(ph))
 
             self.get_interface().send(pckt.bytes())
-            #msg = JoinMsg(self.get_tree().tree_id, self.get_rpf_())
-            #self.pim_if.send_mcast(msg)
         except:
             traceback.print_exc()
             return
@@ -290,8 +258,6 @@ class TreeInterface(metaclass=ABCMeta):
             return
 
 
-
-
     def send_assert_cancel(self):
         print("send assert cancel")
 
@@ -304,12 +270,12 @@ class TreeInterface(metaclass=ABCMeta):
         except:
             traceback.print_exc()
             return
-        #msg = AssertMsg.new_assert_cancel(self.tree_id)
-        #self.pim_if.send_mcast(msg)
 
-    def send_state_refresh(self):
-        # todo time
-        self._assert_state.sendStateRefresh(self)
+
+    def send_state_refresh(self, state_refresh_msg_received: PacketPimStateRefresh):
+        pass
+
+    #############################################################
 
     @abstractmethod
     def is_forwarding(self):
@@ -364,10 +330,6 @@ class TreeInterface(metaclass=ABCMeta):
     def __str__(self):
         return '{}<{}>'.format(self.__class__, self._interface.get_link())
 
-    def get_link(self):
-        # todo
-        return self._interface.get_link()
-
     def get_interface(self):
         kernel = Main.kernel
         interface_name = kernel.vif_index_to_name_dic[self._interface_id]
@@ -396,8 +358,6 @@ class TreeInterface(metaclass=ABCMeta):
         raise NotImplementedError()
 
 
-    #def get_rpf_(self):
-    #    return self.get_neighbor_RPF()
 
 
     # obtain ip of RPF'(S)

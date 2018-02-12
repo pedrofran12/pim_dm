@@ -41,6 +41,12 @@ class Kernel:
     IGMPMSG_WHOLEPKT = 3  # NOT USED ON PIM-DM
 
 
+    # Interface flags
+    VIFF_TUNNEL      = 0x1  # IPIP tunnel
+    VIFF_SRCRT       = 0x2  # NI
+    VIFF_REGISTER    = 0x4  # register vif
+    VIFF_USE_IFINDEX = 0x8  # use vifc_lcl_ifindex instead of vifc_lcl_addr to find an interface
+
     def __init__(self):
         # Kernel is running
         self.running = True
@@ -66,6 +72,9 @@ class Kernel:
         self.rwlock = RWLockWrite()
         self.interface_lock = Lock()
 
+        # Create register interface
+        # todo useless in PIM-DM... useful in PIM-SM
+        #self.create_virtual_interface("0.0.0.0", "pimreg", index=0, flags=Kernel.VIFF_REGISTER)
 
         # Create virtual interfaces
         '''
@@ -149,8 +158,55 @@ class Kernel:
         return index
 
 
+    def create_pim_interface(self, interface_name: str, state_refresh_capable:bool):
+        from InterfacePIM import InterfacePim
+        with self.interface_lock:
+            pim_interface = self.pim_interface.get(interface_name)
+            igmp_interface = self.igmp_interface.get(interface_name)
+            vif_already_exists = pim_interface or igmp_interface
+            if pim_interface:
+                # already exists
+                return
+            elif igmp_interface:
+                index = igmp_interface.vif_index
+            else:
+                index = list(range(0, self.MAXVIFS) - self.vif_index_to_name_dic.keys())[0]
+
+            ip_interface = None
+            if interface_name not in self.pim_interface:
+                pim_interface = InterfacePim(interface_name, index, state_refresh_capable)
+                self.pim_interface[interface_name] = pim_interface
+                ip_interface = pim_interface.ip_interface
+
+            if not vif_already_exists:
+                self.create_virtual_interface(ip_interface=ip_interface, interface_name=interface_name, index=index)
+
+    def create_igmp_interface(self, interface_name: str):
+        from InterfaceIGMP import InterfaceIGMP
+        with self.interface_lock:
+            pim_interface = self.pim_interface.get(interface_name)
+            igmp_interface = self.igmp_interface.get(interface_name)
+            vif_already_exists = pim_interface or igmp_interface
+            if igmp_interface:
+                # already exists
+                return
+            elif pim_interface:
+                index = pim_interface.vif_index
+            else:
+                index = list(range(0, self.MAXVIFS) - self.vif_index_to_name_dic.keys())[0]
+
+            ip_interface = None
+            if interface_name not in self.igmp_interface:
+                igmp_interface = InterfaceIGMP(interface_name, index)
+                self.igmp_interface[interface_name] = igmp_interface
+                ip_interface = igmp_interface.ip_interface
+
+            if not vif_already_exists:
+                self.create_virtual_interface(ip_interface=ip_interface, interface_name=interface_name, index=index)
 
 
+
+    '''
     def create_interface(self, interface_name: str, igmp:bool = False, pim:bool = False):
         from InterfaceIGMP import InterfaceIGMP
         from InterfacePIM import InterfacePim
@@ -180,7 +236,7 @@ class Kernel:
 
             if not vif_already_exists:
                 self.create_virtual_interface(ip_interface=ip_interface, interface_name=interface_name, index=index)
-
+    '''
 
 
 
@@ -263,20 +319,6 @@ class Kernel:
         # TODO: ver melhor tabela routing
         #self.routing[(socket.inet_ntoa(source_ip), socket.inet_ntoa(group_ip))] = {"inbound_interface_index": inbound_interface_index, "outbound_interfaces": outbound_interfaces}
 
-    '''
-    def flood(self, ip_src, ip_dst, iif):
-        source_ip = socket.inet_aton(ip_src)
-        group_ip = socket.inet_aton(ip_dst)
-
-        outbound_interfaces = [1]*Kernel.MAXVIFS
-        outbound_interfaces[iif] = 0
-        outbound_interfaces_and_other_parameters = outbound_interfaces + [0]*4
-
-        #outbound_interfaces, 0, 0, 0, 0 <- only works with python>=3.5
-        #struct_mfcctl = struct.pack("4s 4s H " + "B"*Kernel.MAXVIFS + " IIIi", source_ip, group_ip, inbound_interface_index, *outbound_interfaces, 0, 0, 0, 0)
-        struct_mfcctl = struct.pack("4s 4s H " + "B"*Kernel.MAXVIFS + " IIIi", source_ip, group_ip, iif, *outbound_interfaces_and_other_parameters)
-        self.socket.setsockopt(socket.IPPROTO_IP, Kernel.MRT_ADD_MFC, struct_mfcctl)
-    '''
 
     def remove_multicast_route(self, kernel_entry: KernelEntry):
         source_ip = socket.inet_aton(kernel_entry.source_ip)
@@ -312,8 +354,7 @@ class Kernel:
     def handler(self):
         while self.running:
             try:
-                msg = self.socket.recv(5000)
-                #print(len(msg))
+                msg = self.socket.recv(20)
                 (_, _, im_msgtype, im_mbz, im_vif, _, im_src, im_dst) = struct.unpack("II B B B B 4s 4s", msg[:20])
                 print((im_msgtype, im_mbz, socket.inet_ntoa(im_src), socket.inet_ntoa(im_dst)))
 
@@ -336,6 +377,9 @@ class Kernel:
                 elif im_msgtype == Kernel.IGMPMSG_WRONGVIF:
                     print("WRONG VIF HANDLER")
                     self.igmpmsg_wrongvif_handler(ip_src, ip_dst, im_vif)
+                #elif im_msgtype == Kernel.IGMPMSG_WHOLEPKT:
+                #    print("IGMP_WHOLEPKT")
+                #    self.igmpmsg_wholepacket_handler(ip_src, ip_dst)
                 else:
                     raise Exception
             except Exception:
@@ -378,6 +422,17 @@ class Kernel:
         source_group_pair = (ip_src, ip_dst)
         self.get_routing_entry(source_group_pair, create_if_not_existent=True).recv_data_msg(iif)
         #kernel_entry.recv_data_msg(iif)
+
+
+    ''' useless in PIM-DM... useful in PIM-SM
+    def igmpmsg_wholepacket_handler(self, ip_src, ip_dst):
+        #kernel_entry = self.routing[(ip_src, ip_dst)]
+        source_group_pair = (ip_src, ip_dst)
+        self.get_routing_entry(source_group_pair, create_if_not_existent=True).recv_data_msg()
+        #kernel_entry.recv_data_msg(iif)
+    '''
+
+
 
     """
     def get_routing_entry(self, source_group: tuple):

@@ -15,6 +15,14 @@ kernel = None
 igmp = None
 
 
+def add_pim_interface(interface_name, state_refresh_capable:bool=False):
+    kernel.create_pim_interface(interface_name=interface_name, state_refresh_capable=state_refresh_capable)
+
+
+def add_igmp_interface(interface_name):
+    kernel.create_igmp_interface(interface_name=interface_name)
+
+'''
 def add_interface(interface_name, pim=False, igmp=False):
     #if pim is True and interface_name not in interfaces:
     #    interface = InterfacePim(interface_name)
@@ -28,7 +36,7 @@ def add_interface(interface_name, pim=False, igmp=False):
     #    interfaces[interface_name] = kernel.pim_interface[interface_name]
     #if igmp:
     #    igmp_interfaces[interface_name] = kernel.igmp_interface[interface_name]
-
+'''
 
 def remove_interface(interface_name, pim=False, igmp=False):
     #if pim is True and ((interface_name in interfaces) or interface_name == "*"):
@@ -76,38 +84,6 @@ def list_neighbors():
 
 def list_enabled_interfaces():
     global interfaces
-    # TESTE DE PIM JOIN/PRUNE
-    for interface in interfaces:
-        from Packet.Packet import Packet
-        from Packet.PacketPimHeader import PacketPimHeader
-        from Packet.PacketPimJoinPrune import PacketPimJoinPrune
-        from Packet.PacketPimJoinPruneMulticastGroup import PacketPimJoinPruneMulticastGroup
-
-        ph = PacketPimJoinPrune("10.0.0.13", 210)
-        ph.add_multicast_group(PacketPimJoinPruneMulticastGroup("239.123.123.123", ["1.1.1.1", "10.1.1.1"], []))
-        ph.add_multicast_group(PacketPimJoinPruneMulticastGroup("239.123.123.124", ["1.1.1.2", "10.1.1.2"], []))
-        pckt = Packet(payload=PacketPimHeader(ph))
-        interfaces[interface].send(pckt.bytes())
-
-        ph = PacketPimJoinPrune("ff08::1", 210)
-        ph.add_multicast_group(PacketPimJoinPruneMulticastGroup("2001:1:a:b:c::1", ["1.1.1.1", "2001:1:a:b:c::2"], []))
-        ph.add_multicast_group(PacketPimJoinPruneMulticastGroup("239.123.123.123", ["1.1.1.1"], ["2001:1:a:b:c::3"]))
-        pckt = Packet(payload=PacketPimHeader(ph))
-        interfaces[interface].send(pckt.bytes())
-
-        from Packet.PacketPimAssert import PacketPimAssert
-        ph = PacketPimAssert("224.12.12.12", "10.0.0.2", 210, 2)
-        pckt = Packet(payload=PacketPimHeader(ph))
-        interfaces[interface].send(pckt.bytes())
-
-
-        from Packet.PacketPimGraft import PacketPimGraft
-        ph = PacketPimGraft("10.0.0.13")
-        ph.add_multicast_group(PacketPimJoinPruneMulticastGroup("239.123.123.124", ["1.1.1.2", "10.1.1.2"], []))
-        pckt = Packet(payload=PacketPimHeader(ph))
-        interfaces[interface].send(pckt.bytes())
-
-
 
     t = PrettyTable(['Interface', 'IP', 'PIM/IGMP Enabled', 'IGMP State'])
     for interface in netifaces.interfaces():
@@ -191,12 +167,14 @@ def main():
     from JoinPrune import JoinPrune
     from GraftAck import GraftAck
     from Graft import Graft
+    from StateRefresh import StateRefresh
 
     Hello()
     Assert()
     JoinPrune()
     Graft()
     GraftAck()
+    StateRefresh()
     global kernel
     kernel = Kernel()
 

@@ -15,8 +15,13 @@ from .metric import AssertMetric
 from .downstream_prune import DownstreamState, DownstreamStateABS
 from .tree_interface import TreeInterface
 from Packet.ReceivedPacket import ReceivedPacket
-from Packet.PacketPimAssert import PacketPimAssert
 from threading import Lock
+from Packet.PacketPimStateRefresh import PacketPimStateRefresh
+from Packet.Packet import Packet
+from Packet.PacketPimHeader import PacketPimHeader
+import traceback
+
+
 
 class TreeInterfaceDownstream(TreeInterface):
     def __init__(self, kernel_entry, interface_id):
@@ -88,7 +93,7 @@ class TreeInterfaceDownstream(TreeInterface):
     # Timer timeout
     ###########################################
     def prune_pending_timeout(self):
-        self._prune_state.PPTexpires(self, 10)
+        self._prune_state.PPTexpires(self)
 
     def prune_timeout(self):
         self._prune_state.PTexpires(self)
@@ -103,7 +108,6 @@ class TreeInterfaceDownstream(TreeInterface):
     def recv_prune_msg(self, upstream_neighbor_address, holdtime):
         super().recv_prune_msg(upstream_neighbor_address, holdtime)
 
-        #TODO if upstream_neighbor_address == self.get_ip():
         if upstream_neighbor_address == self.get_ip():
             self.set_receceived_prune_holdtime(holdtime)
             self._prune_state.receivedPrune(self, holdtime)
@@ -124,6 +128,55 @@ class TreeInterfaceDownstream(TreeInterface):
             self._prune_state.receivedGraft(self, source_ip)
 
 
+    ######################################
+    # Send messages
+    ######################################
+    def send_state_refresh(self, state_refresh_msg_received):
+        if not self.get_interface()._state_refresh_capable:
+            return
+
+        interval = state_refresh_msg_received.interval
+        self._assert_state.sendStateRefresh(self, interval)
+        self._prune_state.send_state_refresh(self)
+
+        if self.lost_assert():
+            return
+
+        prune_indicator_bit = 0
+        if self.is_pruned():
+            prune_indicator_bit = 1
+
+            # TODO set timer
+            # todo maybe ja feito na maquina de estados Prune downstream
+            # if state_refresh_capable
+            #   set PT....
+
+        import UnicastRouting
+        (metric_preference, metric, mask) = UnicastRouting.get_metric(state_refresh_msg_received.source_address)
+
+        assert_override_flag = 0
+        if self._assert_state == AssertState.NoInfo:
+            assert_override_flag = 1
+
+        try:
+            ph = PacketPimStateRefresh(multicast_group_adress=state_refresh_msg_received.multicast_group_adress,
+                                       source_address=state_refresh_msg_received.source_address,
+                                       originator_adress=state_refresh_msg_received.originator_adress,
+                                       metric_preference=metric_preference, metric=metric, mask_len=mask,
+                                       ttl=state_refresh_msg_received.ttl - 1,
+                                       prune_indicator_flag=prune_indicator_bit,
+                                       prune_now_flag=state_refresh_msg_received.prune_now_flag,
+                                       assert_override_flag=assert_override_flag,
+                                       interval=interval)
+            pckt = Packet(payload=PacketPimHeader(ph))
+
+            self.get_interface().send(pckt.bytes())
+        except:
+            traceback.print_exc()
+            return
+
+
+    ##########################################################
 
     # Override
     def is_forwarding(self):

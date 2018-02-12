@@ -18,8 +18,10 @@ class Hello:
         options = packet.payload.payload.get_options()
 
         if (1 in options) and (20 in options):
-            hello_hold_time = options[1]
-            generation_id = options[20]
+            #hello_hold_time = options[1]
+            hello_hold_time = options[1].holdtime
+            #generation_id = options[20]
+            generation_id = options[20].generation_id
         else:
             raise Exception
 

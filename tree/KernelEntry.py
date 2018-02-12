@@ -8,6 +8,7 @@ from .tree_interface import TreeInterface
 from threading import Timer, Lock, RLock
 from tree.metric import AssertMetric
 import UnicastRouting
+from Packet.PacketPimStateRefresh import PacketPimStateRefresh
 
 class KernelEntry:
     TREE_TIMEOUT = 180
@@ -37,20 +38,11 @@ class KernelEntry:
         print("RPF_NODE:", UnicastRouting.get_route(source_ip))
         print(self.rpf_node == source_ip)
 
-
         # (S,G) starts IG state
         self._was_olist_null = False
 
-        # todo
-        #self._rpf_is_origin = False
-        self._originator_state = OriginatorState.NotOriginator
-
         # decide inbound interface based on rpf check
         self.inbound_interface_index = Main.kernel.vif_dic[self.check_rpf()]
-
-
-        #Main.kernel.flood(source_ip, group_ip, self.inbound_interface_index)
-
 
         self.interface_state = {}  # type: Dict[int, TreeInterface]
         for i in Main.kernel.vif_index_to_name_dic.keys():
@@ -71,10 +63,6 @@ class KernelEntry:
         self.change()
         self.evaluate_olist_change()
         print('Tree created')
-        #self._liveliness_timer = None
-        #if self.is_originater():
-        #    self.set_liveliness_timer()
-        #    print('set SAT')
 
         #self._lock = threading.RLock()
 
@@ -92,9 +80,9 @@ class KernelEntry:
         return UnicastRouting.check_rpf(self.source_ip)
 
 
-    #################################
-    # Receive (S,G) packet
-    #################################
+    ################################################
+    # Receive (S,G) data packets or control packets
+    ################################################
     def recv_data_msg(self, index):
         print("recv data")
         self.interface_state[index].recv_data_msg()
@@ -132,8 +120,38 @@ class KernelEntry:
 
     def recv_state_refresh_msg(self, index, packet):
         print("recv state refresh msg")
-        prune_indicator = 1
-        self.interface_state[index].recv_state_refresh_msg(prune_indicator)
+        source_of_state_refresh = packet.ip_header.ip_src
+
+        metric_preference = packet.payload.payload.metric_preference
+        metric = packet.payload.payload.metric
+        mask_len = packet.payload.payload.mask_len
+        ttl = packet.payload.payload.ttl
+        prune_indicator_flag = packet.payload.payload.prune_indicator_flag #P
+        assert_override_flag = packet.payload.payload.assert_override_flag #O
+        interval = packet.payload.payload.interval
+        received_metric = AssertMetric(metric_preference=metric_preference, route_metric=metric, ip_address=source_of_state_refresh, state_refresh_interval=interval)
+
+        self.interface_state[index].recv_state_refresh_msg(received_metric, prune_indicator_flag)
+
+
+        iif = packet.interface.vif_index
+        if iif != self.inbound_interface_index:
+            return
+        if self.interface_state[iif].get_neighbor_RPF() != source_of_state_refresh:
+            return
+        # todo refresh limit
+        if ttl == 0:
+            return
+
+        self.forward_state_refresh_msg(packet.payload.payload)
+
+
+    ################################################
+    # Send state refresh msg
+    ################################################
+    def forward_state_refresh_msg(self, state_refresh_packet):
+        for interface in self.interface_state.values():
+            interface.send_state_refresh(state_refresh_packet)
 
 
     ###############################################################
@@ -177,13 +195,9 @@ class KernelEntry:
                 self.rpf_node = rpf_node
                 self.interface_state[self.inbound_interface_index].change_rpf(self._was_olist_null)
 
-    def update(self, caller, arg):
-        #todo
-        return
-
 
     def nbr_event(self, link, node, event):
-        # todo
+        # todo pode ser interessante verificar se a adicao/remocao de vizinhos se altera o olist
         return
 
     def is_olist_null(self):
