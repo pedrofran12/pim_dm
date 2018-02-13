@@ -66,8 +66,6 @@ class TreeInterface(metaclass=ABCMeta):
         self._assert_state = AssertState.NoInfo
         self._assert_winner_metric = AssertMetric()
         self._assert_timer = None
-        #self._assert_winner_ip = None
-        #self._assert_winner_metric = None
 
         # Received prune hold time
         self._received_prune_holdtime = None
@@ -126,8 +124,9 @@ class TreeInterface(metaclass=ABCMeta):
         self._assert_state.assertTimerExpires(self)
 
 
-
-
+    ###########################################
+    # Recv packets
+    ###########################################
     def recv_data_msg(self):
         pass
 
@@ -156,8 +155,8 @@ class TreeInterface(metaclass=ABCMeta):
         if upstream_neighbor_address == self.get_ip():
             self._assert_state.receivedPruneOrJoinOrGraft(self)
 
-    def recv_graft_ack_msg(self):
-        pass
+    def recv_graft_ack_msg(self, source_ip_of_graft_ack):
+        return
 
     def recv_state_refresh_msg(self, received_metric: AssertMetric, prune_indicator):
         self.recv_assert_msg(received_metric)
@@ -336,9 +335,6 @@ class TreeInterface(metaclass=ABCMeta):
         interface = Main.interfaces[interface_name]
         return interface
 
-    def get_node(self):
-        # todo: para ser substituido por get_ip
-        return self.get_ip()
 
     def get_ip(self):
         ip = self.get_interface().get_ip()

@@ -8,7 +8,7 @@ This module is intended to have all constants and global values for pim_dm
 
 ASSERT_TIME = 180
 GRAFT_RETRY_PERIOD = 3
-JT_OVERRIDE_INTERVAL = 3.0
+JP_OVERRIDE_INTERVAL = 3.0
 OVERRIDE_INTERVAL = 2.5
 PROPAGATION_DELAY = 0.5
 REFRESH_INTERVAL = 60  # State Refresh Interval

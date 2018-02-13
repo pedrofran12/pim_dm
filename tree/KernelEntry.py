@@ -116,7 +116,8 @@ class KernelEntry:
 
     def recv_graft_ack_msg(self, index, packet):
         print("recv graft ack msg")
-        self.interface_state[index].recv_graft_ack_msg()
+        source_ip = packet.ip_header.ip_src
+        self.interface_state[index].recv_graft_ack_msg(source_ip)
 
     def recv_state_refresh_msg(self, index, packet):
         print("recv state refresh msg")
@@ -124,10 +125,8 @@ class KernelEntry:
 
         metric_preference = packet.payload.payload.metric_preference
         metric = packet.payload.payload.metric
-        mask_len = packet.payload.payload.mask_len
         ttl = packet.payload.payload.ttl
         prune_indicator_flag = packet.payload.payload.prune_indicator_flag #P
-        assert_override_flag = packet.payload.payload.assert_override_flag #O
         interval = packet.payload.payload.interval
         received_metric = AssertMetric(metric_preference=metric_preference, route_metric=metric, ip_address=source_of_state_refresh, state_refresh_interval=interval)
 

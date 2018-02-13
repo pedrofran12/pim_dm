@@ -3,10 +3,6 @@ Created on Jul 16, 2015
 
 @author: alex
 '''
-#from des.addr import Addr
-
-#from .messages.assert_msg import SFMRAssertMsg
-#from .messages.join import SFMRJoinMsg
 from .tree_interface import TreeInterface
 from .upstream_prune import UpstreamState
 from threading import Timer
@@ -23,11 +19,13 @@ import threading
 class TreeInterfaceUpstream(TreeInterface):
     def __init__(self, kernel_entry, interface_id, is_originater: bool):
         TreeInterface.__init__(self, kernel_entry, interface_id)
+        # Graft/Prune State:
         self._graft_prune_state = UpstreamState.Forward
         self._graft_retry_timer = None
         self._override_timer = None
         self._prune_limit_timer = None
 
+        # Originator state
         self._originator_state = OriginatorState.NotOriginator
         self._state_refresh_timer = None
         self._source_active_timer = None
@@ -35,7 +33,8 @@ class TreeInterfaceUpstream(TreeInterface):
 
         if self.is_S_directly_conn():
             self._graft_prune_state.sourceIsNowDirectConnect(self)
-            self._originator_state.recvDataMsgFromSource(self)
+            if self.get_interface().is_state_refresh_enabled():
+                self._originator_state.recvDataMsgFromSource(self)
 
 
         # TODO TESTE SOCKET RECV DATA PCKTS
@@ -160,27 +159,25 @@ class TreeInterfaceUpstream(TreeInterface):
     # Recv packets
     ###########################################
     def recv_data_msg(self):
-        # todo check olist
         if self.is_olist_null() and not self.is_prune_limit_timer_running() and not self.is_S_directly_conn():
             self._graft_prune_state.dataArrivesRPFinterface_OListNull_PLTstoped(self)
-
-        if self.is_S_directly_conn():
+        elif self.is_S_directly_conn() and self.get_interface().is_state_refresh_enabled():
             self._originator_state.recvDataMsgFromSource(self)
 
 
     def recv_join_msg(self, upstream_neighbor_address):
         super().recv_join_msg(upstream_neighbor_address)
-        # todo check rpf nbr
-        self._graft_prune_state.seeJoinToRPFnbr(self)
+        if upstream_neighbor_address == self.get_neighbor_RPF():
+            self._graft_prune_state.seeJoinToRPFnbr(self)
 
     def recv_prune_msg(self, upstream_neighbor_address, holdtime):
         super().recv_prune_msg(upstream_neighbor_address, holdtime)
         self._graft_prune_state.seePrune(self)
 
-    def recv_graft_ack_msg(self):
+    def recv_graft_ack_msg(self, source_ip_of_graft_ack):
         print("GRAFT ACK!!!")
-        # todo check rpf nbr
-        self._graft_prune_state.recvGraftAckFromRPFnbr(self)
+        if source_ip_of_graft_ack == self.get_neighbor_RPF():
+            self._graft_prune_state.recvGraftAckFromRPFnbr(self)
 
     def recv_state_refresh_msg(self, received_metric: AssertMetric, prune_indicator: int):
         super().recv_state_refresh_msg(received_metric, prune_indicator)

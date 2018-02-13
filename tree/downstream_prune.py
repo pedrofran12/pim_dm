@@ -88,16 +88,13 @@ class NoInfo(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-
         interface.set_prune_state(DownstreamState.PrunePending)
 
         time = 0
         if len(interface.get_interface().neighbors) > 1:
-            time = pim_globals.JT_OVERRIDE_INTERVAL
+            time = pim_globals.JP_OVERRIDE_INTERVAL
 
-        #timer = interface.get_ppt().start(time)
         interface.set_prune_pending_timer(time)
-
 
         print("receivedPrune, NI -> PP")
 
@@ -119,9 +116,6 @@ class NoInfo(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-        # todo why pt stop???!!!
-        #interface.get_pt().stop()
-
         interface.send_graft_ack(source_ip)
 
         print('receivedGraft, NI -> NI')
@@ -211,8 +205,6 @@ class PrunePending(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-        # todo why prune timer and not prune pending timer???!
-        #interface.get_pt().stop()
         interface.clear_prune_pending_timer()
 
         interface.set_prune_state(DownstreamState.NoInfo)
@@ -227,16 +219,11 @@ class PrunePending(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-
         interface.set_prune_state(DownstreamState.Pruned)
+        interface.set_prune_timer(interface.get_received_prune_holdtime() - pim_globals.JP_OVERRIDE_INTERVAL)
 
-        #pt = interface.get_pt()
-        #pt.start(interface.get_lpht() - pim_globals.JT_OVERRIDE_INTERVAL)
-        #interface.set_prune_timer(prune_holdtime - pim_globals.JT_OVERRIDE_INTERVAL)
-        interface.set_prune_timer(interface.get_received_prune_holdtime() - pim_globals.JT_OVERRIDE_INTERVAL)
-
-
-        interface.send_pruneecho()
+        if len(interface.get_interface().neighbors) > 1:
+            interface.send_pruneecho()
 
         print('PPTexpires, PP -> P')
 
@@ -260,7 +247,6 @@ class PrunePending(DownstreamStateABS):
         """
 
         # todo understand better
-        #interface.get_ppt().stop()
         interface.clear_prune_pending_timer()
 
         interface.set_prune_state(DownstreamState.NoInfo)
@@ -293,13 +279,6 @@ class Pruned(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-        # todo ppt???! should be pt
-        #ppt = interface.get_ppt()
-        #if interface.get_lpht() > ppt.time_left():
-        #    ppt.set_timer(interface.get_lpht())
-        #    ppt.reset()
-        # todo nao percebo... corrigir 0
-        #if holdtime > 0:
         if interface.get_received_prune_holdtime() > interface.remaining_prune_timer():
             interface.set_prune_timer(holdtime)
 
@@ -312,8 +291,6 @@ class Pruned(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-
-        #interface.get_pt().stop()
         interface.clear_prune_timer()
 
         interface.set_prune_state(DownstreamState.NoInfo)
@@ -327,7 +304,6 @@ class Pruned(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-        #interface.get_pt().stop()
         interface.clear_prune_timer()
         interface.set_prune_state(DownstreamState.NoInfo)
         interface.send_graft_ack(source_ip)
@@ -377,11 +353,6 @@ class Pruned(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-
-        #pt = interface.get_pt()
-        #pt.set_timer(interface.get_lpht())
-        #pt.reset()
-        #interface.set_prune_timer(interface.get_lpht())
         interface.set_prune_timer(interface.get_received_prune_holdtime())
 
         print('send_state_refresh, P -> P')

@@ -195,8 +195,6 @@ class Forward(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
-
-        #interface.cancel_ot()
         interface.clear_override_timer()
 
         print('seeJoinToRPFnbr, F -> F')
@@ -686,6 +684,7 @@ class AckPending(UpstreamStateABC):
         interface.clear_graft_retry_timer()
 
         print('recvGraftAckFromRPFnbr, AP -> F')
+
 
 class UpstreamState():
     Forward = Forward()

@@ -27,22 +27,6 @@ class TreeInterfaceDownstream(TreeInterface):
     def __init__(self, kernel_entry, interface_id):
         TreeInterface.__init__(self, kernel_entry, interface_id)
 
-        # State
-        #self._local_membership_state = None # todo NoInfo or Include
-
-        # Prune State
-        #self._prune_state = DownstreamState.NoInfo
-        #self._prune_pending_timer = None
-        #self._prune_timer = None
-
-        # Assert Winner State
-        #self._assert_state = AssertState.NoInfo
-        #self._assert_timer = None
-        #self._assert_winner_ip = None
-        #self._assert_winner_metric = None
-
-        #self.set_dipt_timer()
-        #self.send_prune()
 
     ##########################################
     # Set state
@@ -132,7 +116,7 @@ class TreeInterfaceDownstream(TreeInterface):
     # Send messages
     ######################################
     def send_state_refresh(self, state_refresh_msg_received):
-        if not self.get_interface()._state_refresh_capable:
+        if not self.get_interface().is_state_refresh_enabled():
             return
 
         interval = state_refresh_msg_received.interval
