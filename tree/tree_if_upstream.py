@@ -159,7 +159,7 @@ class TreeInterfaceUpstream(TreeInterface):
     # Recv packets
     ###########################################
     def recv_data_msg(self):
-        if self.is_olist_null() and not self.is_prune_limit_timer_running() and not self.is_S_directly_conn():
+        if not self.is_prune_limit_timer_running() and not self.is_S_directly_conn() and self.is_olist_null():
             self._graft_prune_state.dataArrivesRPFinterface_OListNull_PLTstoped(self)
         elif self.is_S_directly_conn() and self.get_interface().is_state_refresh_enabled():
             self._originator_state.recvDataMsgFromSource(self)

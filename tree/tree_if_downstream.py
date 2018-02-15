@@ -116,13 +116,10 @@ class TreeInterfaceDownstream(TreeInterface):
     # Send messages
     ######################################
     def send_state_refresh(self, state_refresh_msg_received):
-        if not self.get_interface().is_state_refresh_enabled():
+        if self.lost_assert() or not self.get_interface().is_state_refresh_enabled():
             return
 
         interval = state_refresh_msg_received.interval
-
-        if self.lost_assert():
-            return
 
         self._assert_state.sendStateRefresh(self, interval)
         self._prune_state.send_state_refresh(self)
@@ -166,17 +163,18 @@ class TreeInterfaceDownstream(TreeInterface):
     # Override
     def is_forwarding(self):
         return ((self.has_neighbors() and not self.is_pruned()) or self.igmp_has_members()) and not self.lost_assert()
-        #return self._assert_state == AssertState.Winner and self.is_in_group()
 
     def is_pruned(self):
         return self._prune_state == DownstreamState.Pruned
 
-    def lost_assert(self):
-        return self._assert_state == AssertState.Loser
+    #def lost_assert(self):
+    #    return not AssertMetric.i_am_assert_winner(self) and \
+    #           self._assert_winner_metric.is_better_than(AssertMetric.spt_assert_metric(self))
 
     # Override
     def nbr_connected(self):
-        self._prune_state.new_nbr(self)
+        # TODO resend last state refresh messages
+        return
 
     # Override
     def delete(self):
@@ -185,21 +183,5 @@ class TreeInterfaceDownstream(TreeInterface):
         self.clear_prune_timer()
         self.clear_prune_pending_timer()
 
-    def get_metric(self):
-        return AssertMetric.spt_assert_metric(self)
-
-    def _get_winner_metric(self):
-        '''
-        @rtype: SFMRAssertMetric
-        '''
-        return self._assert_metric
-
-    def _set_winner_metric(self, value):
-        assert isinstance(value, AssertMetric) or value is None
-        # todo
-        self._assert_metric = value
-
-
     def is_downstream(self):
         return True
-

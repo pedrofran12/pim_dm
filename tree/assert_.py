@@ -104,10 +104,8 @@ class AssertStateABC(metaclass=ABCMeta):
 
 
     def _sendAssert_setAT(interface: "TreeInterfaceDownstream"):
-        #interface.assert_timer.set_timer(pim_globals.ASSERT_TIME)
         interface.set_assert_timer(pim_globals.ASSERT_TIME)
         interface.send_assert()
-        #interface.assert_timer.reset()
 
     @staticmethod
     def rprint(interface: "TreeInterfaceDownstream", msg, *entrys):
@@ -134,11 +132,10 @@ class NoInfoState(AssertStateABC):
         """
         @type interface: TreeInterface
         """
-        interface.set_assert_state(AssertState.Winner)
         interface.set_assert_winner_metric(interface.my_assert_metric())
+        interface.set_assert_state(AssertState.Winner)
 
         NoInfoState._sendAssert_setAT(interface)
-        #interface.assert_winner_metric = interface.assert_metric
 
         print('receivedDataFromDownstreamIf, NI -> W')
 
@@ -148,12 +145,10 @@ class NoInfoState(AssertStateABC):
 
     @staticmethod
     def receivedInferiorMetricFromNonWinner_couldAssertIsTrue(interface: "TreeInterfaceDownstream"):
-        interface.set_assert_state(AssertState.Winner)
         interface.set_assert_winner_metric(interface.my_assert_metric())
+        interface.set_assert_state(AssertState.Winner)
 
         NoInfoState._sendAssert_setAT(interface)
-        #interface.assert_state = AssertState.Winner
-        #interface.assert_winner_metric = interface.assert_metric
 
         print(
             'receivedInferiorMetricFromNonWinner_couldAssertIsTrue, NI -> W')
@@ -260,9 +255,8 @@ class WinnerState(AssertStateABC):
 
     @staticmethod
     def assertTimerExpires(interface: "TreeInterfaceDownstream"):
-        #interface.assert_state = AssertState.NoInfo
-        interface.set_assert_state(AssertState.NoInfo)
         interface.set_assert_winner_metric(AssertMetric.infinite_assert_metric())
+        interface.set_assert_state(AssertState.NoInfo)
 
         print('assertTimerExpires, W -> NI')
 
@@ -270,13 +264,10 @@ class WinnerState(AssertStateABC):
     def couldAssertIsNowFalse(interface: "TreeInterfaceDownstream"):
         interface.send_assert_cancel()
 
-        #interface.assert_timer.stop()
         interface.clear_assert_timer()
 
-        #interface.assert_state = AssertState.NoInfo
-        interface.set_assert_state(AssertState.NoInfo)
-
         interface.set_assert_winner_metric(AssertMetric.infinite_assert_metric())
+        interface.set_assert_state(AssertState.NoInfo)
 
         print('couldAssertIsNowFalse, W -> NI')
 
@@ -330,9 +321,6 @@ class LoserState(AssertStateABC):
             assert_timer_value = state_refresh_interval*3
 
         interface.set_assert_timer(assert_timer_value)
-
-        #has_winner_changed = interface.assert_winner_metric.node != better_metric.node
-
         interface.set_assert_winner_metric(better_metric)
 
         if interface.could_assert():
@@ -348,21 +336,16 @@ class LoserState(AssertStateABC):
     @staticmethod
     def assertTimerExpires(interface: "TreeInterfaceDownstream"):
         LoserState._to_NoInfo(interface)
-
-        if interface.could_assert():
-            interface.evaluate_ingroup()
         print('assertTimerExpires, L -> NI')
 
     @staticmethod
     def couldAssertIsNowFalse(interface: "TreeInterfaceDownstream"):
         LoserState._to_NoInfo(interface)
-
         print('couldAssertIsNowFalse, L -> NI')
 
     @staticmethod
     def couldAssertIsNowTrue(interface: "TreeInterfaceDownstream"):
         LoserState._to_NoInfo(interface)
-
         print('couldAssertIsNowTrue, L -> NI')
 
     @staticmethod
@@ -379,10 +362,9 @@ class LoserState(AssertStateABC):
 
     @staticmethod
     def _to_NoInfo(interface: "TreeInterfaceDownstream"):
-        #interface.assert_timer.stop()
         interface.clear_assert_timer()
-        interface.set_assert_state(AssertState.NoInfo)
         interface.set_assert_winner_metric(AssertMetric.infinite_assert_metric())
+        interface.set_assert_state(AssertState.NoInfo)
 
 
 class AssertState():

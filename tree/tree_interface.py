@@ -377,7 +377,7 @@ class TreeInterface(metaclass=ABCMeta):
         if not self.is_downstream():
             return False
         else:
-            return not AssertMetric.i_am_assert_winner(self) and \
+            return not self._assert_winner_metric.i_am_assert_winner(self) and \
                    self._assert_winner_metric.is_better_than(AssertMetric.spt_assert_metric(self))
 
     def could_assert(self):

@@ -45,8 +45,7 @@ class AssertMetric(object):
 
 
     def i_am_assert_winner(self, tree_if):
-        interface_ip = ipaddress.ip_address(tree_if.get_ip())
-        return self._ip_address == interface_ip
+        return self.get_ip() == tree_if.get_ip()
 
     @property
     def metric_preference(self):
@@ -83,7 +82,6 @@ class AssertMetric(object):
     @state_refresh_interval.setter
     def state_refresh_interval(self, value):
         self._state_refresh_interval = value
-
 
     def get_ip(self):
         return str(self._ip_address)
