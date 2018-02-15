@@ -120,11 +120,12 @@ class TreeInterfaceDownstream(TreeInterface):
             return
 
         interval = state_refresh_msg_received.interval
-        self._assert_state.sendStateRefresh(self, interval)
-        self._prune_state.send_state_refresh(self)
 
         if self.lost_assert():
             return
+
+        self._assert_state.sendStateRefresh(self, interval)
+        self._prune_state.send_state_refresh(self)
 
         prune_indicator_bit = 0
         if self.is_pruned():
@@ -164,7 +165,7 @@ class TreeInterfaceDownstream(TreeInterface):
 
     # Override
     def is_forwarding(self):
-        return ((len(self.get_interface().neighbors) >= 1 and not self.is_pruned()) or self.igmp_has_members()) and not self.lost_assert()
+        return ((self.has_neighbors() and not self.is_pruned()) or self.igmp_has_members()) and not self.lost_assert()
         #return self._assert_state == AssertState.Winner and self.is_in_group()
 
     def is_pruned(self):

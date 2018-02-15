@@ -73,20 +73,4 @@ class PacketPimHeader(PacketPayload):
 
         pim_payload = data[PacketPimHeader.PIM_HDR_LEN:]
         pim_payload = PacketPimHeader.PIM_MSG_TYPES[pim_type].parse_bytes(pim_payload)
-        '''
-        if pim_type == 0:  # hello
-            pim_payload = PacketPimHello.parse_bytes(pim_payload)
-        elif pim_type == 3:  # join/prune
-            pim_payload = PacketPimJoinPrune.parse_bytes(pim_payload)
-            print("hold_time = ", pim_payload.hold_time)
-            print("upstream_neighbor = ", pim_payload.upstream_neighbor_address)
-            for i in pim_payload.groups:
-                print(i.multicast_group)
-                print(i.joined_src_addresses)
-                print(i.pruned_src_addresses)
-        elif pim_type == 5:  # assert
-            pim_payload = PacketPimAssert.parse_bytes(pim_payload)
-        else:
-            raise Exception
-        '''
         return PacketPimHeader(pim_payload)

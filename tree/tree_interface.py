@@ -30,19 +30,8 @@ from .globals import *
 
 class TreeInterface(metaclass=ABCMeta):
     def __init__(self, kernel_entry, interface_id):
-        '''
-        @type interface: SFMRInterface
-        @type node: Node
-        '''
-        #assert isinstance(interface, SFMRInterface)
-
         self._kernel_entry = kernel_entry
         self._interface_id = interface_id
-        #self._interface = interface
-        #self._node = node
-        #self._tree_id = tree_id
-        #self._cost = cost
-        #self._evaluate_ig = evaluate_ig_cb
 
         # Local Membership State
         try:
@@ -53,7 +42,6 @@ class TreeInterface(metaclass=ABCMeta):
             igmp_has_members = group_state.add_multicast_routing_entry(self)
             self._local_membership_state = LocalMembership.Include if igmp_has_members else LocalMembership.NoInfo
         except:
-            #traceback.print_exc()
             self._local_membership_state = LocalMembership.NoInfo
 
 
@@ -86,24 +74,17 @@ class TreeInterface(metaclass=ABCMeta):
                 self.evaluate_ingroup()
 
     def set_assert_winner_metric(self, new_assert_metric: AssertMetric):
-        import ipaddress
         with self.get_state_lock():
             try:
-                old_neighbor = self.get_interface().get_neighbor(str(self._assert_winner_metric.ip_address))
-                new_neighbor = self.get_interface().get_neighbor(str(new_assert_metric.ip_address))
+                old_neighbor = self.get_interface().get_neighbor(self._assert_winner_metric.get_ip())
+                new_neighbor = self.get_interface().get_neighbor(new_assert_metric.get_ip())
 
                 if old_neighbor is not None:
                     old_neighbor.unsubscribe_nlt_expiration(self)
                 if new_neighbor is not None:
                     new_neighbor.subscribe_nlt_expiration(self)
-                '''
-                if new_assert_metric.ip_address == ipaddress.ip_address("0.0.0.0") or new_assert_metric.ip_address is None:
-                    if old_neighbor is not None:
-                        old_neighbor.unsubscribe_nlt_expiration(self)
-                else:
-                    old_neighbor.unsubscribe_nlt_expiration(self)
-                    new_neighbor.subscribe_nlt_expiration(self)
-                '''
+            except:
+                traceback.print_exc()
             finally:
                 self._assert_winner_metric = new_assert_metric
 
@@ -339,6 +320,12 @@ class TreeInterface(metaclass=ABCMeta):
     def get_ip(self):
         ip = self.get_interface().get_ip()
         return ip
+
+    def has_neighbors(self):
+        try:
+            return len(self.get_interface().neighbors) > 0
+        except:
+            return False
 
     def get_tree_id(self):
         return (self._kernel_entry.source_ip, self._kernel_entry.group_ip)

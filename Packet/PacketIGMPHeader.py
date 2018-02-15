@@ -47,6 +47,9 @@ class PacketIGMPHeader(PacketPayload):
         self.max_resp_time = max_resp_time
         self.group_address = group_address
 
+    def get_igmp_type(self):
+        return self.type
+
     def bytes(self) -> bytes:
         # obter mensagem e criar checksum
         msg_without_chcksum = struct.pack(PacketIGMPHeader.IGMP_HDR, self.type, self.max_resp_time, 0,

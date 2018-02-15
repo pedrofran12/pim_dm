@@ -10,10 +10,9 @@ import UnicastRouting
 
 interfaces = {}  # interfaces with multicast routing enabled
 igmp_interfaces = {}  # igmp interfaces
-protocols = {}
 kernel = None
 igmp = None
-
+unicast_routing = None
 
 def add_pim_interface(interface_name, state_refresh_capable:bool=False):
     kernel.create_pim_interface(interface_name=interface_name, state_refresh_capable=state_refresh_capable)
@@ -63,10 +62,6 @@ def remove_interface(interface_name, pim=False, igmp=False):
     #    print("removido interface")
     #    print(igmp_interfaces)
     kernel.remove_interface(interface_name, pim=pim, igmp=igmp)
-
-def add_protocol(protocol_number, protocol_obj):
-    global protocols
-    protocols[protocol_number] = protocol_obj
 
 def list_neighbors():
     interfaces_list = interfaces.values()
@@ -157,32 +152,16 @@ def list_routing_state():
 def stop():
     remove_interface("*", pim=True, igmp=True)
     kernel.exit()
-    UnicastRouting.stop()
+    unicast_routing.stop()
+
 
 
 def main():
-    from Hello import Hello
-    from IGMP import IGMP
-    from Assert import Assert
-    from JoinPrune import JoinPrune
-    from GraftAck import GraftAck
-    from Graft import Graft
-    from StateRefresh import StateRefresh
-
-    Hello()
-    Assert()
-    JoinPrune()
-    Graft()
-    GraftAck()
-    StateRefresh()
     global kernel
     kernel = Kernel()
 
-    global igmp
-    igmp = IGMP()
-
-    global u
-    u = UnicastRouting.UnicastRouting()
+    global unicast_routing
+    unicast_routing = UnicastRouting.UnicastRouting()
 
     global interfaces
     global igmp_interfaces

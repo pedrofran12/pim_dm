@@ -193,7 +193,6 @@ class TreeInterfaceUpstream(TreeInterface):
     ####################################
     def create_state_refresh_msg(self):
         self._prune_now_counter+=1
-        self._prune_now_counter%=3
         (source_ip, group_ip) = self.get_tree_id()
         ph = PacketPimStateRefresh(multicast_group_adress=group_ip,
                                    source_address=source_ip,
@@ -201,9 +200,11 @@ class TreeInterfaceUpstream(TreeInterface):
                                    metric_preference=0, metric=0, mask_len=0,
                                    ttl=256,
                                    prune_indicator_flag=0,
-                                   prune_now_flag=(self._prune_now_counter+1)//3,
+                                   prune_now_flag=self._prune_now_counter//3,
                                    assert_override_flag=0,
                                    interval=60)
+
+        self._prune_now_counter %= 3
         self._kernel_entry.forward_state_refresh_msg(ph)
 
     ###########################################

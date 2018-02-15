@@ -470,3 +470,8 @@ class Kernel:
 
         pass
 
+    # When interface changes number of neighbors verify if olist changes and prune/forward respectively
+    def interface_change_number_of_neighbors(self):
+        with self.rwlock.genWlock():
+            for entry in self.routing.values():
+                entry.change_at_number_of_neighbors()

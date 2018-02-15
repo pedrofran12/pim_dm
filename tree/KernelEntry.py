@@ -195,9 +195,11 @@ class KernelEntry:
                 self.interface_state[self.inbound_interface_index].change_rpf(self._was_olist_null)
 
 
-    def nbr_event(self, link, node, event):
-        # todo pode ser interessante verificar se a adicao/remocao de vizinhos se altera o olist
-        return
+    # check if add/removal of neighbors from interface afects olist and forward/prune state of interface
+    def change_at_number_of_neighbors(self):
+        with self.CHANGE_STATE_LOCK:
+            self.change()
+            self.evaluate_olist_change()
 
     def is_olist_null(self):
         for interface in self.interface_state.values():
