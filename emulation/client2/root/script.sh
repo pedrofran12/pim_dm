@@ -1,6 +1,6 @@
-rm -rf test/
-cp -rf /hosthome/PycharmProjects/RPC/ test/
-cd test
-pip-3.2 install --index-url=https://pypi.python.org/simple/ -r requirements.txt
+pip-3.2 install --index-url=https://pypi.python.org/simple/ netifaces
 
-python3 Client.py
+cp /hosthome/PycharmProjects/Test/ServerLog.py .
+cp /hosthome/PycharmProjects/Test/TestAssert.py .
+python3 ServerLog.py
+
