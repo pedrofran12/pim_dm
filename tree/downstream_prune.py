@@ -353,7 +353,8 @@ class Pruned(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-        interface.set_prune_timer(interface.get_received_prune_holdtime())
+        if interface.get_interface().is_state_refresh_capable():
+            interface.set_prune_timer(interface.get_received_prune_holdtime())
 
         print('send_state_refresh, P -> P')
 

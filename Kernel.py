@@ -1,7 +1,7 @@
 import socket
 import struct
 import netifaces
-import threading
+from threading import Lock
 import traceback
 
 import ipaddress
@@ -56,7 +56,7 @@ class Kernel:
         self.vif_index_to_name_dic = {}
         self.vif_name_to_index_dic = {}
 
-        # KEY : (source_ip, group_ip), VALUE : KernelEntry ???? TODO
+        # KEY : source_ip, VALUE : {group_ip: KernelEntry}
         self.routing = {}
 
         s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IGMP)
@@ -76,23 +76,13 @@ class Kernel:
         # todo useless in PIM-DM... useful in PIM-SM
         #self.create_virtual_interface("0.0.0.0", "pimreg", index=0, flags=Kernel.VIFF_REGISTER)
 
-        # Create virtual interfaces
-        '''
-        interfaces = netifaces.interfaces()
-        for interface in interfaces:
-            try:
-                # ignore localhost interface
-                if interface == 'lo':
-                    continue
-                addrs = netifaces.ifaddresses(interface)
-                addr = addrs[netifaces.AF_INET][0]['addr']
-                self.create_virtual_interface(ip_interface=addr, interface_name=interface)
-            except Exception:
-                continue
-        '''
 
         self.pim_interface = {} # name: interface_pim
         self.igmp_interface = {}  # name: interface_igmp
+
+        # logs
+        self.interface_logger = Main.logger.getChild('KernelInterface')
+        self.tree_logger = Main.logger.getChild('KernelTree')
 
         # receive signals from kernel with a background thread
         handler_thread = threading.Thread(target=self.handler)
@@ -152,9 +142,11 @@ class Kernel:
         self.vif_name_to_index_dic[interface_name] = index
 
         with self.rwlock.genWlock():
-            for kernel_entry in list(self.routing.values()):
-                kernel_entry.new_interface(index)
+            for source_dict in list(self.routing.values()):
+                for kernel_entry in list(source_dict.values()):
+                    kernel_entry.new_interface(index)
 
+        self.interface_logger.debug('Create virtual interface: %s -> %d', interface_name, index)
         return index
 
 
@@ -273,13 +265,15 @@ class Kernel:
 
         del self.vif_dic[ip_interface]
         del self.vif_name_to_index_dic[self.vif_index_to_name_dic[index]]
-        del self.vif_index_to_name_dic[index]
-        # TODO alterar MFC's para colocar a 0 esta interface
+        interface_name = self.vif_index_to_name_dic.pop(index)
 
+        # alterar MFC's para colocar a 0 esta interface
         with self.rwlock.genWlock():
-            for kernel_entry in list(self.routing.values()):
-                kernel_entry.remove_interface(index)
+            for source_dict in list(self.routing.values()):
+                for kernel_entry in list(source_dict.values()):
+                    kernel_entry.remove_interface(index)
 
+        self.interface_logger.debug('Remove virtual interface: %s -> %d', interface_name, index)
 
 
 
@@ -316,9 +310,6 @@ class Kernel:
         struct_mfcctl = struct.pack("4s 4s H " + "B"*Kernel.MAXVIFS + " IIIi", source_ip, group_ip, kernel_entry.inbound_interface_index, *outbound_interfaces_and_other_parameters)
         self.socket.setsockopt(socket.IPPROTO_IP, Kernel.MRT_ADD_MFC, struct_mfcctl)
 
-        # TODO: ver melhor tabela routing
-        #self.routing[(socket.inet_ntoa(source_ip), socket.inet_ntoa(group_ip))] = {"inbound_interface_index": inbound_interface_index, "outbound_interfaces": outbound_interfaces}
-
 
     def remove_multicast_route(self, kernel_entry: KernelEntry):
         source_ip = socket.inet_aton(kernel_entry.source_ip)
@@ -326,9 +317,10 @@ class Kernel:
         outbound_interfaces_and_other_parameters = [0] + [0]*Kernel.MAXVIFS + [0]*4
 
         struct_mfcctl = struct.pack("4s 4s H " + "B"*Kernel.MAXVIFS + " IIIi", source_ip, group_ip, *outbound_interfaces_and_other_parameters)
-
         self.socket.setsockopt(socket.IPPROTO_IP, Kernel.MRT_DEL_MFC, struct_mfcctl)
-        self.routing.pop((kernel_entry.source_ip, kernel_entry.group_ip))
+        self.routing[kernel_entry.source_ip].pop(kernel_entry.group_ip)
+        if len(self.routing[kernel_entry.source_ip]) == 0:
+            self.routing.pop(kernel_entry.source_ip)
 
     def exit(self):
         self.running = False
@@ -389,39 +381,12 @@ class Kernel:
     # receive multicast (S,G) packet and multicast routing table has no (S,G) entry
     def igmpmsg_nocache_handler(self, ip_src, ip_dst, iif):
         source_group_pair = (ip_src, ip_dst)
-        """
-        with self.rwlock.genWlock():
-            if source_group_pair in self.routing:
-                kernel_entry = self.routing[(ip_src, ip_dst)]
-            else:
-                kernel_entry = KernelEntry(ip_src, ip_dst, iif)
-                self.routing[(ip_src, ip_dst)] = kernel_entry
-                self.set_multicast_route(kernel_entry)
-            kernel_entry.recv_data_msg(iif)
-        """
-        """
-        with self.rwlock.genRlock():
-            if source_group_pair in self.routing:
-                kernel_entry = self.routing[(ip_src, ip_dst)]
-
-        with self.rwlock.genWlock():
-            if source_group_pair in self.routing:
-                kernel_entry = self.routing[(ip_src, ip_dst)]
-            else:
-                kernel_entry = KernelEntry(ip_src, ip_dst, iif)
-                self.routing[(ip_src, ip_dst)] = kernel_entry
-                self.set_multicast_route(kernel_entry)
-
-            kernel_entry.recv_data_msg(iif)
-        """
         self.get_routing_entry(source_group_pair, create_if_not_existent=True).recv_data_msg(iif)
 
     # receive multicast (S,G) packet in a outbound_interface
     def igmpmsg_wrongvif_handler(self, ip_src, ip_dst, iif):
-        #kernel_entry = self.routing[(ip_src, ip_dst)]
         source_group_pair = (ip_src, ip_dst)
         self.get_routing_entry(source_group_pair, create_if_not_existent=True).recv_data_msg(iif)
-        #kernel_entry.recv_data_msg(iif)
 
 
     ''' useless in PIM-DM... useful in PIM-SM
@@ -434,44 +399,40 @@ class Kernel:
 
 
 
-    """
-    def get_routing_entry(self, source_group: tuple):
-        with self.rwlock.genRlock():
-            return self.routing[source_group]
-    """
     def get_routing_entry(self, source_group: tuple, create_if_not_existent=True):
         ip_src = source_group[0]
         ip_dst = source_group[1]
         with self.rwlock.genRlock():
-            if source_group in self.routing:
-                return self.routing[(ip_src, ip_dst)]
+            if ip_src in self.routing and ip_dst in self.routing[ip_src]:
+                return self.routing[ip_src][ip_dst]
 
         with self.rwlock.genWlock():
-            if source_group in self.routing:
-                return self.routing[(ip_src, ip_dst)]
+            if ip_src in self.routing and ip_dst in self.routing[ip_src]:
+                return self.routing[ip_src][ip_dst]
             elif create_if_not_existent:
                 kernel_entry = KernelEntry(ip_src, ip_dst, 0)
-                self.routing[source_group] = kernel_entry
-                kernel_entry.change()
-                #self.set_multicast_route(kernel_entry)
+                if ip_src not in self.routing:
+                    self.routing[ip_src] = {}
+
+                self.routing[ip_src][ip_dst] = kernel_entry
                 return kernel_entry
             else:
                 return None
 
-
+    # notify KernelEntries about changes at the unicast routing table
     def notify_unicast_changes(self, subnet):
-        # todo
         with self.rwlock.genWlock():
-            for (source_ip, group) in self.routing.keys():
+            for source_ip in self.routing.keys():
                 source_ip_obj = ipaddress.ip_address(source_ip)
-                if source_ip_obj in subnet:
-                    self.routing[(source_ip, group)].network_update()
-                    print(source_ip)
+                if source_ip_obj not in subnet:
+                    continue
+                for group_ip in self.routing[source_ip].keys():
+                    self.routing[source_ip][group_ip].network_update()
 
-        pass
 
     # When interface changes number of neighbors verify if olist changes and prune/forward respectively
     def interface_change_number_of_neighbors(self):
         with self.rwlock.genWlock():
-            for entry in self.routing.values():
-                entry.change_at_number_of_neighbors()
+            for groups_dict in self.routing.values():
+                for entry in groups_dict.values():
+                    entry.change_at_number_of_neighbors()

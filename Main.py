@@ -2,17 +2,17 @@ import netifaces
 import time
 from prettytable import PrettyTable
 
-from InterfacePIM import InterfacePim
-from InterfaceIGMP import InterfaceIGMP
+#from InterfacePIM import InterfacePim
+#from InterfaceIGMP import InterfaceIGMP
 from Kernel import Kernel
-from threading import Lock
+#from threading import Lock
 import UnicastRouting
 
 interfaces = {}  # interfaces with multicast routing enabled
 igmp_interfaces = {}  # igmp interfaces
 kernel = None
-igmp = None
 unicast_routing = None
+logger = None
 
 def add_pim_interface(interface_name, state_refresh_capable:bool=False):
     kernel.create_pim_interface(interface_name=interface_name, state_refresh_capable=state_refresh_capable)
@@ -119,7 +119,10 @@ def list_igmp_state():
 
 
 def list_routing_state():
-    routing_entries = kernel.routing.values()
+    routing_entries = []
+    for a in list(kernel.routing.values()):
+        for b in list(a.values()):
+            routing_entries.append(b)
     vif_indexes = kernel.vif_index_to_name_dic.keys()
 
     t = PrettyTable(['SourceIP', 'GroupIP', 'Interface', 'PruneState', 'AssertState', 'LocalMembership', "Is Forwarding?"])
@@ -133,17 +136,17 @@ def list_routing_state():
             interface_name = kernel.vif_index_to_name_dic[index]
             local_membership = type(interface_state._local_membership_state).__name__
             try:
+                assert_state = type(interface_state._assert_state).__name__
                 if index != upstream_if_index:
                     prune_state = type(interface_state._prune_state).__name__
-                    assert_state = type(interface_state._assert_state).__name__
                     is_forwarding = interface_state.is_forwarding()
                 else:
                     prune_state = type(interface_state._graft_prune_state).__name__
-                    assert_state = "-"
                     is_forwarding = "upstream"
             except:
                 prune_state = "-"
                 assert_state = "-"
+                is_forwarding = "-"
 
             t.add_row([ip, group, interface_name, prune_state, assert_state, local_membership, is_forwarding])
     return str(t)
@@ -155,8 +158,27 @@ def stop():
     unicast_routing.stop()
 
 
+def test(router_name, server_logger_ip):
+    global logger
+    import logging.handlers
+    from TestLogger import RootFilter
+    socketHandler = logging.handlers.SocketHandler(server_logger_ip,
+                                                   logging.handlers.DEFAULT_TCP_LOGGING_PORT)
+    # don't bother with a formatter, since a socket handler sends the event as
+    # an unformatted pickle
+    socketHandler.addFilter(RootFilter(router_name))
+    logger.addHandler(socketHandler)
+
 
 def main():
+    # logging
+    global logger
+    import sys
+    import logging, logging.handlers
+    logger = logging.getLogger('pim')
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(logging.StreamHandler(sys.stdout))
+
     global kernel
     kernel = Kernel()
 

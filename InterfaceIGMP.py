@@ -6,7 +6,7 @@ from Interface import Interface
 from ctypes import create_string_buffer, addressof
 from ipaddress import IPv4Address
 from utils import Version_1_Membership_Report, Version_2_Membership_Report, Leave_Group, Membership_Query
-
+import subprocess
 if not hasattr(socket, 'SO_BINDTODEVICE'):
     socket.SO_BINDTODEVICE = 25
 
@@ -15,6 +15,7 @@ class InterfaceIGMP(Interface):
     ETH_P_IP = 0x0800		# Internet Protocol packet
     SO_ATTACH_FILTER = 26
 
+    # TODO filtro nao esta a funcionar bem no netkit
     FILTER_IGMP = [
         struct.pack('HBBI', 0x28, 0, 0, 0x0000000c),
         struct.pack('HBBI', 0x15, 0, 3, 0x00000800),
@@ -25,31 +26,36 @@ class InterfaceIGMP(Interface):
     ]
 
     def __init__(self, interface_name: str, vif_index:int):
-        # RECEIVE SOCKET
-        rcv_s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(InterfaceIGMP.ETH_P_IP))
-
-        # receive only IGMP packets by setting a BPF filter
-        filters = b''.join(InterfaceIGMP.FILTER_IGMP)
-        b = create_string_buffer(filters)
-        mem_addr_of_filters = addressof(b)
-        fprog = struct.pack('HL', len(InterfaceIGMP.FILTER_IGMP), mem_addr_of_filters)
-        rcv_s.setsockopt(socket.SOL_SOCKET, InterfaceIGMP.SO_ATTACH_FILTER, fprog)
-
-        # bind to interface
-        rcv_s.bind((interface_name, 0x0800))
-
-
         # SEND SOCKET
         snd_s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IGMP)
 
         # bind to interface
         snd_s.setsockopt(socket.SOL_SOCKET, socket.SO_BINDTODEVICE, str(interface_name + "\0").encode('utf-8'))
 
+        # RECEIVE SOCKET
+        rcv_s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(InterfaceIGMP.ETH_P_IP))
+
+        # receive only IGMP packets by setting a BPF filter
+        # TODO filtro nao esta a funcionar bem no netkit
+        cmd = "tcpdump -ddd \"ip proto 2\""
+        result = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        bpf_filter = b''
+
+        tmp = result.stdout.read().splitlines()
+        for line in tmp[1:]:
+            bpf_filter += struct.pack("HBBI", *tuple(map(int, line.split(b' '))))
+
+        b = create_string_buffer(bpf_filter)
+        mem_addr_of_filters = addressof(b)
+        fprog = struct.pack('HL', len(InterfaceIGMP.FILTER_IGMP), mem_addr_of_filters)
+        rcv_s.setsockopt(socket.SOL_SOCKET, InterfaceIGMP.SO_ATTACH_FILTER, fprog)
+
+        # bind to interface
+        rcv_s.bind((interface_name, 0x0800))
         super().__init__(interface_name=interface_name, recv_socket=rcv_s, send_socket=snd_s, vif_index=vif_index)
-
-
         from igmp.RouterState import RouterState
         self.interface_state = RouterState(self)
+        super()._enable()
 
 
     def get_ip(self):

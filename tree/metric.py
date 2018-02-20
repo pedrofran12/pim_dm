@@ -1,11 +1,8 @@
 import ipaddress
 
-class AssertMetric(object):
-    '''
-    Note: we consider the node name the ip of the metric.
-    '''
 
-    def __init__(self, metric_preference: int or float = float("Inf"), route_metric: int or float = float("Inf"), ip_address: str = "0.0.0.0", state_refresh_interval:int = None):
+class AssertMetric(object):
+    def __init__(self, metric_preference: int = 0x7FFFFFFF, route_metric: int = 0xFFFFFFFF, ip_address: str = "0.0.0.0", state_refresh_interval:int = None):
         if type(ip_address) is str:
             ip_address = ipaddress.ip_address(ip_address)
 
@@ -30,7 +27,7 @@ class AssertMetric(object):
         '''
         @type metric: AssertMetric
         '''
-        return AssertMetric(metric_preference=float("Inf"), route_metric=float("Inf"), ip_address="0.0.0.0")
+        return AssertMetric()
 
     @staticmethod
     def spt_assert_metric(tree_if):

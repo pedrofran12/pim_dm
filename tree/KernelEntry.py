@@ -8,13 +8,22 @@ from .tree_interface import TreeInterface
 from threading import Timer, Lock, RLock
 from tree.metric import AssertMetric
 import UnicastRouting
-from Packet.PacketPimStateRefresh import PacketPimStateRefresh
+from time import time
+import Main
+from TestLogger import NonRootFilter, logging
 
 class KernelEntry:
     TREE_TIMEOUT = 180
 
 
     def __init__(self, source_ip: str, group_ip: str, inbound_interface_index: int):
+        self.kernel_entry_logger = Main.logger.getChild('KernelEntry')
+        ch = logging.NullHandler()
+        ch.addFilter(NonRootFilter('(' + source_ip + ',' + group_ip + ')'))
+        self.kernel_entry_logger.addHandler(ch)
+        self.kernel_entry_logger.debug('Create KernelEntry')
+
+
         self.source_ip = source_ip
         self.group_ip = group_ip
 
@@ -59,9 +68,9 @@ class KernelEntry:
         self._multicast_change = Lock()
         self._lock_test2 = RLock()
         self.CHANGE_STATE_LOCK = RLock()
-        #self._was_olist_null = self.is_olist_null()
         self.change()
         self.evaluate_olist_change()
+        self.timestamp_of_last_state_refresh_message_received = 0
         print('Tree created')
 
         #self._lock = threading.RLock()
@@ -138,7 +147,11 @@ class KernelEntry:
             return
         if self.interface_state[iif].get_neighbor_RPF() != source_of_state_refresh:
             return
-        # todo refresh limit
+        # refresh limit
+        timestamp = time()
+        if (timestamp - self.timestamp_of_last_state_refresh_message_received) < interval:
+            return
+        self.timestamp_of_last_state_refresh_message_received = timestamp
         if ttl == 0:
             return
 
@@ -157,10 +170,8 @@ class KernelEntry:
     # Unicast Changes to RPF
     ###############################################################
     def network_update(self):
+        # TODO TALVEZ OUTRO LOCK PARA BLOQUEAR ENTRADA DE PACOTES
         with self.CHANGE_STATE_LOCK:
-            #next_hop = UnicastRouting.get_route(self.source_ip)["gateway"]
-            #rpf_node = self.source_ip if next_hop is None else next_hop
-
             next_hop = UnicastRouting.get_route(self.source_ip)["gateway"]
             multipaths = UnicastRouting.get_route(self.source_ip)["multipath"]
 
@@ -179,20 +190,35 @@ class KernelEntry:
 
             print(self.rpf_node == self.source_ip)
 
-            new_inbound_interface_index = Main.kernel.vif_dic[self.check_rpf()]
+            new_inbound_interface_index = Main.kernel.vif_dic.get(self.check_rpf(), None)
+            if new_inbound_interface_index is None:
+                self.delete()
+                return
             if new_inbound_interface_index != self.inbound_interface_index:
-                # todo: criar novo upstream e downstream interface
-                # todo: stop upstream e downstream
-                #self.interface_state[self.inbound_interface_index].stop()
-                #self.interface_state[new_inbound_interface_index].stop()
-                #Unicast routing or Assert state causes RPF'(S) to change,
-                self.interface_state[self.inbound_interface_index] = TreeInterfaceDownstream
-                self.interface_state[new_inbound_interface_index] = TreeInterfaceUpstream
+                self.rpf_node = rpf_node
+
+                # get old interfaces
+                old_upstream_interface = self.interface_state[self.inbound_interface_index]
+                old_downstream_interface = self.interface_state[new_inbound_interface_index]
+
+                # change type of interfaces
+                new_downstream_interface = TreeInterfaceDownstream(self, self.inbound_interface_index)
+                self.interface_state[self.inbound_interface_index] = new_downstream_interface
+                new_upstream_interface = TreeInterfaceUpstream(self, new_inbound_interface_index, False)
+                self.interface_state[new_inbound_interface_index] = new_upstream_interface
                 self.inbound_interface_index = new_inbound_interface_index
 
-            if self.rpf_node != rpf_node:
+                # remove old interfaces
+                old_upstream_interface.delete(change_type_interface=True)
+                old_downstream_interface.delete(change_type_interface=True)
+
+                # atualizar tabela de encaminhamento multicast
+                self._was_olist_null = False
+                self.change()
+                self.evaluate_olist_change()
+            elif self.rpf_node != rpf_node:
                 self.rpf_node = rpf_node
-                self.interface_state[self.inbound_interface_index].change_rpf(self._was_olist_null)
+                self.interface_state[self.inbound_interface_index].change_on_unicast_routing()
 
 
     # check if add/removal of neighbors from interface afects olist and forward/prune state of interface
@@ -231,10 +257,11 @@ class KernelEntry:
             Main.kernel.set_multicast_route(self)
 
     def delete(self):
-        for state in self.interface_state.values():
-            state.delete()
+        with self._multicast_change:
+            for state in self.interface_state.values():
+                state.delete()
 
-        Main.kernel.remove_multicast_route(self)
+            Main.kernel.remove_multicast_route(self)
 
 
     ######################################
@@ -252,7 +279,6 @@ class KernelEntry:
             if self.inbound_interface_index == index:
                 self.delete()
             else:
-                self.interface_state[index].delete()
-                del self.interface_state[index]
+                self.interface_state.pop(index).delete()
                 self.change()
                 self.evaluate_olist_change()

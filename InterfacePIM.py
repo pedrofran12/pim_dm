@@ -13,6 +13,8 @@ from threading import Timer
 from tree.globals import REFRESH_INTERVAL
 import socket
 import netifaces
+
+
 class InterfacePim(Interface):
     MCAST_GRP = '224.0.0.13'
     PROPAGATION_DELAY = 0.5
@@ -23,9 +25,34 @@ class InterfacePim(Interface):
 
 
     def __init__(self, interface_name: str, vif_index:int, state_refresh_capable:bool=False):
+        # generation id
+        self.generation_id = random.getrandbits(32)
+
+        # When PIM is enabled on an interface or when a router first starts, the Hello Timer (HT)
+        # MUST be set to random value between 0 and Triggered_Hello_Delay
+        self.hello_timer = None
+
+        # state refresh capable
+        self._state_refresh_capable = state_refresh_capable
+        self._neighbors_state_refresh_capable = False
+
+        # todo: lan delay enabled
+        self._lan_delay_enabled = False
+
+        # todo: propagation delay
+        self._propagation_delay = self.PROPAGATION_DELAY
+
+        # todo: override interval
+        self._override_interval = self.OVERRIDE_INTERNAL
+
+        # pim neighbors
+        self._had_neighbors = False
+        self.neighbors = {}
+        self.neighbors_lock = RWLockWrite()
+
+        # SOCKET
         ip_interface = netifaces.ifaddresses(interface_name)[netifaces.AF_INET][0]['addr']
         self.ip_interface = ip_interface
-        self.ip_mask_interface = netifaces.ifaddresses(interface_name)[netifaces.AF_INET][0]['netmask']
 
         s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_PIM)
 
@@ -49,34 +76,8 @@ class InterfacePim(Interface):
         s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 0)
 
         super().__init__(interface_name, s, s, vif_index)
-
-
-
-        # generation id
-        self.generation_id = random.getrandbits(32)
-
-        # When PIM is enabled on an interface or when a router first starts, the Hello Timer (HT)
-        # MUST be set to random value between 0 and Triggered_Hello_Delay
-        self.hello_timer = None
+        super()._enable()
         self.force_send_hello()
-
-
-        # state refresh capable
-        self._state_refresh_capable = state_refresh_capable
-
-        # todo: lan delay enabled
-        self._lan_delay_enabled = False
-
-        # todo: propagation delay
-        self._propagation_delay = self.PROPAGATION_DELAY
-
-        # todo: override interval
-        self._override_interval = self.OVERRIDE_INTERNAL
-
-        # pim neighbors
-        self._had_neighbors = False
-        self.neighbors = {}
-        self.neighbors_lock = RWLockWrite()
 
 
     def get_ip(self):
@@ -144,7 +145,7 @@ class InterfacePim(Interface):
             self._had_neighbors = has_neighbors
             Main.kernel.interface_change_number_of_neighbors()
 
-
+    '''
     def add_neighbor(self, ip, random_number, hello_hold_time):
         with self.neighbors_lock.genWlock():
             if ip not in self.neighbors:
@@ -153,6 +154,7 @@ class InterfacePim(Interface):
                 self.neighbors[ip] = Neighbor(self, ip, random_number, hello_hold_time)
                 self.force_send_hello()
                 self.check_number_of_neighbors()
+    '''
 
     def get_neighbors(self):
         with self.neighbors_lock.genRlock():
@@ -170,6 +172,19 @@ class InterfacePim(Interface):
 
     def is_state_refresh_enabled(self):
         return self._state_refresh_capable
+
+    # check if Interface is StateRefreshCapable
+    def is_state_refresh_capable(self):
+        with self.neighbors_lock.genWlock():
+            if len(self.neighbors) == 0:
+                return False
+
+            state_refresh_capable = True
+            for neighbor in list(self.neighbors.values()):
+                state_refresh_capable &= neighbor.state_refresh_capable
+
+            return state_refresh_capable
+
 
 
     ###########################################

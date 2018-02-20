@@ -21,8 +21,11 @@ class Interface(metaclass=ABCMeta):
         # set receive socket and send socket
         self._send_socket = send_socket
         self._recv_socket = recv_socket
-        self.interface_enabled = True
+        self.interface_enabled = False
 
+
+    def _enable(self):
+        self.interface_enabled = True
         # run receive method in background
         receive_thread = threading.Thread(target=self.receive)
         receive_thread.daemon = True

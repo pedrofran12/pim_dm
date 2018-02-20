@@ -3,29 +3,22 @@ Created on Jul 16, 2015
 
 @author: alex
 '''
-
-#from convergence import Convergence
-#from des.event.timer import Timer
 from threading import Timer
 from CustomTimer.RemainingTimer import RemainingTimer
 from .assert_ import AssertState, AssertStateABC
-#from .messages.assert_msg import SFMRAssertMsg
-#from .messages.reset import SFMResetMsg
-from .metric import AssertMetric
 from .downstream_prune import DownstreamState, DownstreamStateABS
 from .tree_interface import TreeInterface
-from Packet.ReceivedPacket import ReceivedPacket
-from threading import Lock
 from Packet.PacketPimStateRefresh import PacketPimStateRefresh
 from Packet.Packet import Packet
 from Packet.PacketPimHeader import PacketPimHeader
 import traceback
 
 
-
 class TreeInterfaceDownstream(TreeInterface):
     def __init__(self, kernel_entry, interface_id):
-        TreeInterface.__init__(self, kernel_entry, interface_id)
+        logger = kernel_entry.kernel_entry_logger.getChild('DownstreamInterface')
+        TreeInterface.__init__(self, kernel_entry, interface_id, logger)
+        self.logger.debug('Created DownstreamInterface')
 
 
     ##########################################
@@ -177,8 +170,8 @@ class TreeInterfaceDownstream(TreeInterface):
         return
 
     # Override
-    def delete(self):
-        TreeInterface.delete(self)
+    def delete(self, change_type_interface=False):
+        super().delete(change_type_interface)
         self.clear_assert_timer()
         self.clear_prune_timer()
         self.clear_prune_pending_timer()

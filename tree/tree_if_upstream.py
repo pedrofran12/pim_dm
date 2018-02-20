@@ -18,12 +18,15 @@ import threading
 
 class TreeInterfaceUpstream(TreeInterface):
     def __init__(self, kernel_entry, interface_id, is_originater: bool):
-        TreeInterface.__init__(self, kernel_entry, interface_id)
+        logger = kernel_entry.kernel_entry_logger.getChild('UpstreamInterface')
+        TreeInterface.__init__(self, kernel_entry, interface_id, logger)
+
         # Graft/Prune State:
         self._graft_prune_state = UpstreamState.Forward
         self._graft_retry_timer = None
         self._override_timer = None
         self._prune_limit_timer = None
+        self._last_rpf = self.get_neighbor_RPF()
 
         # Originator state
         self._originator_state = OriginatorState.NotOriginator
@@ -47,6 +50,8 @@ class TreeInterfaceUpstream(TreeInterface):
         receive_thread = threading.Thread(target=self.socket_recv)
         receive_thread.daemon = True
         receive_thread.start()
+
+        self.logger.debug('Created UpstreamInterface')
 
 
     def socket_recv(self):
@@ -216,30 +221,53 @@ class TreeInterfaceUpstream(TreeInterface):
     def olist_is_not_null(self):
         self._graft_prune_state.olistIsNowNotNull(self)
 
-    ###########################################
-    # Changes on Unicast Routing Table
-    ###########################################
-    def change_rpf(self, olist_is_null):
-        if olist_is_null:
-            self._graft_prune_state.RPFnbrChanges_olistIsNull()
-        else:
-            self._graft_prune_state.RPFnbrChanges_olistIsNotNull()
 
+    ###########################################
+    # Changes to RPF'(s)
+    ###########################################
+
+    # caused by assert transition:
+    def set_assert_state(self, new_state):
+        super().set_assert_state(new_state)
+        self.change_rpf(self.is_olist_null())
+
+    # caused by unicast routing table:
+    def change_on_unicast_routing(self):
+        self.change_rpf(self.is_olist_null())
+
+
+    def change_rpf(self, olist_is_null):
+        current_rpf = self.get_neighbor_RPF()
+        if self._last_rpf != current_rpf:
+            self._last_rpf = current_rpf
+            if olist_is_null:
+                self._graft_prune_state.RPFnbrChanges_olistIsNull(self)
+            else:
+                self._graft_prune_state.RPFnbrChanges_olistIsNotNull(self)
+
+
+    ####################################################################
     #Override
     def is_forwarding(self):
         return False
 
     #Override
-    def delete(self):
-        super().delete()
+    def delete(self, change_type_interface=False):
         self.socket_is_enabled = False
         self.socket_pkt.close()
+        super().delete(change_type_interface)
         self.clear_graft_retry_timer()
         self.clear_assert_timer()
         self.clear_prune_limit_timer()
         self.clear_override_timer()
         self.clear_state_refresh_timer()
         self.clear_source_active_timer()
+
+        # Clear Graft/Prune State:
+        self._graft_prune_state = None
+
+        # Clear Originator state
+        self._originator_state = None
 
     def is_downstream(self):
         return False

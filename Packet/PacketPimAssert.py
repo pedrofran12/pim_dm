@@ -30,13 +30,13 @@ class PacketPimAssert:
     PIM_HDR_ASSERT_v4_LEN = struct.calcsize(PIM_HDR_ASSERT_v4)
     PIM_HDR_ASSERT_v6_LEN = struct.calcsize(PIM_HDR_ASSERT_v6)
 
-    def __init__(self, multicast_group_address: str or bytes, source_address: str or bytes, metric_preference: int, metric: int or float):
+    def __init__(self, multicast_group_address: str or bytes, source_address: str or bytes, metric_preference: int or float, metric: int or float):
         if type(multicast_group_address) is bytes:
             multicast_group_address = socket.inet_ntoa(multicast_group_address)
         if type(source_address) is bytes:
             source_address = socket.inet_ntoa(source_address)
-        if metric_preference > ASSERT_CANCEL_METRIC:
-            metric_preference = ASSERT_CANCEL_METRIC
+        if metric_preference > 0x7FFFFFFF:
+            metric_preference = 0x7FFFFFFF
         if metric > ASSERT_CANCEL_METRIC:
             metric = ASSERT_CANCEL_METRIC
         self.multicast_group_address = multicast_group_address
@@ -67,6 +67,6 @@ class PacketPimAssert:
         data = data[source_addr_len:]
 
         (metric_preference, metric) = struct.unpack(PacketPimAssert.PIM_HDR_ASSERT_WITHOUT_ADDRESS, data[:PacketPimAssert.PIM_HDR_ASSERT_WITHOUT_ADDRESS_LEN])
-        pim_payload = PacketPimAssert(multicast_group_addr_obj.group_address, source_addr_obj.unicast_address, metric_preference, metric)
+        pim_payload = PacketPimAssert(multicast_group_addr_obj.group_address, source_addr_obj.unicast_address, 0x7FFFFFFF & metric_preference, metric)
 
         return pim_payload

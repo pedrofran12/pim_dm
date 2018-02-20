@@ -8,7 +8,8 @@ ETH_P_IP = 0x0800  # Internet Protocol packet
 SO_RCVBUFFORCE = 33
 
 def get_s_g_bpf_filter_code(source, group, interface_name):
-    cmd = "tcpdump -ddd \"(udp or icmp) and host %s and dst %s\"" % (source, group)
+    #cmd = "tcpdump -ddd \"(udp or icmp) and host %s and dst %s\"" % (source, group)
+    cmd = "tcpdump -ddd \"(ip proto not 2) and host %s and dst %s\"" % (source, group)
     result = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     bpf_filter = b''
 

@@ -81,6 +81,9 @@ class MyDaemon(Daemon):
                 elif 'stop' in args and args.stop:
                     Main.stop()
                     connection.shutdown(socket.SHUT_RDWR)
+                elif 'test' in args and args.test:
+                    Main.test(args.test[0], args.test[1])
+                    connection.shutdown(socket.SHUT_RDWR)
             except Exception:
                 connection.shutdown(socket.SHUT_RDWR)
                 traceback.print_exc()
@@ -107,6 +110,7 @@ if __name__ == "__main__":
     group.add_argument("-ri", "--remove_interface", nargs=1, metavar='INTERFACE_NAME', help="Remove PIM interface")
     group.add_argument("-riigmp", "--remove_interface_igmp", nargs=1, metavar='INTERFACE_NAME', help="Remove IGMP interface")
     group.add_argument("-v", "--verbose", action="store_true", default=False, help="Verbose (print all debug messages)")
+    group.add_argument("-t", "--test", nargs=2, metavar=('ROUTER_NAME', 'SERVER_LOG_IP'), help="Tester... send log information to SERVER_LOG_IP. Set the router name to ROUTER_NAME")
     args = parser.parse_args()
 
     print(parser.parse_args())

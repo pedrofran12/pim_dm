@@ -8,9 +8,6 @@ import Main
 from threading import Lock, RLock
 import traceback
 
-#from convergence import Convergence
-#from sfmr.messages.prune import SFMRPruneMsg
-#from .router_interface import SFMRInterface
 from .downstream_prune import DownstreamState
 from .assert_ import AssertState, AssertStateABC
 
@@ -27,11 +24,18 @@ from .metric import AssertMetric
 from threading import Timer
 from .local_membership import LocalMembership
 from .globals import *
+from TestLogger import InterfaceFilter, logging
 
 class TreeInterface(metaclass=ABCMeta):
-    def __init__(self, kernel_entry, interface_id):
+    def __init__(self, kernel_entry, interface_id, logger):
         self._kernel_entry = kernel_entry
         self._interface_id = interface_id
+        self.logger = logger
+        ch = logging.NullHandler()
+        ch.addFilter(InterfaceFilter(interface_id))
+        self.logger.addHandler(ch)
+        self.assert_logger = logger.getChild('Assert')
+        self.join_prune_logger = logger.getChild('JoinPrune')
 
         # Local Membership State
         try:
@@ -60,7 +64,6 @@ class TreeInterface(metaclass=ABCMeta):
 
         self._igmp_lock = RLock()
 
-        #self.rprint('new ' + self.__class__.__name__)
 
     ############################################
     # Set ASSERT State
@@ -69,6 +72,7 @@ class TreeInterface(metaclass=ABCMeta):
         with self.get_state_lock():
             if new_state != self._assert_state:
                 self._assert_state = new_state
+                self.assert_logger.debug(str(new_state))
 
                 self.change_tree()
                 self.evaluate_ingroup()
@@ -243,7 +247,7 @@ class TreeInterface(metaclass=ABCMeta):
 
         try:
             (source, group) = self.get_tree_id()
-            ph = PacketPimAssert(multicast_group_address=group, source_address=source, metric_preference=1, metric=float("Inf"))
+            ph = PacketPimAssert(multicast_group_address=group, source_address=source, metric_preference=float("Inf"), metric=float("Inf"))
             pckt = Packet(payload=PacketPimHeader(ph))
 
             self.get_interface().send(pckt.bytes())
@@ -276,7 +280,32 @@ class TreeInterface(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def delete(self):
+    def delete(self, change_type_interface=False):
+        if change_type_interface:
+            if self.could_assert():
+                self._assert_state.couldAssertIsNowFalse(self)
+            else:
+                self._assert_state.couldAssertIsNowTrue(self)
+
+        (s, g) = self.get_tree_id()
+        # unsubscribe igmp information
+        try:
+            interface_name = Main.kernel.vif_index_to_name_dic[self._interface_id]
+            igmp_interface = Main.igmp_interfaces[interface_name]  # type: InterfaceIGMP
+            group_state = igmp_interface.interface_state.get_group_state(g)
+            group_state.remove_multicast_routing_entry(self)
+        except:
+            pass
+
+        # Prune State
+        self._prune_state = None
+
+        # Assert State
+        self._assert_state = None
+        self.set_assert_winner_metric(AssertMetric.infinite_assert_metric()) # unsubscribe from current AssertWinner NeighborLivenessTimer
+        self._assert_winner_metric = None
+        self.clear_assert_timer()
+
         print('Tree Interface deleted')
 
     def is_olist_null(self):
@@ -293,7 +322,6 @@ class TreeInterface(metaclass=ABCMeta):
         with self.get_state_lock():
             with self._igmp_lock:
                 if has_members != self._local_membership_state.has_members():
-                    #self._igmp_has_members = has_members
                     self._local_membership_state = LocalMembership.Include if has_members else LocalMembership.NoInfo
                     self.change_tree()
                     self.evaluate_ingroup()
@@ -301,11 +329,7 @@ class TreeInterface(metaclass=ABCMeta):
 
     def igmp_has_members(self):
         with self._igmp_lock:
-        #return self._igmp_has_members
             return self._local_membership_state.has_members()
-
-    def rprint(self, msg, *entrys):
-        return
 
     def __str__(self):
         return '{}<{}>'.format(self.__class__, self._interface.get_link())
