@@ -16,4 +16,5 @@ iptables -t nat -A POSTROUTING -s 0.0.0.0/0 -o eth4 -j MASQUERADE
 
 #apt-get update && apt-get --assume-yes install python3 python3-pip
 
+echo VTYSH_PAGER=more > /etc/environment
 

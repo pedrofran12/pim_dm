@@ -20,3 +20,5 @@ done
 # install python
 #apt-get update && apt-get --assume-yes install python3 python3-pip
 
+echo VTYSH_PAGER=more > /etc/environment
+
