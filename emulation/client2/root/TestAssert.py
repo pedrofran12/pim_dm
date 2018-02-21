@@ -1,4 +1,5 @@
 import logging
+from abc import ABCMeta
 
 class ContextFilter(logging.Filter):
     """
@@ -7,74 +8,94 @@ class ContextFilter(logging.Filter):
     Rather than use actual contextual information, we just use random
     data in this demo.
     """
-    def __init__(self, tree, router_name):
+    def __init__(self):
         super().__init__()
 
     def filter(self, record):
         return record.routername in ["R2","R3","R4","R5","R6"]
 
 
-class Test1(logging.Filter):
-    expectedState = {"R2": "L",
-                     "R3": "L",
-                     "R4": "W",
-                     "R5": "L",
-                     "R6": "L",
-    }
+class Test():
+    __metaclass__ = ABCMeta
 
-    Success = {"R2": False,
-               "R3": False,
-               "R4": False,
-               "R5": False,
-               "R6": False,
-    }
+    def __init__(self, testName, expectedState, success):
+        self.testName = testName
+        self.expectedState = expectedState
+        self.success = success
+
+    def test(self, record):
+        if record.routername not in self.expectedState:
+            return False
+        if record.msg == self.expectedState.get(record.routername).get(record.interfacename):
+            self.success[record.routername][record.interfacename] = True
+
+        for interface_test in self.success.values():
+            if False in interface_test.values():
+                return False
+        print('\x1b[1;32;40m' + self.testName + ' Success' + '\x1b[0m')
+        return True
+
+
+
+
+class Test1(Test):
 
     def __init__(self):
+        expectedState = {"R2": {"eth1": "L"},
+                         "R3": {"eth1": "L"},
+                         "R4": {"eth1": "W"},
+                         "R5": {"eth0": "L"},
+                         "R6": {"eth0": "L"},
+                         }
+
+        success = {"R2": {"eth1": False},
+                   "R3": {"eth1": False},
+                   "R4": {"eth1": False},
+                   "R5": {"eth0": False},
+                   "R6": {"eth0": False},
+                   }
+
+        super().__init__("Test1", expectedState, success)
+
+    def print_test(self):
         print("Test1: No info about (10.1.1.100,224.12.12.12)")
         print("Expected: R4 WINNER")
-        super().__init__()
-
-    def test(self, record):
-        if record.routername not in self.expectedState:
-            return False
-        if record.msg == self.expectedState.get(record.routername):
-            self.Success[record.routername] = True
-        if sum(self.Success.values()) == len(self.Success):
-            # tudo certo
-            print("Test1 Success")
-            return True
-        return False
 
 
 
-
-
-
-class Test2(logging.Filter):
-    expectedState = {"R2": "L",
-                     "R3": "W",
-                     "R5": "L",
-                     "R6": "L",
-    }
-
-    Success = {"R2": False,
-               "R3": False,
-               "R5": False,
-               "R6": False,
-    }
-
+class Test2(Test):
     def __init__(self):
+        expectedState = {"R2": {"eth1": "L"},
+                         "R3": {"eth1": "W"},
+                         "R5": {"eth0": "L"},
+                         "R6": {"eth0": "L"},
+                         }
+
+        success = {"R2": {"eth1": False},
+                   "R3": {"eth1": False},
+                   "R5": {"eth0": False},
+                   "R6": {"eth0": False},
+                   }
+        super().__init__("Test2", expectedState, success)
+
+    def print_test(self):
         print("Test2: Kill assert winner")
         print("Expected: R3 WINNER")
-        super().__init__()
 
-    def test(self, record):
-        if record.routername not in self.expectedState:
-            return False
-        if record.msg == self.expectedState.get(record.routername):
-            self.Success[record.routername] = True
-        if sum(self.Success.values()) == len(self.Success):
-            # tudo certo
-            print("Test2 Success")
-            return True
-        return False
+
+class Test3(Test):
+
+    def __init__(self):
+        expectedState = {"R2": {"eth1": "NI"},
+                         "R3": {"eth1": "NI"},
+                         }
+
+        success = {"R2": {"eth1": False},
+                   "R3": {"eth1": False},
+                   }
+
+        super().__init__("Test3", expectedState, success)
+
+    def print_test(self):
+        print("Test3: CouldAssert of AssertWinner(R3) -> False")
+        print("Expected: everyone NI")

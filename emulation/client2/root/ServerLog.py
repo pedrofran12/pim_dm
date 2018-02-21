@@ -3,9 +3,14 @@ import logging
 import logging.handlers
 import socketserver
 import struct
-from TestAssert import Test1, Test2
-import sys
+from TestAssert import Test1, Test2, Test3
 from threading import Lock
+
+class CustomFilter(logging.Filter):
+    def filter(self, record):
+        return record.name in ("pim.KernelEntry.DownstreamInterface.Assert", "pim.KernelEntry.UpstreamInterface.Assert", "pim.KernelInterface")
+
+
 
 class LogRecordStreamHandler(socketserver.StreamRequestHandler):
     """Handler for a streaming logging request.
@@ -13,9 +18,9 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
     This basically logs the record using whatever logging policy is
     configured locally.
     """
-
     currentTest = Test1()
-    nextTests = [Test2()]
+    currentTest.print_test()
+    nextTests = [Test2(), Test3()]
     lock = Lock()
     main = None
 
@@ -25,7 +30,7 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
         followed by the LogRecord in pickle format. Logs the record
         according to whatever policy is configured locally.
         """
-        logging.FileHandler('server.log').setLevel(logging.DEBUG)
+        #logging.FileHandler('server.log').setLevel(logging.DEBUG)
         while True:
             chunk = self.connection.recv(4)
             if len(chunk) < 4:
@@ -49,7 +54,7 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
         else:
             name = record.name
         logger = logging.getLogger(name)
-        logger.addFilter(logging.Filter('pim'))
+        logger.addFilter(CustomFilter())
         # N.B. EVERY record gets logged. This is because Logger.handle
         # is normally called AFTER logger-level filtering. If you want
         # to do filtering, do it at the client end to save wasting
@@ -60,8 +65,10 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
             if LogRecordStreamHandler.currentTest and record.routername in ["R2","R3","R4","R5","R6"] and record.name in ("pim.KernelEntry.DownstreamInterface.Assert", "pim.KernelEntry.UpstreamInterface.Assert") and LogRecordStreamHandler.currentTest.test(record):
                 if len(LogRecordStreamHandler.nextTests) > 0:
                     LogRecordStreamHandler.currentTest = LogRecordStreamHandler.nextTests.pop(0)
-                if LogRecordStreamHandler.currentTest is None:
-                    LogRecordStreamHandler.main.abort = 1
+                    LogRecordStreamHandler.currentTest.print_test()
+                else:
+                    LogRecordStreamHandler.currentTest = None
+                    LogRecordStreamHandler.main.abort = True
 
 
 
@@ -73,7 +80,7 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
 
     allow_reuse_address = True
 
-    def __init__(self, host='10.5.5.100',
+    def __init__(self, host='localhost',
                  port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
                  handler=LogRecordStreamHandler):
         handler.main = self
@@ -93,14 +100,16 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
                 self.handle_request()
             abort = self.abort
 
+
 def main():
     logging.basicConfig(
-        format='%(relativeCreated)5d %(name)-50s %(levelname)-8s %(tree)-35s %(vif)-2s %(routername)-2s %(message)s',
+        format='%(name)-50s %(levelname)-8s %(tree)-35s %(vif)-2s %(interfacename)-5s %(routername)-2s %(message)s',
         )
         #filename='example.log')
-    tcpserver = LogRecordSocketReceiver()
+    tcpserver = LogRecordSocketReceiver(host='10.5.5.100')
     print('About to start TCP server...')
     tcpserver.serve_until_stopped()
+
 
 if __name__ == '__main__':
     main()
