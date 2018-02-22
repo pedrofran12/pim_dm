@@ -96,7 +96,8 @@ class NoInfo(DownstreamStateABS):
 
         interface.set_prune_pending_timer(time)
 
-        print("receivedPrune, NI -> PP")
+        #print("receivedPrune, NI -> PP")
+        interface.join_prune_logger.debug("receivedPrune, NI -> PP")
 
     @staticmethod
     def receivedJoin(interface: "TreeInterfaceDownstream"):
@@ -107,7 +108,8 @@ class NoInfo(DownstreamStateABS):
         """
 
         # Do nothing
-        print("receivedJoin, NI -> NI")
+        #print("receivedJoin, NI -> NI")
+        interface.join_prune_logger.debug("receivedJoin, NI -> NI")
 
     @staticmethod
     def receivedGraft(interface: "TreeInterfaceDownstream", source_ip):
@@ -118,7 +120,8 @@ class NoInfo(DownstreamStateABS):
         """
         interface.send_graft_ack(source_ip)
 
-        print('receivedGraft, NI -> NI')
+        #print('receivedGraft, NI -> NI')
+        interface.join_prune_logger.debug('receivedGraft, NI -> NI')
 
     @staticmethod
     def PPTexpires(interface: "TreeInterfaceDownstream"):
@@ -127,7 +130,7 @@ class NoInfo(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-        #assert False
+        #assert False, "PPTexpires in state NI"
         return
 
     @staticmethod
@@ -137,7 +140,7 @@ class NoInfo(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-        #assert False
+        #assert False, "PTexpires in state NI"
         return
 
     @staticmethod
@@ -147,9 +150,8 @@ class NoInfo(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-        pass
-
         # Do nothing
+        return
 
     @staticmethod
     def send_state_refresh(interface: "TreeInterfaceDownstream"):
@@ -158,9 +160,12 @@ class NoInfo(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-        pass
-
         # Do nothing
+        return
+
+    def __str__(self):
+        return "NI"
+
 
 
 class PrunePending(DownstreamStateABS):
@@ -181,7 +186,9 @@ class PrunePending(DownstreamStateABS):
         @type interface: TreeInterfaceDownstreamDownstream
         """
 
-        print('receivedPrune, PP -> PP')
+        #print('receivedPrune, PP -> PP')
+        interface.join_prune_logger.debug('receivedPrune, PP -> PP')
+
 
     @staticmethod
     def receivedJoin(interface: "TreeInterfaceDownstream"):
@@ -190,13 +197,12 @@ class PrunePending(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-
-        #interface.get_ppt().stop()
         interface.clear_prune_pending_timer()
 
         interface.set_prune_state(DownstreamState.NoInfo)
 
-        print('receivedJoin, PP -> NI')
+        #print('receivedJoin, PP -> NI')
+        interface.join_prune_logger.debug('receivedJoin, PP -> NI')
 
     @staticmethod
     def receivedGraft(interface: "TreeInterfaceDownstream", source_ip):
@@ -210,7 +216,8 @@ class PrunePending(DownstreamStateABS):
         interface.set_prune_state(DownstreamState.NoInfo)
         interface.send_graft_ack(source_ip)
 
-        print('receivedGraft, PP -> NI')
+        #print('receivedGraft, PP -> NI')
+        interface.join_prune_logger.debug('receivedGraft, PP -> NI')
 
     @staticmethod
     def PPTexpires(interface: "TreeInterfaceDownstream"):
@@ -225,7 +232,8 @@ class PrunePending(DownstreamStateABS):
         if len(interface.get_interface().neighbors) > 1:
             interface.send_pruneecho()
 
-        print('PPTexpires, PP -> P')
+        #print('PPTexpires, PP -> P')
+        interface.join_prune_logger.debug('PPTexpires, PP -> P')
 
     @staticmethod
     def PTexpires(interface: "TreeInterfaceDownstream"):
@@ -235,7 +243,7 @@ class PrunePending(DownstreamStateABS):
         @type interface: TreeInterfaceDownstreamDownstream
         """
 
-        #assert False
+        #assert False, "PTexpires in state PP"
         return
 
     @staticmethod
@@ -245,8 +253,6 @@ class PrunePending(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-
-        # todo understand better
         interface.clear_prune_pending_timer()
 
         interface.set_prune_state(DownstreamState.NoInfo)
@@ -260,8 +266,10 @@ class PrunePending(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-        pass
+        return
 
+    def __str__(self):
+        return "PP"
 
 class Pruned(DownstreamStateABS):
     '''
@@ -279,10 +287,11 @@ class Pruned(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-        if interface.get_received_prune_holdtime() > interface.remaining_prune_timer():
+        if holdtime > interface.remaining_prune_timer():
             interface.set_prune_timer(holdtime)
 
-        print('receivedPrune, P -> P')
+        #print('receivedPrune, P -> P')
+        interface.join_prune_logger.debug('receivedPrune, P -> P')
 
     @staticmethod
     def receivedJoin(interface: "TreeInterfaceDownstream"):
@@ -295,7 +304,8 @@ class Pruned(DownstreamStateABS):
 
         interface.set_prune_state(DownstreamState.NoInfo)
 
-        print('receivedPrune, P -> NI')
+        #print('receivedPrune, P -> NI')
+        interface.join_prune_logger.debug('receivedPrune, P -> NI')
 
     @staticmethod
     def receivedGraft(interface: "TreeInterfaceDownstream", source_ip):
@@ -308,7 +318,8 @@ class Pruned(DownstreamStateABS):
         interface.set_prune_state(DownstreamState.NoInfo)
         interface.send_graft_ack(source_ip)
 
-        print('receivedGraft, P -> NI')
+        #print('receivedGraft, P -> NI')
+        interface.join_prune_logger.debug('receivedGraft, P -> NI')
 
     @staticmethod
     def PPTexpires(interface: "TreeInterfaceDownstream"):
@@ -317,7 +328,7 @@ class Pruned(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-        #assert False
+        #assert False, "PPTexpires in state P"
         return
 
     @staticmethod
@@ -327,10 +338,10 @@ class Pruned(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-
         interface.set_prune_state(DownstreamState.NoInfo)
 
-        print('PTexpires, P -> NI')
+        #print('PTexpires, P -> NI')
+        interface.join_prune_logger.debug('PTexpires, P -> NI')
 
     @staticmethod
     def is_now_RPF_Interface(interface: "TreeInterfaceDownstream"):
@@ -339,8 +350,6 @@ class Pruned(DownstreamStateABS):
 
         @type interface: TreeInterfaceDownstreamDownstream
         """
-        # todo ver melhor
-        #interface.get_pt().stop()
         interface.clear_prune_timer()
         interface.set_prune_state(DownstreamState.NoInfo)
 
@@ -356,8 +365,11 @@ class Pruned(DownstreamStateABS):
         if interface.get_interface().is_state_refresh_capable():
             interface.set_prune_timer(interface.get_received_prune_holdtime())
 
-        print('send_state_refresh, P -> P')
+        #print('send_state_refresh, P -> P')
+        interface.join_prune_logger.debug('send_state_refresh, P -> P')
 
+    def __str__(self):
+        return "P"
 
 class DownstreamState():
     NoInfo = NoInfo()

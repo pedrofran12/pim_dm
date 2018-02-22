@@ -30,25 +30,27 @@ class Originator(OriginatorStateABC):
         '''
         @type tree: Tree
         '''
-        print('SRT expired, O to O')
-
         tree.set_state_refresh_timer()
         tree.create_state_refresh_msg()
+        #print('SRT expired, O to O')
+        tree.originator_logger.debug('SRT expired, O -> O')
 
     @staticmethod
     def SATexpires(tree):
-        print('SAT expired, O to NO')
-
         tree.clear_state_refresh_timer()
         tree.set_originator_state(OriginatorState.NotOriginator)
+
+        #print('SAT expired, O to NO')
+        tree.originator_logger.debug('SAT expired, O -> NO')
 
     @staticmethod
     def SourceNotConnected(tree):
-        print('Source no longer directly connected, O to NO')
-
         tree.clear_state_refresh_timer()
         tree.clear_source_active_timer()
         tree.set_originator_state(OriginatorState.NotOriginator)
+
+        #print('Source no longer directly connected, O to NO')
+        tree.originator_logger.debug('Source no longer directly connected, O -> NO')
 
 
 class NotOriginator(OriginatorStateABC):
@@ -62,15 +64,16 @@ class NotOriginator(OriginatorStateABC):
         tree.set_state_refresh_timer()
         tree.set_source_active_timer()
 
-        print('new DataMsg from Source, NO to O')
+        #print('new DataMsg from Source, NO to O')
+        tree.originator_logger.debug('new DataMsg from Source, NO -> O')
 
     @staticmethod
     def SRTexpires(tree):
-        assert False
+        assert False, "SRTexpires in NO"
 
     @staticmethod
     def SATexpires(tree):
-        assert False
+        assert False, "SATexpires in NO"
 
     @staticmethod
     def SourceNotConnected(tree):

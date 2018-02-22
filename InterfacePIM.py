@@ -185,7 +185,21 @@ class InterfacePim(Interface):
 
             return state_refresh_capable
 
+    '''
+    def change_interface(self):
+        old_ip_address = self.ip_interface
+        self._recv_socket.setsockopt(socket.IPPROTO_IP, socket.IP_DROP_MEMBERSHIP,
+                     socket.inet_aton(Interface.MCAST_GRP) + socket.inet_aton(old_ip_address))
 
+        new_ip_interface = netifaces.ifaddresses(self.interface_name)[netifaces.AF_INET][0]['addr']
+        self._recv_socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                                     socket.inet_aton(Interface.MCAST_GRP) + socket.inet_aton(new_ip_interface))
+
+        self._send_socket.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_IF, socket.inet_aton(new_ip_interface))
+        self.ip_interface = new_ip_interface
+        import Main
+        Main.kernel.vif_dic[new_ip_interface] = Main.kernel.vif_dic.pop(old_ip_address)
+    '''
 
     ###########################################
     # Recv packets

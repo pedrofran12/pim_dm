@@ -1,7 +1,6 @@
 import socket
 import struct
-import netifaces
-from threading import Lock
+from threading import Lock, Thread
 import traceback
 
 import ipaddress
@@ -9,8 +8,8 @@ import ipaddress
 from RWLock.RWLock import RWLockWrite
 import Main
 
-from tree.tree_if_upstream import *
-from tree.tree_if_downstream import *
+from InterfacePIM import InterfacePim
+from InterfaceIGMP import InterfaceIGMP
 from tree.KernelEntry import KernelEntry
 
 
@@ -85,7 +84,7 @@ class Kernel:
         self.tree_logger = Main.logger.getChild('KernelTree')
 
         # receive signals from kernel with a background thread
-        handler_thread = threading.Thread(target=self.handler)
+        handler_thread = Thread(target=self.handler)
         handler_thread.daemon = True
         handler_thread.start()
 
@@ -103,34 +102,7 @@ class Kernel:
         struct in_addr vifc_rmt_addr;	/* IPIP tunnel addr */
     };
     '''
-    '''
-    def create_virtual_interface(self, ip_interface: str or bytes, interface_name: str, flags=0x0):
-        with self.interface_lock:
-            index = list(range(0, self.MAXVIFS) - self.vif_index_to_name_dic.keys())[0]
-
-
-            if type(ip_interface) is str:
-                ip_interface = socket.inet_aton(ip_interface)
-
-            struct_mrt_add_vif = struct.pack("HBBI 4s 4s", index, flags, 1, 0, ip_interface, socket.inet_aton("0.0.0.0"))
-            self.socket.setsockopt(socket.IPPROTO_IP, Kernel.MRT_ADD_VIF, struct_mrt_add_vif)
-            self.vif_dic[socket.inet_ntoa(ip_interface)] = index
-            self.vif_index_to_name_dic[index] = interface_name
-            self.vif_name_to_index_dic[interface_name] = index
-
-
-            with self.rwlock.genWlock():
-                for kernel_entry in list(self.routing.values()):
-                    kernel_entry.new_interface(index)
-
-            return index
-    '''
-
-
-
-######################### new create virtual if
     def create_virtual_interface(self, ip_interface: str or bytes, interface_name: str, index, flags=0x0):
-        #with self.interface_lock:
         if type(ip_interface) is str:
             ip_interface = socket.inet_aton(ip_interface)
 
@@ -151,7 +123,6 @@ class Kernel:
 
 
     def create_pim_interface(self, interface_name: str, state_refresh_capable:bool):
-        from InterfacePIM import InterfacePim
         with self.interface_lock:
             pim_interface = self.pim_interface.get(interface_name)
             igmp_interface = self.igmp_interface.get(interface_name)
@@ -174,7 +145,6 @@ class Kernel:
                 self.create_virtual_interface(ip_interface=ip_interface, interface_name=interface_name, index=index)
 
     def create_igmp_interface(self, interface_name: str):
-        from InterfaceIGMP import InterfaceIGMP
         with self.interface_lock:
             pim_interface = self.pim_interface.get(interface_name)
             igmp_interface = self.igmp_interface.get(interface_name)
@@ -197,41 +167,6 @@ class Kernel:
                 self.create_virtual_interface(ip_interface=ip_interface, interface_name=interface_name, index=index)
 
 
-
-    '''
-    def create_interface(self, interface_name: str, igmp:bool = False, pim:bool = False):
-        from InterfaceIGMP import InterfaceIGMP
-        from InterfacePIM import InterfacePim
-        if (not igmp and not pim):
-            return
-        with self.interface_lock:
-            pim_interface = self.pim_interface.get(interface_name)
-            igmp_interface = self.igmp_interface.get(interface_name)
-            vif_already_exists = pim_interface or igmp_interface
-            if pim_interface:
-                index = pim_interface.vif_index
-            elif igmp_interface:
-                index = igmp_interface.vif_index
-            else:
-                index = list(range(0, self.MAXVIFS) - self.vif_index_to_name_dic.keys())[0]
-
-            ip_interface = None
-            if pim and interface_name not in self.pim_interface:
-                pim_interface = InterfacePim(interface_name, index)
-                self.pim_interface[interface_name] = pim_interface
-                ip_interface = pim_interface.ip_interface
-            if igmp and interface_name not in self.igmp_interface:
-                igmp_interface = InterfaceIGMP(interface_name, index)
-                self.igmp_interface[interface_name] = igmp_interface
-                ip_interface = igmp_interface.ip_interface
-
-
-            if not vif_already_exists:
-                self.create_virtual_interface(ip_interface=ip_interface, interface_name=interface_name, index=index)
-    '''
-
-
-
     def remove_interface(self, interface_name, igmp:bool=False, pim:bool=False):
         with self.interface_lock:
             ip_interface = None
@@ -250,10 +185,6 @@ class Kernel:
 
             if (not self.igmp_interface.get(interface_name) and not self.pim_interface.get(interface_name)):
                 self.remove_virtual_interface(ip_interface)
-
-
-
-
 
 
     def remove_virtual_interface(self, ip_interface):
@@ -292,10 +223,6 @@ class Kernel:
     '''
     def set_multicast_route(self, kernel_entry: KernelEntry):
         source_ip = socket.inet_aton(kernel_entry.source_ip)
-        print("============")
-        print(type(kernel_entry.group_ip))
-        print(kernel_entry.group_ip)
-        print("============")
         group_ip = socket.inet_aton(kernel_entry.group_ip)
 
         outbound_interfaces = kernel_entry.get_outbound_interfaces_indexes()
@@ -422,11 +349,11 @@ class Kernel:
     # notify KernelEntries about changes at the unicast routing table
     def notify_unicast_changes(self, subnet):
         with self.rwlock.genWlock():
-            for source_ip in self.routing.keys():
+            for source_ip in list(self.routing.keys()):
                 source_ip_obj = ipaddress.ip_address(source_ip)
                 if source_ip_obj not in subnet:
                     continue
-                for group_ip in self.routing[source_ip].keys():
+                for group_ip in list(self.routing[source_ip].keys()):
                     self.routing[source_ip][group_ip].network_update()
 
 

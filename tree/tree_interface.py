@@ -24,18 +24,15 @@ from .metric import AssertMetric
 from threading import Timer
 from .local_membership import LocalMembership
 from .globals import *
-from TestLogger import InterfaceFilter, logging
+import logging
 
 class TreeInterface(metaclass=ABCMeta):
-    def __init__(self, kernel_entry, interface_id, logger):
+    def __init__(self, kernel_entry, interface_id, logger: logging.LoggerAdapter):
         self._kernel_entry = kernel_entry
         self._interface_id = interface_id
         self.logger = logger
-        ch = logging.NullHandler()
-        ch.addFilter(InterfaceFilter(interface_id))
-        self.logger.addHandler(ch)
-        self.assert_logger = logger.getChild('Assert')
-        self.join_prune_logger = logger.getChild('JoinPrune')
+        self.assert_logger = logging.LoggerAdapter(logger.logger.getChild('Assert'), logger.extra)
+        self.join_prune_logger = logging.LoggerAdapter(logger.logger.getChild('JoinPrune'), logger.extra)
 
         # Local Membership State
         try:
@@ -58,6 +55,7 @@ class TreeInterface(metaclass=ABCMeta):
         self._assert_state = AssertState.NoInfo
         self._assert_winner_metric = AssertMetric()
         self._assert_timer = None
+        self.assert_logger.debug("NI")
 
         # Received prune hold time
         self._received_prune_holdtime = None
@@ -265,9 +263,6 @@ class TreeInterface(metaclass=ABCMeta):
     def is_forwarding(self):
         pass
 
-    def nbr_died(self):
-        pass
-
     def nbr_connected(self):
         pass
 
@@ -331,9 +326,6 @@ class TreeInterface(metaclass=ABCMeta):
         with self._igmp_lock:
             return self._local_membership_state.has_members()
 
-    def __str__(self):
-        return '{}<{}>'.format(self.__class__, self._interface.get_link())
-
     def get_interface(self):
         kernel = Main.kernel
         interface_name = kernel.vif_index_to_name_dic[self._interface_id]
@@ -377,12 +369,6 @@ class TreeInterface(metaclass=ABCMeta):
         else:
             return self._kernel_entry.rpf_node
 
-    def i_am_assert_loser(self):
-        return self._assert_state == AssertState.Loser
-
-    def is_assert_winner(self):
-        return not self.is_downstream() and not self._assert_state == AssertState.Loser
-
     def is_S_directly_conn(self):
         return self._kernel_entry.rpf_node == self._kernel_entry.source_ip
 
@@ -403,6 +389,9 @@ class TreeInterface(metaclass=ABCMeta):
         else:
             return not self._assert_winner_metric.i_am_assert_winner(self) and \
                    self._assert_winner_metric.is_better_than(AssertMetric.spt_assert_metric(self))
+
+    def i_am_assert_loser(self):
+        return self._assert_state == AssertState.Loser
 
     def could_assert(self):
         return self.is_downstream()

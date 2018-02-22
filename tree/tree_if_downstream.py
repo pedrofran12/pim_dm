@@ -12,14 +12,20 @@ from Packet.PacketPimStateRefresh import PacketPimStateRefresh
 from Packet.Packet import Packet
 from Packet.PacketPimHeader import PacketPimHeader
 import traceback
-
+import logging
+import Main
 
 class TreeInterfaceDownstream(TreeInterface):
+    LOGGER = logging.getLogger('pim.KernelEntry.DownstreamInterface')
+
     def __init__(self, kernel_entry, interface_id):
-        logger = kernel_entry.kernel_entry_logger.getChild('DownstreamInterface')
+        extra_dict_logger = kernel_entry.kernel_entry_logger.extra.copy()
+        extra_dict_logger['vif'] = interface_id
+        extra_dict_logger['interfacename'] = Main.kernel.vif_index_to_name_dic[interface_id]
+        logger = logging.LoggerAdapter(TreeInterfaceDownstream.LOGGER, extra_dict_logger)
         TreeInterface.__init__(self, kernel_entry, interface_id, logger)
         self.logger.debug('Created DownstreamInterface')
-
+        self.join_prune_logger.debug(str(self._prune_state))
 
     ##########################################
     # Set state
@@ -28,6 +34,7 @@ class TreeInterfaceDownstream(TreeInterface):
         with self.get_state_lock():
             if new_state != self._prune_state:
                 self._prune_state = new_state
+                self.join_prune_logger.debug(str(new_state))
 
                 self.change_tree()
                 self.evaluate_ingroup()
@@ -120,11 +127,6 @@ class TreeInterfaceDownstream(TreeInterface):
         prune_indicator_bit = 0
         if self.is_pruned():
             prune_indicator_bit = 1
-
-            # TODO set timer
-            # todo maybe ja feito na maquina de estados Prune downstream
-            # if state_refresh_capable
-            #   set PT....
 
         import UnicastRouting
         (metric_preference, metric, mask) = UnicastRouting.get_metric(state_refresh_msg_received.source_address)

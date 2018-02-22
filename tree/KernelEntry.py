@@ -1,7 +1,3 @@
-import Main
-import socket
-
-from tree.originator import OriginatorState
 from tree.tree_if_upstream import TreeInterfaceUpstream
 from tree.tree_if_downstream import TreeInterfaceDownstream
 from .tree_interface import TreeInterface
@@ -10,19 +6,15 @@ from tree.metric import AssertMetric
 import UnicastRouting
 from time import time
 import Main
-from TestLogger import NonRootFilter, logging
+import logging
 
 class KernelEntry:
     TREE_TIMEOUT = 180
-
+    KERNEL_LOGGER = logging.getLogger('pim.KernelEntry')
 
     def __init__(self, source_ip: str, group_ip: str, inbound_interface_index: int):
-        self.kernel_entry_logger = Main.logger.getChild('KernelEntry')
-        ch = logging.NullHandler()
-        ch.addFilter(NonRootFilter('(' + source_ip + ',' + group_ip + ')'))
-        self.kernel_entry_logger.addHandler(ch)
+        self.kernel_entry_logger = logging.LoggerAdapter(KernelEntry.KERNEL_LOGGER, {'tree': '(' + source_ip + ',' + group_ip + ')'})
         self.kernel_entry_logger.debug('Create KernelEntry')
-
 
         self.source_ip = source_ip
         self.group_ip = group_ip
@@ -50,24 +42,27 @@ class KernelEntry:
         # (S,G) starts IG state
         self._was_olist_null = False
 
+        # Locks
+        self._multicast_change = Lock()
+        self._lock_test2 = RLock()
+        self.CHANGE_STATE_LOCK = RLock()
+
         # decide inbound interface based on rpf check
         self.inbound_interface_index = Main.kernel.vif_dic[self.check_rpf()]
 
         self.interface_state = {}  # type: Dict[int, TreeInterface]
-        for i in Main.kernel.vif_index_to_name_dic.keys():
-            try:
-                if i == self.inbound_interface_index:
-                    self.interface_state[i] = TreeInterfaceUpstream(self, i, False)
-                else:
-                    self.interface_state[i] = TreeInterfaceDownstream(self, i)
-            except:
-                import traceback
-                print(traceback.print_exc())
-                continue
+        with self.CHANGE_STATE_LOCK:
+            for i in Main.kernel.vif_index_to_name_dic.keys():
+                try:
+                    if i == self.inbound_interface_index:
+                        self.interface_state[i] = TreeInterfaceUpstream(self, i, False)
+                    else:
+                        self.interface_state[i] = TreeInterfaceDownstream(self, i)
+                except:
+                    import traceback
+                    print(traceback.print_exc())
+                    continue
 
-        self._multicast_change = Lock()
-        self._lock_test2 = RLock()
-        self.CHANGE_STATE_LOCK = RLock()
         self.change()
         self.evaluate_olist_change()
         self.timestamp_of_last_state_refresh_message_received = 0
@@ -213,9 +208,10 @@ class KernelEntry:
                 old_downstream_interface.delete(change_type_interface=True)
 
                 # atualizar tabela de encaminhamento multicast
-                self._was_olist_null = False
+                #self._was_olist_null = False
                 self.change()
                 self.evaluate_olist_change()
+                new_upstream_interface.change_on_unicast_routing(interface_change=True)
             elif self.rpf_node != rpf_node:
                 self.rpf_node = rpf_node
                 self.interface_state[self.inbound_interface_index].change_on_unicast_routing()

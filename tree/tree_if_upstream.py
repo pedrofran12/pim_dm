@@ -6,6 +6,7 @@ Created on Jul 16, 2015
 from .tree_interface import TreeInterface
 from .upstream_prune import UpstreamState
 from threading import Timer
+from CustomTimer.RemainingTimer import RemainingTimer
 from .globals import *
 import random
 from .metric import AssertMetric
@@ -14,11 +15,18 @@ from Packet.PacketPimStateRefresh import PacketPimStateRefresh
 import traceback
 from . import DataPacketsSocket
 import threading
+import logging
+import Main
 
 
 class TreeInterfaceUpstream(TreeInterface):
+    LOGGER = logging.getLogger('pim.KernelEntry.UpstreamInterface')
+
     def __init__(self, kernel_entry, interface_id, is_originater: bool):
-        logger = kernel_entry.kernel_entry_logger.getChild('UpstreamInterface')
+        extra_dict_logger = kernel_entry.kernel_entry_logger.extra.copy()
+        extra_dict_logger['vif'] = interface_id
+        extra_dict_logger['interfacename'] = Main.kernel.vif_index_to_name_dic[interface_id]
+        logger = logging.LoggerAdapter(TreeInterfaceUpstream.LOGGER, extra_dict_logger)
         TreeInterface.__init__(self, kernel_entry, interface_id, logger)
 
         # Graft/Prune State:
@@ -27,12 +35,14 @@ class TreeInterfaceUpstream(TreeInterface):
         self._override_timer = None
         self._prune_limit_timer = None
         self._last_rpf = self.get_neighbor_RPF()
+        self.join_prune_logger.debug(str(self._graft_prune_state))
 
         # Originator state
         self._originator_state = OriginatorState.NotOriginator
         self._state_refresh_timer = None
         self._source_active_timer = None
         self._prune_now_counter = 0
+        self.originator_logger = logging.LoggerAdapter(TreeInterfaceUpstream.LOGGER, extra_dict_logger)
 
         if self.is_S_directly_conn():
             self._graft_prune_state.sourceIsNowDirectConnect(self)
@@ -71,6 +81,7 @@ class TreeInterfaceUpstream(TreeInterface):
         with self.get_state_lock():
             if new_state != self._graft_prune_state:
                 self._graft_prune_state = new_state
+                self.join_prune_logger.debug(str(new_state))
 
                 self.change_tree()
                 self.evaluate_ingroup()
@@ -90,6 +101,9 @@ class TreeInterfaceUpstream(TreeInterface):
 
     def is_prune_limit_timer_running(self):
         return self._prune_limit_timer is not None and self._prune_limit_timer.is_alive()
+
+    def remaining_prune_limit_timer(self):
+        return 0 if not self._prune_limit_timer else self._prune_limit_timer.time_remaining()
 
     ##########################################
     # Set timers
@@ -114,7 +128,7 @@ class TreeInterfaceUpstream(TreeInterface):
 
     def set_prune_limit_timer(self, time=T_LIMIT):
         self.clear_prune_limit_timer()
-        self._prune_limit_timer = Timer(time, self.prune_limit_timeout)
+        self._prune_limit_timer = RemainingTimer(time, self.prune_limit_timeout)
         self._prune_limit_timer.start()
 
     def clear_prune_limit_timer(self):
@@ -177,6 +191,7 @@ class TreeInterfaceUpstream(TreeInterface):
 
     def recv_prune_msg(self, upstream_neighbor_address, holdtime):
         super().recv_prune_msg(upstream_neighbor_address, holdtime)
+        self.set_receceived_prune_holdtime(holdtime)
         self._graft_prune_state.seePrune(self)
 
     def recv_graft_ack_msg(self, source_ip_of_graft_ack):
@@ -232,13 +247,13 @@ class TreeInterfaceUpstream(TreeInterface):
         self.change_rpf(self.is_olist_null())
 
     # caused by unicast routing table:
-    def change_on_unicast_routing(self):
-        self.change_rpf(self.is_olist_null())
+    def change_on_unicast_routing(self, interface_change=False):
+        self.change_rpf(self.is_olist_null(), interface_change)
 
 
-    def change_rpf(self, olist_is_null):
+    def change_rpf(self, olist_is_null, interface_change=False):
         current_rpf = self.get_neighbor_RPF()
-        if self._last_rpf != current_rpf:
+        if interface_change or self._last_rpf != current_rpf:
             self._last_rpf = current_rpf
             if olist_is_null:
                 self._graft_prune_state.RPFnbrChanges_olistIsNull(self)

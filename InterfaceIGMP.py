@@ -15,7 +15,6 @@ class InterfaceIGMP(Interface):
     ETH_P_IP = 0x0800		# Internet Protocol packet
     SO_ATTACH_FILTER = 26
 
-    # TODO filtro nao esta a funcionar bem no netkit
     FILTER_IGMP = [
         struct.pack('HBBI', 0x28, 0, 0, 0x0000000c),
         struct.pack('HBBI', 0x15, 0, 3, 0x00000800),
@@ -36,15 +35,7 @@ class InterfaceIGMP(Interface):
         rcv_s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(InterfaceIGMP.ETH_P_IP))
 
         # receive only IGMP packets by setting a BPF filter
-        # TODO filtro nao esta a funcionar bem no netkit
-        cmd = "tcpdump -ddd \"ip proto 2\""
-        result = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-        bpf_filter = b''
-
-        tmp = result.stdout.read().splitlines()
-        for line in tmp[1:]:
-            bpf_filter += struct.pack("HBBI", *tuple(map(int, line.split(b' '))))
-
+        bpf_filter = b''.join(InterfaceIGMP.FILTER_IGMP)
         b = create_string_buffer(bpf_filter)
         mem_addr_of_filters = addressof(b)
         fprog = struct.pack('HL', len(InterfaceIGMP.FILTER_IGMP), mem_addr_of_filters)
@@ -74,8 +65,7 @@ class InterfaceIGMP(Interface):
             packet = ReceivedPacket(raw_bytes, self)
             ip_src = packet.ip_header.ip_src
             if not (ip_src == "0.0.0.0" or IPv4Address(ip_src).is_multicast):
-                self.PKT_FUNCTIONS[packet.payload.get_igmp_type()](self, packet)
-
+                self.PKT_FUNCTIONS.get(packet.payload.get_igmp_type(), InterfaceIGMP.receive_unknown_type)(self, packet)
 
     ###########################################
     # Recv packets
@@ -103,6 +93,9 @@ class InterfaceIGMP(Interface):
         igmp_group = packet.payload.group_address
         if ip_dst == igmp_group or (ip_dst == "224.0.0.1" and igmp_group == "0.0.0.0"):
             self.interface_state.receive_query(packet)
+
+    def receive_unknown_type(self, packet):
+        return
 
     PKT_FUNCTIONS = {
         Version_1_Membership_Report: receive_version_1_membership_report,

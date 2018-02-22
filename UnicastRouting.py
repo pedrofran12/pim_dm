@@ -101,7 +101,19 @@ class UnicastRouting(object):
             Main.kernel.notify_unicast_changes(subnet)
         elif action == "RTM_NEWADDR" or action == "RTM_DELADDR":
             # TODO ALTERACOES NA INTERFACE
-            print("a")
+            '''
+            print(msg)
+            attrs = msg["attrs"]
+            for (key, value) in attrs:
+                print((key, value))
+                if key == "IFA_LABEL":
+                    interface_name = value
+                    break
+            pim_interface = Main.kernel.pim_interface.get(interface_name)
+            pim_interface.change_interface()
+            igmp_interface = Main.kernel.igmp_interface.get(interface_name)
+            '''
+            pass
 
 
     def stop(self):
