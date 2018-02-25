@@ -3,14 +3,39 @@ import logging
 import logging.handlers
 import socketserver
 import struct
-from TestAssert import Test1, Test2, Test3
-from threading import Lock
+from TestAssert import CustomFilter, Test1, Test2, Test3
+import sys
+import threading
+from queue import Queue
 
-class CustomFilter(logging.Filter):
-    def filter(self, record):
-        return record.name in ("pim.KernelEntry.DownstreamInterface.Assert", "pim.KernelEntry.UpstreamInterface.Assert", "pim.KernelInterface")
+q = Queue()
 
 
+def worker():
+    while True:
+        item = q.get()
+        if item is None:
+            break
+        logger = logging.getLogger('my_logger')
+        logger.handle(item)
+        q.task_done()
+
+
+class TestHandler(logging.StreamHandler):
+    currentTest = Test1()
+    currentTest.print_test()
+    nextTests = [Test2(), Test3()]
+    main = None
+
+    def emit(self, record):
+        super().emit(record)
+        if TestHandler.currentTest and TestHandler.currentTest.test(record):
+            if len(TestHandler.nextTests) > 0:
+                TestHandler.currentTest = TestHandler.nextTests.pop(0)
+                TestHandler.currentTest.print_test()
+            else:
+                TestHandler.currentTest = None
+                TestHandler.main.abort = True
 
 class LogRecordStreamHandler(socketserver.StreamRequestHandler):
     """Handler for a streaming logging request.
@@ -18,11 +43,6 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
     This basically logs the record using whatever logging policy is
     configured locally.
     """
-    currentTest = Test1()
-    currentTest.print_test()
-    nextTests = [Test2(), Test3()]
-    lock = Lock()
-    main = None
 
     def handle(self):
         """
@@ -30,7 +50,6 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
         followed by the LogRecord in pickle format. Logs the record
         according to whatever policy is configured locally.
         """
-        #logging.FileHandler('server.log').setLevel(logging.DEBUG)
         while True:
             chunk = self.connection.recv(4)
             if len(chunk) < 4:
@@ -41,36 +60,10 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
                 chunk = chunk + self.connection.recv(slen - len(chunk))
             obj = self.unPickle(chunk)
             record = logging.makeLogRecord(obj)
-            self.handleLogRecord(record)
+            q.put(item=record)
 
     def unPickle(self, data):
         return pickle.loads(data)
-
-    def handleLogRecord(self, record):
-        # if a name is specified, we use the named logger rather than the one
-        # implied by the record.
-        if self.server.logname is not None:
-            name = self.server.logname
-        else:
-            name = record.name
-        logger = logging.getLogger(name)
-        logger.addFilter(CustomFilter())
-        # N.B. EVERY record gets logged. This is because Logger.handle
-        # is normally called AFTER logger-level filtering. If you want
-        # to do filtering, do it at the client end to save wasting
-        # cycles and network bandwidth!
-        #if record.routername == "R2":
-        logger.handle(record)
-        with LogRecordStreamHandler.lock:
-            if LogRecordStreamHandler.currentTest and record.routername in ["R2","R3","R4","R5","R6"] and record.name in ("pim.KernelEntry.DownstreamInterface.Assert", "pim.KernelEntry.UpstreamInterface.Assert") and LogRecordStreamHandler.currentTest.test(record):
-                if len(LogRecordStreamHandler.nextTests) > 0:
-                    LogRecordStreamHandler.currentTest = LogRecordStreamHandler.nextTests.pop(0)
-                    LogRecordStreamHandler.currentTest.print_test()
-                else:
-                    LogRecordStreamHandler.currentTest = None
-                    LogRecordStreamHandler.main.abort = True
-
-
 
 
 class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
@@ -102,10 +95,15 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
 
 
 def main():
-    logging.basicConfig(
-        format='%(name)-50s %(levelname)-8s %(tree)-35s %(vif)-2s %(interfacename)-5s %(routername)-2s %(message)s',
-        )
-        #filename='example.log')
+    handler = TestHandler(sys.stdout)
+    formatter = logging.Formatter('%(name)-50s %(levelname)-8s %(tree)-35s %(vif)-2s %(interfacename)-5s %(routername)-2s %(message)s')
+    handler.setFormatter(formatter)
+    logging.getLogger('my_logger').addHandler(handler)
+    logging.getLogger('my_logger').addFilter(CustomFilter())
+
+    t = threading.Thread(target=worker)
+    t.start()
+
     tcpserver = LogRecordSocketReceiver(host='10.5.5.100')
     print('About to start TCP server...')
     tcpserver.serve_until_stopped()
