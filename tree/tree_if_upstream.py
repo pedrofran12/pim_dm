@@ -22,7 +22,7 @@ import Main
 class TreeInterfaceUpstream(TreeInterface):
     LOGGER = logging.getLogger('pim.KernelEntry.UpstreamInterface')
 
-    def __init__(self, kernel_entry, interface_id, is_originater: bool):
+    def __init__(self, kernel_entry, interface_id):
         extra_dict_logger = kernel_entry.kernel_entry_logger.extra.copy()
         extra_dict_logger['vif'] = interface_id
         extra_dict_logger['interfacename'] = Main.kernel.vif_index_to_name_dic[interface_id]
@@ -42,7 +42,8 @@ class TreeInterfaceUpstream(TreeInterface):
         self._state_refresh_timer = None
         self._source_active_timer = None
         self._prune_now_counter = 0
-        self.originator_logger = logging.LoggerAdapter(TreeInterfaceUpstream.LOGGER, extra_dict_logger)
+        self.originator_logger = logging.LoggerAdapter(TreeInterfaceUpstream.LOGGER.getChild('Originator'), extra_dict_logger)
+        self.originator_logger.debug(str(self._originator_state))
 
         if self.is_S_directly_conn():
             self._graft_prune_state.sourceIsNowDirectConnect(self)
@@ -89,6 +90,7 @@ class TreeInterfaceUpstream(TreeInterface):
     def set_originator_state(self, new_state: OriginatorStateABC):
         if new_state != self._originator_state:
             self._originator_state = new_state
+            self.originator_logger.debug(str(new_state))
 
     ##########################################
     # Check timers
@@ -250,6 +252,12 @@ class TreeInterfaceUpstream(TreeInterface):
     def change_on_unicast_routing(self, interface_change=False):
         self.change_rpf(self.is_olist_null(), interface_change)
 
+        '''
+        if self.is_S_directly_conn():
+            self._graft_prune_state.sourceIsNowDirectConnect(self)
+        else:
+            self._originator_state.SourceNotConnected(self)
+        '''
 
     def change_rpf(self, olist_is_null, interface_change=False):
         current_rpf = self.get_neighbor_RPF()
@@ -265,6 +273,11 @@ class TreeInterfaceUpstream(TreeInterface):
     #Override
     def is_forwarding(self):
         return False
+
+    # If new/reset neighbor is RPF neighbor => clear prune limit timer
+    def new_or_reset_neighbor(self, neighbor_ip):
+        if neighbor_ip == self.get_neighbor_RPF():
+            self.clear_prune_limit_timer()
 
     #Override
     def delete(self, change_type_interface=False):

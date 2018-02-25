@@ -52,6 +52,8 @@ class Originator(OriginatorStateABC):
         #print('Source no longer directly connected, O to NO')
         tree.originator_logger.debug('Source no longer directly connected, O -> NO')
 
+    def __str__(self):
+        return 'O'
 
 class NotOriginator(OriginatorStateABC):
     @staticmethod
@@ -78,6 +80,9 @@ class NotOriginator(OriginatorStateABC):
     @staticmethod
     def SourceNotConnected(tree):
         return
+
+    def __str__(self):
+        return 'NO'
 
 
 class OriginatorState():

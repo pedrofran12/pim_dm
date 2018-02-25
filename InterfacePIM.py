@@ -145,6 +145,9 @@ class InterfacePim(Interface):
             self._had_neighbors = has_neighbors
             Main.kernel.interface_change_number_of_neighbors()
 
+    def new_or_reset_neighbor(self, neighbor_ip):
+        Main.kernel.new_or_reset_neighbor(self.vif_index, neighbor_ip)
+
     '''
     def add_neighbor(self, ip, random_number, hello_hold_time):
         with self.neighbors_lock.genWlock():
@@ -187,18 +190,21 @@ class InterfacePim(Interface):
 
     '''
     def change_interface(self):
+        # check if ip change was already applied to interface
         old_ip_address = self.ip_interface
+        new_ip_interface = netifaces.ifaddresses(self.interface_name)[netifaces.AF_INET][0]['addr']
+        if old_ip_address == new_ip_interface:
+            return
+        
+        self._send_socket.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_IF, socket.inet_aton(new_ip_interface))
+
         self._recv_socket.setsockopt(socket.IPPROTO_IP, socket.IP_DROP_MEMBERSHIP,
                      socket.inet_aton(Interface.MCAST_GRP) + socket.inet_aton(old_ip_address))
 
-        new_ip_interface = netifaces.ifaddresses(self.interface_name)[netifaces.AF_INET][0]['addr']
         self._recv_socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
                                      socket.inet_aton(Interface.MCAST_GRP) + socket.inet_aton(new_ip_interface))
 
-        self._send_socket.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_IF, socket.inet_aton(new_ip_interface))
         self.ip_interface = new_ip_interface
-        import Main
-        Main.kernel.vif_dic[new_ip_interface] = Main.kernel.vif_dic.pop(old_ip_address)
     '''
 
     ###########################################
@@ -220,11 +226,14 @@ class InterfacePim(Interface):
 
         with self.neighbors_lock.genWlock():
             if ip not in self.neighbors:
+                if hello_hold_time == 0:
+                    return
                 print("ADD NEIGHBOR")
                 from Neighbor import Neighbor
                 self.neighbors[ip] = Neighbor(self, ip, generation_id, hello_hold_time, state_refresh_capable)
                 self.force_send_hello()
                 self.check_number_of_neighbors()
+                self.new_or_reset_neighbor(ip)
                 return
             else:
                 neighbor = self.neighbors[ip]

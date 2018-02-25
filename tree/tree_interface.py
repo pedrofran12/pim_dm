@@ -5,7 +5,7 @@ Created on Jul 16, 2015
 '''
 from abc import ABCMeta, abstractmethod
 import Main
-from threading import Lock, RLock
+from threading import RLock
 import traceback
 
 from .downstream_prune import DownstreamState
@@ -263,16 +263,12 @@ class TreeInterface(metaclass=ABCMeta):
     def is_forwarding(self):
         pass
 
-    def nbr_connected(self):
-        pass
-
     def assert_winner_nlt_expires(self):
         self._assert_state.winnerLivelinessTimerExpires(self)
 
-
-    #@abstractmethod
-    def is_now_root(self):
-        pass
+    @abstractmethod
+    def new_or_reset_neighbor(self, neighbor_ip):
+        raise NotImplementedError()
 
     @abstractmethod
     def delete(self, change_type_interface=False):

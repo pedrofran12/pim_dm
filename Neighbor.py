@@ -45,7 +45,7 @@ class Neighbor:
         # neighbor restarted
         if self.generation_id != generation_id:
             self.generation_id = generation_id
-            self.contact_interface.send_hello()
+            self.contact_interface.force_send_hello()
             self.reset()
 
     """
@@ -74,7 +74,7 @@ class Neighbor:
 
 
     def reset(self):
-        return
+        self.contact_interface.new_or_reset_neighbor(self.ip)
 
 
     def receive_hello(self, generation_id, hello_hold_time, state_refresh_capable):

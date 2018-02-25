@@ -27,6 +27,9 @@ class TreeInterfaceDownstream(TreeInterface):
         self.logger.debug('Created DownstreamInterface')
         self.join_prune_logger.debug(str(self._prune_state))
 
+        # Last state refresh message sent (resend in case of new neighbors)
+        self._last_state_refresh_message = None
+
     ##########################################
     # Set state
     ##########################################
@@ -116,6 +119,10 @@ class TreeInterfaceDownstream(TreeInterface):
     # Send messages
     ######################################
     def send_state_refresh(self, state_refresh_msg_received):
+        if state_refresh_msg_received is None:
+            return
+
+        self._last_state_refresh_message = state_refresh_msg_received
         if self.lost_assert() or not self.get_interface().is_state_refresh_enabled():
             return
 
@@ -167,9 +174,10 @@ class TreeInterfaceDownstream(TreeInterface):
     #           self._assert_winner_metric.is_better_than(AssertMetric.spt_assert_metric(self))
 
     # Override
-    def nbr_connected(self):
-        # TODO resend last state refresh messages
-        return
+    # When new neighbor connects, send last state refresh msg
+    def new_or_reset_neighbor(self, neighbor_ip):
+        self.send_state_refresh(self._last_state_refresh_message)
+
 
     # Override
     def delete(self, change_type_interface=False):

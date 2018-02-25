@@ -12,7 +12,7 @@ class KernelEntry:
     TREE_TIMEOUT = 180
     KERNEL_LOGGER = logging.getLogger('pim.KernelEntry')
 
-    def __init__(self, source_ip: str, group_ip: str, inbound_interface_index: int):
+    def __init__(self, source_ip: str, group_ip: str):
         self.kernel_entry_logger = logging.LoggerAdapter(KernelEntry.KERNEL_LOGGER, {'tree': '(' + source_ip + ',' + group_ip + ')'})
         self.kernel_entry_logger.debug('Create KernelEntry')
 
@@ -55,7 +55,7 @@ class KernelEntry:
             for i in Main.kernel.vif_index_to_name_dic.keys():
                 try:
                     if i == self.inbound_interface_index:
-                        self.interface_state[i] = TreeInterfaceUpstream(self, i, False)
+                        self.interface_state[i] = TreeInterfaceUpstream(self, i)
                     else:
                         self.interface_state[i] = TreeInterfaceDownstream(self, i)
                 except:
@@ -199,7 +199,7 @@ class KernelEntry:
                 # change type of interfaces
                 new_downstream_interface = TreeInterfaceDownstream(self, self.inbound_interface_index)
                 self.interface_state[self.inbound_interface_index] = new_downstream_interface
-                new_upstream_interface = TreeInterfaceUpstream(self, new_inbound_interface_index, False)
+                new_upstream_interface = TreeInterfaceUpstream(self, new_inbound_interface_index)
                 self.interface_state[new_inbound_interface_index] = new_upstream_interface
                 self.inbound_interface_index = new_inbound_interface_index
 
@@ -222,6 +222,10 @@ class KernelEntry:
         with self.CHANGE_STATE_LOCK:
             self.change()
             self.evaluate_olist_change()
+
+    def new_or_reset_neighbor(self, if_index, neighbor_ip):
+        # todo maybe lock de interfaces
+        self.interface_state[if_index].new_or_reset_neighbor(neighbor_ip)
 
     def is_olist_null(self):
         for interface in self.interface_state.values():
@@ -248,7 +252,6 @@ class KernelEntry:
         return self.group_ip
 
     def change(self):
-        # todo: changes on unicast routing or multicast routing...
         with self._multicast_change:
             Main.kernel.set_multicast_route(self)
 

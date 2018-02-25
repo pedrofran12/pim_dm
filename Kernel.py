@@ -337,7 +337,7 @@ class Kernel:
             if ip_src in self.routing and ip_dst in self.routing[ip_src]:
                 return self.routing[ip_src][ip_dst]
             elif create_if_not_existent:
-                kernel_entry = KernelEntry(ip_src, ip_dst, 0)
+                kernel_entry = KernelEntry(ip_src, ip_dst)
                 if ip_src not in self.routing:
                     self.routing[ip_src] = {}
 
@@ -357,9 +357,38 @@ class Kernel:
                     self.routing[source_ip][group_ip].network_update()
 
 
+    # notify about changes at the interface (IP)
+    '''
+    def notify_interface_change(self, interface_name):
+        with self.interface_lock:
+            # check if interface was already added
+            if interface_name not in self.vif_name_to_index_dic:
+                return
+
+            print("trying to change ip")
+            pim_interface = self.pim_interface.get(interface_name)
+            if pim_interface:
+                old_ip = pim_interface.get_ip()
+                pim_interface.change_interface()
+                new_ip = pim_interface.get_ip()
+                if old_ip != new_ip:
+                    self.vif_dic[new_ip] = self.vif_dic.pop(old_ip)
+
+            igmp_interface = self.igmp_interface.get(interface_name)
+            if igmp_interface:
+                igmp_interface.change_interface()
+    '''
+
     # When interface changes number of neighbors verify if olist changes and prune/forward respectively
     def interface_change_number_of_neighbors(self):
-        with self.rwlock.genWlock():
+        with self.rwlock.genRlock():
             for groups_dict in self.routing.values():
                 for entry in groups_dict.values():
                     entry.change_at_number_of_neighbors()
+
+    # When new neighbor connects try to resend last state refresh msg (if AssertWinner)
+    def new_or_reset_neighbor(self, vif_index, neighbor_ip):
+        with self.rwlock.genRlock():
+            for groups_dict in self.routing.values():
+                for entry in groups_dict.values():
+                    entry.new_or_reset_neighbor(vif_index, neighbor_ip)

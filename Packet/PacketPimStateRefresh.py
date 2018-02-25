@@ -64,7 +64,7 @@ class PacketPimStateRefresh:
 
         msg = multicast_group_adress + source_address + originator_adress + \
               struct.pack(self.PIM_HDR_STATE_REFRESH_WITHOUT_ADDRESSES, 0x7FFFFFFF & self.metric_preference,
-                          self.metric, self.mask_len, self.ttl, prune_and_assert_flags, self. interval)
+                          self.metric, self.mask_len, self.ttl, prune_and_assert_flags, self.interval)
 
         return msg
 

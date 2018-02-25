@@ -26,8 +26,8 @@ class PacketPimHelloOptions(metaclass=ABCMeta):
     def parse_bytes(data: bytes, type:int = None, length:int = None):
         (type, length) = struct.unpack(PacketPimHelloOptions.PIM_HDR_OPTS,
                                         data[:PacketPimHelloOptions.PIM_HDR_OPTS_LEN])
-        print("TYPE:", type)
-        print("LENGTH:", length)
+        #print("TYPE:", type)
+        #print("LENGTH:", length)
         data = data[PacketPimHelloOptions.PIM_HDR_OPTS_LEN:]
         #return PIM_MSG_TYPES[type](data)
         return PIM_MSG_TYPES.get(type, PacketPimHelloUnknown).parse_bytes(data, type, length)
@@ -114,7 +114,7 @@ class PacketPimHelloHoldtime(PacketPimHelloOptions):
             raise Exception
         (holdtime, ) = struct.unpack(PacketPimHelloHoldtime.PIM_HDR_OPT,
                                      data[:PacketPimHelloHoldtime.PIM_HDR_OPT_LEN])
-        print("HOLDTIME:", holdtime)
+        #print("HOLDTIME:", holdtime)
         return PacketPimHelloHoldtime(holdtime=holdtime)
 
 
@@ -142,7 +142,7 @@ class PacketPimHelloGenerationID(PacketPimHelloOptions):
             raise Exception
         (generation_id, ) = struct.unpack(PacketPimHelloGenerationID.PIM_HDR_OPT,
                                      data[:PacketPimHelloGenerationID.PIM_HDR_OPT_LEN])
-        print("GenerationID:", generation_id)
+        #print("GenerationID:", generation_id)
         return PacketPimHelloGenerationID(generation_id=generation_id)
 
 
@@ -158,7 +158,7 @@ class PacketPimHelloUnknown(PacketPimHelloOptions):
     '''
     def __init__(self, type, length):
         super().__init__(type=type, length=length)
-        print("PIM Hello Option Unknown... TYPE=", type, "LENGTH=", length)
+        #print("PIM Hello Option Unknown... TYPE=", type, "LENGTH=", length)
 
     def bytes(self) -> bytes:
         raise Exception

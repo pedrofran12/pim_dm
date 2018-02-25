@@ -44,6 +44,7 @@ class InterfaceIGMP(Interface):
         # bind to interface
         rcv_s.bind((interface_name, 0x0800))
         super().__init__(interface_name=interface_name, recv_socket=rcv_s, send_socket=snd_s, vif_index=vif_index)
+        self.interface_enabled = True
         from igmp.RouterState import RouterState
         self.interface_state = RouterState(self)
         super()._enable()

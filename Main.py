@@ -1,11 +1,11 @@
 import netifaces
 import time
 from prettytable import PrettyTable
+import sys
+import logging, logging.handlers
+from TestLogger import RootFilter
 
-#from InterfacePIM import InterfacePim
-#from InterfaceIGMP import InterfaceIGMP
 from Kernel import Kernel
-#from threading import Lock
 import UnicastRouting
 
 interfaces = {}  # interfaces with multicast routing enabled
@@ -160,8 +160,6 @@ def stop():
 
 def test(router_name, server_logger_ip):
     global logger
-    import logging.handlers
-    from TestLogger import RootFilter
     socketHandler = logging.handlers.SocketHandler(server_logger_ip,
                                                    logging.handlers.DEFAULT_TCP_LOGGING_PORT)
     # don't bother with a formatter, since a socket handler sends the event as
@@ -173,8 +171,6 @@ def test(router_name, server_logger_ip):
 def main():
     # logging
     global logger
-    import sys
-    import logging, logging.handlers
     logger = logging.getLogger('pim')
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler(sys.stdout))

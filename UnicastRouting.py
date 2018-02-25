@@ -102,16 +102,17 @@ class UnicastRouting(object):
         elif action == "RTM_NEWADDR" or action == "RTM_DELADDR":
             # TODO ALTERACOES NA INTERFACE
             '''
+            print(action)
             print(msg)
+            interface_name = None
             attrs = msg["attrs"]
             for (key, value) in attrs:
                 print((key, value))
                 if key == "IFA_LABEL":
                     interface_name = value
                     break
-            pim_interface = Main.kernel.pim_interface.get(interface_name)
-            pim_interface.change_interface()
-            igmp_interface = Main.kernel.igmp_interface.get(interface_name)
+    
+            Main.kernel.notify_interface_change(interface_name)
             '''
             pass
 
