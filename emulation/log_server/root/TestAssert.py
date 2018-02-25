@@ -1,18 +1,10 @@
 import logging
 from abc import ABCMeta
 
-class ContextFilter(logging.Filter):
-    """
-    This is a filter which injects contextual information into the log.
-
-    Rather than use actual contextual information, we just use random
-    data in this demo.
-    """
-    def __init__(self):
-        super().__init__()
-
+class CustomFilter(logging.Filter):
     def filter(self, record):
-        return record.routername in ["R2","R3","R4","R5","R6"]
+        return record.name in ("pim.KernelEntry.DownstreamInterface.Assert", "pim.KernelEntry.UpstreamInterface.Assert", "pim.KernelInterface") and \
+                record.routername in ["R1", "R2", "R3", "R4", "R5", "R6"]
 
 
 class Test():
