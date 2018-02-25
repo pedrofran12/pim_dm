@@ -10,8 +10,8 @@ python3 Run.py -aiigmp eth0
 python3 Run.py -aiigmp eth1
 python3 Run.py -aiigmp eth2
 python3 Run.py -aiigmp eth3
-python3 Run.py -ai eth0
-python3 Run.py -ai eth1
-python3 Run.py -ai eth2
-python3 Run.py -ai eth3
+python3 Run.py -aisr eth0
+python3 Run.py -aisr eth1
+python3 Run.py -aisr eth2
+python3 Run.py -aisr eth3
 python3 Run.py -v

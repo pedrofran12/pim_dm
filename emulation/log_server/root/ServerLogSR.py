@@ -3,8 +3,10 @@ import logging
 import logging.handlers
 import socketserver
 import struct
-from TestJoinPrune import CustomFilter, Test1, Test2, Test3, Test4, Test5
+from TestStateRefresh import CustomFilter, Test1, Test2, Test3
 from queue import Queue
+import sys
+import threading
 
 q = Queue()
 
@@ -22,7 +24,7 @@ def worker():
 class TestHandler(logging.StreamHandler):
     currentTest = Test1()
     currentTest.print_test()
-    nextTests = [Test2(), Test3(), Test4(), Test5()]
+    nextTests = [Test2(), Test3()]
     main = None
 
     def emit(self, record):
@@ -93,14 +95,12 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
 
 
 def main():
-    import sys
     handler = TestHandler(sys.stdout)
     formatter = logging.Formatter('%(name)-50s %(levelname)-8s %(tree)-35s %(vif)-2s %(interfacename)-5s %(routername)-2s %(message)s')
     handler.setFormatter(formatter)
     logging.getLogger('my_logger').addHandler(handler)
     logging.getLogger('my_logger').addFilter(CustomFilter())
 
-    import threading
     t = threading.Thread(target=worker)
     t.start()
 
