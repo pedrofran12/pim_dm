@@ -3,9 +3,7 @@ import logging
 import logging.handlers
 import socketserver
 import struct
-from TestAssert import CustomFilter, Test1, Test2, Test3
-import sys
-import threading
+from TestJoinPrune import CustomFilter, Test1, Test2, Test3, Test4, Test5
 from queue import Queue
 
 q = Queue()
@@ -24,7 +22,7 @@ def worker():
 class TestHandler(logging.StreamHandler):
     currentTest = Test1()
     currentTest.print_test()
-    nextTests = [Test2(), Test3()]
+    nextTests = [Test2(), Test3(), Test4(), Test5()]
     main = None
 
     def emit(self, record):
@@ -36,6 +34,7 @@ class TestHandler(logging.StreamHandler):
             else:
                 TestHandler.currentTest = None
                 TestHandler.main.abort = True
+
 
 class LogRecordStreamHandler(socketserver.StreamRequestHandler):
     """Handler for a streaming logging request.
@@ -76,11 +75,10 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
     def __init__(self, host='localhost',
                  port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
                  handler=LogRecordStreamHandler):
-        handler.main = self
+        TestHandler.main = self
         socketserver.ThreadingTCPServer.__init__(self, (host, port), handler)
         self.abort = 0
         self.timeout = 1
-        self.logname = None
 
     def serve_until_stopped(self):
         import select
@@ -95,12 +93,14 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
 
 
 def main():
+    import sys
     handler = TestHandler(sys.stdout)
     formatter = logging.Formatter('%(name)-50s %(levelname)-8s %(tree)-35s %(vif)-2s %(interfacename)-5s %(routername)-2s %(message)s')
     handler.setFormatter(formatter)
     logging.getLogger('my_logger').addHandler(handler)
     logging.getLogger('my_logger').addFilter(CustomFilter())
 
+    import threading
     t = threading.Thread(target=worker)
     t.start()
 
