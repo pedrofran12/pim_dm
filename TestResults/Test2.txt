@@ -1,0 +1,35 @@
+Script started on Thu Jul 19 16:46:52 2018
+root@switch1:~# exit[2Pfgpython3 ServerLog.pyroot@switch1:~# tcpdump -i br0 -Q in -w /hosthome/Desktop/IgmpTest1.pcap &[1P[1@2
+[1] 1671
+root@switch1:~# tcpdump: listening on br0, link-type EN10MB (Ethernet), capture size 262144 bytes
+
+root@switch1:~# tcpdump -i br0 -Q in -w /hosthome/Desktop/IgmpTest2.pcap &root@switch1:~# exit[K[2Pfgpython3 ServerLog.py
+About to start TCP server...
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:47:17,601                                       0  eth0  R2 Querier state: receive_query
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:47:17,602                                       0  eth0  R2 change querier state to -> NonQuerier
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:49:22,620                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:49:22,623                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:53:37,686                                       0  eth0  R2 NonQuerier state: other_querier_present_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:53:37,689                                       0  eth0  R2 change querier state to -> Querier
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:55:42,754                                       0  eth0  R2 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:57:47,799                                       0  eth0  R2 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:59:52,848                                       0  eth0  R2 Querier state: general_query_timeout
+^CTraceback (most recent call last):
+  File "ServerLog.py", line 105, in <module>
+    main()
+  File "ServerLog.py", line 101, in main
+    tcpserver.serve_until_stopped()
+  File "ServerLog.py", line 83, in serve_until_stopped
+    self.timeout)
+KeyboardInterrupt
+^CException KeyboardInterrupt: KeyboardInterrupt() in <module 'threading' from '/usr/lib/python3.2/threading.py'> ignored
+root@switch1:~# fg
+tcpdump -i br0 -Q in -w /hosthome/Desktop/IgmpTest2.pcap
+^C39 packets captured
+68 packets received by filter
+0 packets dropped by kernel
+root@switch1:~#
+root@switch1:~# exit
+exit
+
+Script done on Thu Jul 19 17:00:05 2018

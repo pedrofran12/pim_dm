@@ -1,8 +1,6 @@
-router2: router1 switch1
-router3: router1
-router4: switch1 router2 router3
+router1: switch1
+router2: switch1
 
-client1: router2
-client2: switch1 router2 router3
-client3: router4
+client1: switch1
+client2: switch1
 

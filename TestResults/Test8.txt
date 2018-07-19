@@ -1,0 +1,81 @@
+Script started on Thu Jul 19 17:58:08 2018
+root@switch1:~# exit[2Pfgpython3 ServerLog.py root@switch1:~# tcpdump -i br0 -Q in -w /hosthome/Desktop/IgmpTest8.pcap &
+[1] 1794
+root@switch1:~# tcpdump: listening on br0, link-type EN10MB (Ethernet), capture size 262144 bytes
+tcpdump -i br0 -Q in -w /hosthome/Desktop/IgmpTest8.pcap &root@switch1:~# exit[K[2Pfgpython3 ServerLog.py 
+About to start TCP server...
+protocol.igmp.RouterState                          DEBUG    2018-07-19 17:58:35,554                                       0  eth0  R2 Querier state: receive_query
+protocol.igmp.RouterState                          DEBUG    2018-07-19 17:58:35,555                                       0  eth0  R2 change querier state to -> NonQuerier
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 17:58:41,038   (*,224.12.12.12)                    0  eth0  R2 NonQuerier NoMembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 17:58:41,046   (*,224.12.12.12)                    0  eth0  R1 Querier NoMembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 17:58:41,073   (*,224.12.12.12)                    0  eth0  R2 change membership state to: MembersPresent
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 17:58:41,080   (*,224.12.12.12)                    0  eth0  R1 change membership state to: MembersPresent
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 17:58:45,424   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 17:58:45,428   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 17:58:50,398   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 17:58:50,394   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 17:58:52,370   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 17:58:52,367   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 17:58:58,642   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 17:58:58,646   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 17:59:01,949   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 17:59:01,953   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:00:40,578                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:00:40,588                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:00:41,811   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:00:41,809   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:00:42,645   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:00:42,642   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:01:02,590   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: receive_leave_group
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:01:02,589   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_leave_group
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:01:02,682   (*,224.12.12.12)                    0  eth0  R1 change membership state to: CheckingMembership
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:01:02,680                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:01:02,698   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_group_specific_query
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:01:02,710   (*,224.12.12.12)                    0  eth0  R2 change membership state to: CheckingMembership
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:01:03,690   (*,224.12.12.12)                    0  eth0  R1 Querier CheckingMembership: retransmit_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:01:03,693                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:01:03,747   (*,224.12.12.12)                    0  eth0  R1 Querier CheckingMembership: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:01:03,743   (*,224.12.12.12)                    0  eth0  R2 NonQuerier CheckingMembership: receive_group_specific_query
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:01:03,749   (*,224.12.12.12)                    0  eth0  R2 NonQuerier CheckingMembership: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:01:03,802   (*,224.12.12.12)                    0  eth0  R2 change membership state to: MembersPresent
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:01:03,805   (*,224.12.12.12)                    0  eth0  R1 change membership state to: MembersPresent
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:01:04,813   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: retransmit_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:02:45,646                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:02:45,651                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:02:50,645   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:02:50,650   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:04:20,849   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_leave_group
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:04:20,861   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: receive_leave_group
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:04:20,939                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:04:20,943   (*,224.12.12.12)                    0  eth0  R1 change membership state to: CheckingMembership
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:04:20,955   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_group_specific_query
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:04:20,969   (*,224.12.12.12)                    0  eth0  R2 change membership state to: CheckingMembership
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:04:21,952   (*,224.12.12.12)                    0  eth0  R1 Querier CheckingMembership: retransmit_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:04:21,953                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:04:22,009   (*,224.12.12.12)                    0  eth0  R2 NonQuerier CheckingMembership: receive_group_specific_query
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:04:22,948   (*,224.12.12.12)                    0  eth0  R1 Querier CheckingMembership: group_membership_timeout
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:04:22,950   (*,224.12.12.12)                    0  eth0  R1 change membership state to: NoMembersPresent
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:04:22,973   (*,224.12.12.12)                    0  eth0  R2 NonQuerier CheckingMembership: group_membership_timeout
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:04:22,975   (*,224.12.12.12)                    0  eth0  R2 change membership state to: NoMembersPresent
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:04:50,709                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:04:50,716                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:06:55,776                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:06:55,775                                       0  eth0  R2 NonQuerier state: receive_query
+^CTraceback (most recent call last):
+  File "ServerLog.py", line 105, in <module>
+    main()
+  File "ServerLog.py", line 101, in main
+    tcpserver.serve_until_stopped()
+  File "ServerLog.py", line 83, in serve_until_stopped
+    self.timeout)
+KeyboardInterrupt
+^CException KeyboardInterrupt: KeyboardInterrupt() in <module 'threading' from '/usr/lib/python3.2/threading.py'> ignored
+root@switch1:~# fg
+tcpdump -i br0 -Q in -w /hosthome/Desktop/IgmpTest8.pcap
+^C103 packets captured
+182 packets received by filter
+0 packets dropped by kernel
+root@switch1:~# exit
+exit
+
+Script done on Thu Jul 19 18:07:20 2018

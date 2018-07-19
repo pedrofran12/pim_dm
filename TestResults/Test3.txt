@@ -1,0 +1,32 @@
+Script started on Thu Jul 19 17:02:18 2018
+root@switch1:~# exit[2Pfgpython3 ServerLog.py root@switch1:~# tcpdump -i br0 -Q in -w /hosthome/Desktop/IgmpTest2.pcap &[1P[1@3
+[1] 1721
+root@switch1:~# tcpdump: listening on br0, link-type EN10MB (Ethernet), capture size 262144 bytes
+
+root@switch1:~# tcpdump -i br0 -Q in -w /hosthome/Desktop/IgmpTest3.pcap &root@switch1:~# exit[K[2Pfgpython3 ServerLog.py 
+About to start TCP server...
+protocol.igmp.RouterState                          DEBUG    2018-07-19 17:02:53,219                                       0  eth0  R2 Querier state: receive_query
+protocol.igmp.RouterState                          DEBUG    2018-07-19 17:02:53,220                                       0  eth0  R2 change querier state to -> NonQuerier
+protocol.igmp.RouterState                          DEBUG    2018-07-19 17:04:58,233                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 17:04:58,232                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState                          DEBUG    2018-07-19 17:07:03,274                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 17:09:08,297                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 17:11:13,316                                       0  eth0  R1 Querier state: general_query_timeout
+^CTraceback (most recent call last):
+  File "ServerLog.py", line 105, in <module>
+    main()
+  File "ServerLog.py", line 101, in main
+    tcpserver.serve_until_stopped()
+  File "ServerLog.py", line 83, in serve_until_stopped
+    self.timeout)
+KeyboardInterrupt
+^CException KeyboardInterrupt: KeyboardInterrupt() in <module 'threading' from '/usr/lib/python3.2/threading.py'> ignored
+root@switch1:~# fg
+tcpdump -i br0 -Q in -w /hosthome/Desktop/IgmpTest3.pcap
+^C34 packets captured
+61 packets received by filter
+1 packet dropped by kernel
+root@switch1:~# exit
+exit
+
+Script done on Thu Jul 19 17:11:59 2018

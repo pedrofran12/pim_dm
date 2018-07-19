@@ -1,0 +1,37 @@
+Script started on Thu Jul 19 16:31:49 2018
+root@switch1:~# tcpdump -i br0 -Q in -w /hosthD ome/Desktop/Test1.[1@I[1@g[1@m[1@pTest1.ca  pcap / &
+[1] 1606
+root@switch1:~# tcpdump: listening on br0, link-type EN10MB (Ethernet), capture size 262144 bytes
+
+root@switch1:~# pt ython3 ServerLog.py 
+About to start TCP server...
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:32:44,738                                       0  eth0  R1 Querier state: receive_query
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:34:42,682                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:34:42,689                                       0  eth0  R2 Querier state: receive_query
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:34:42,698                                       0  eth0  R2 change querier state to -> NonQuerier
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:36:47,751                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:36:47,754                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:38:52,817                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:38:52,819                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:40:57,872                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:40:57,874                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:43:02,927                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 16:43:02,925                                       0  eth0  R2 NonQuerier state: receive_query
+^CTraceback (most recent call last):
+  File "ServerLog.py", line 105, in <module>
+    main()
+  File "ServerLog.py", line 101, in main
+    tcpserver.serve_until_stopped()
+  File "ServerLog.py", line 83, in serve_until_stopped
+    self.timeout)
+KeyboardInterrupt
+^CException KeyboardInterrupt: KeyboardInterrupt() in <module 'threading' from '/usr/lib/python3.2/threading.py'> ignored
+root@switch1:~# fg
+tcpdump -i br0 -Q in -w /hosthome/Desktop/IgmpTest1.pcap
+^C50 packets captured
+86 packets received by filter
+0 packets dropped by kernel
+root@switch1:~# exit
+exit
+
+Script done on Thu Jul 19 16:43:43 2018

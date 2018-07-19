@@ -7,10 +7,11 @@ brctl addif br0 eth0
 brctl addif br0 eth1
 brctl addif br0 eth2
 brctl addif br0 eth3
+ip addr add dev br0 10.0.0.5/24
 ip link set dev br0 up
 
 
 # identify ports with routers (they need to receive all multicast traffic!)
 echo "2" > /sys/devices/virtual/net/br0/brif/eth0/multicast_router
 echo "2" > /sys/devices/virtual/net/br0/brif/eth1/multicast_router
-echo "2" > /sys/devices/virtual/net/br0/brif/eth3/multicast_router
+

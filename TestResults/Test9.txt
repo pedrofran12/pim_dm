@@ -1,0 +1,57 @@
+Script started on Thu Jul 19 18:13:38 2018
+root@switch1:~# tcpdump -i br0 -q Q in -w /hosthome/Desktop/IgmpTest9.pcpa  ap &
+[1] 1579
+root@switch1:~# tcpdump: listening on br0, link-type EN10MB (Ethernet), capture size 262144 bytes
+
+root@switch1:~# python3 ServerLog.py [Kroot@switch1:~# python3 ServerLog.py 
+About to start TCP server...
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:14:29,328                                       0  eth0  R2 Querier state: receive_query
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:14:29,329                                       0  eth0  R2 change querier state to -> NonQuerier
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:14:48,366   (*,224.12.12.12)                    0  eth0  R2 NonQuerier NoMembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:14:48,383   (*,224.12.12.12)                    0  eth0  R1 Querier NoMembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:14:48,427   (*,224.12.12.12)                    0  eth0  R2 change membership state to: MembersPresent
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:14:48,455   (*,224.12.12.12)                    0  eth0  R1 change membership state to: MembersPresent
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:14:58,401   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:14:58,407   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:15:08,087   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:15:08,083   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:16:34,357                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:16:34,361                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:16:39,172   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:16:39,168   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:18:39,459                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:18:39,458                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:18:44,944   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:18:44,939   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:20:44,487                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:20:44,488                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:20:47,660   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:20:47,664   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: receive_v2_membership_report
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:22:49,554                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:22:49,558                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:24:54,628                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:24:54,632                                       0  eth0  R2 NonQuerier state: receive_query
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:25:07,687   (*,224.12.12.12)                    0  eth0  R1 Querier MembersPresent: group_membership_timeout
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:25:07,691   (*,224.12.12.12)                    0  eth0  R1 change membership state to: NoMembersPresent
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:25:07,684   (*,224.12.12.12)                    0  eth0  R2 NonQuerier MembersPresent: group_membership_timeout
+protocol.igmp.RouterState.GroupState               DEBUG    2018-07-19 18:25:07,689   (*,224.12.12.12)                    0  eth0  R2 change membership state to: NoMembersPresent
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:26:59,694                                       0  eth0  R1 Querier state: general_query_timeout
+protocol.igmp.RouterState                          DEBUG    2018-07-19 18:26:59,697                                       0  eth0  R2 NonQuerier state: receive_query
+^CTraceback (most recent call last):
+  File "ServerLog.py", line 105, in <module>
+    main()
+  File "ServerLog.py", line 101, in main
+    tcpserver.serve_until_stopped()
+  File "ServerLog.py", line 83, in serve_until_stopped
+    self.timeout)
+KeyboardInterrupt
+^CException KeyboardInterrupt: KeyboardInterrupt() in <module 'threading' from '/usr/lib/python3.2/threading.py'> ignored
+root@switch1:~# fg
+tcpdump -i br0 -Q in -w /hosthome/Desktop/IgmpTest9.pcap
+^C76 packets captured
+136 packets received by filter
+1 packet dropped by kernel
+root@switch1:~# exit
+exit
+
+Script done on Thu Jul 19 18:27:20 2018
