@@ -1,14 +1,24 @@
-from threading import Timer
-from .wrapper import NoMembersPresent
-from utils import GroupMembershipInterval, LastMemberQueryInterval, TYPE_CHECKING
+import logging
 from threading import Lock
+from threading import Timer
+
+from utils import GroupMembershipInterval, LastMemberQueryInterval, TYPE_CHECKING
+from .wrapper import NoMembersPresent
 
 if TYPE_CHECKING:
     from .RouterState import RouterState
 
 
 class GroupState(object):
+    LOGGER = logging.getLogger('pim.igmp.RouterState.GroupState')
+
     def __init__(self, router_state: 'RouterState', group_ip: str):
+        #logger
+        extra_dict_logger = router_state.router_state_logger.extra.copy()
+        extra_dict_logger['tree'] = '(*,' + group_ip + ')'
+        self.group_state_logger = logging.LoggerAdapter(GroupState.LOGGER, extra_dict_logger)
+
+        #timers and state
         self.router_state = router_state
         self.group_ip = group_ip
         self.state = NoMembersPresent
@@ -24,6 +34,13 @@ class GroupState(object):
 
     def print_state(self):
         return self.state.print_state()
+
+    ###########################################
+    # Set state
+    ###########################################
+    def set_state(self, state):
+        self.state = state
+        self.group_state_logger.debug("change membership state to: " + state.print_state())
 
     ###########################################
     # Set timers
@@ -130,3 +147,12 @@ class GroupState(object):
 
     def has_members(self):
         return self.state is not NoMembersPresent
+
+    def remove(self):
+        with self.multicast_interface_state_lock:
+            self.clear_retransmit_timer()
+            self.clear_timer()
+            self.clear_v1_host_timer()
+            for interface_state in self.multicast_interface_state:
+                interface_state.notify_igmp(has_members=False)
+            del self.multicast_interface_state[:]

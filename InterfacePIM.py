@@ -13,6 +13,7 @@ from threading import Timer
 from tree.globals import REFRESH_INTERVAL
 import socket
 import netifaces
+import logging
 
 
 class InterfacePim(Interface):
@@ -20,9 +21,10 @@ class InterfacePim(Interface):
     PROPAGATION_DELAY = 0.5
     OVERRIDE_INTERNAL = 2.5
 
-    HELLO_PERIOD = 16
+    HELLO_PERIOD = 30
     TRIGGERED_HELLO_PERIOD = 5
 
+    LOGGER = logging.getLogger('pim.Interface')
 
     def __init__(self, interface_name: str, vif_index:int, state_refresh_capable:bool=False):
         # generation id
@@ -49,6 +51,7 @@ class InterfacePim(Interface):
         self._had_neighbors = False
         self.neighbors = {}
         self.neighbors_lock = RWLockWrite()
+        self.interface_logger = logging.LoggerAdapter(InterfacePim.LOGGER, {'vif': vif_index, 'interfacename': interface_name})
 
         # SOCKET
         ip_interface = netifaces.ifaddresses(interface_name)[netifaces.AF_INET][0]['addr']
@@ -103,6 +106,7 @@ class InterfacePim(Interface):
         self.hello_timer.start()
 
     def send_hello(self):
+        self.interface_logger.debug('Send Hello message')
         self.hello_timer.cancel()
 
         pim_payload = PacketPimHello()
@@ -170,6 +174,7 @@ class InterfacePim(Interface):
     def remove_neighbor(self, ip):
         with self.neighbors_lock.genWlock():
             del self.neighbors[ip]
+            self.interface_logger.debug("Remove neighbor: " + ip)
             self.check_number_of_neighbors()
 
 

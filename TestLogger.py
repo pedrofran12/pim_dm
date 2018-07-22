@@ -7,7 +7,7 @@ class RootFilter(logging.Filter):
     Rather than use actual contextual information, we just use random
     data in this demo.
     """
-    def __init__(self, router_name, tree=''):
+    def __init__(self, router_name):
         super().__init__()
         self.router_name = router_name
 
@@ -19,4 +19,6 @@ class RootFilter(logging.Filter):
             record.vif = ''
         if not hasattr(record, 'interfacename'):
             record.interfacename = ''
+        if not hasattr(record, 'neighbor_ip'):
+            record.neighbor_ip = ''
         return True

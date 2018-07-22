@@ -23,6 +23,7 @@ class KernelEntry:
         #next_hop = UnicastRouting.get_route(source_ip)["gateway"]
         #self.rpf_node = source_ip if next_hop is None else next_hop
 
+        '''
         next_hop = UnicastRouting.get_route(source_ip)["gateway"]
         multipaths = UnicastRouting.get_route(source_ip)["multipath"]
 
@@ -34,6 +35,21 @@ class KernelEntry:
                 self.rpf_node = source_ip
                 break
             else:
+                self.rpf_node = m["gateway"]
+        '''
+        unicast_route = UnicastRouting.get_route(source_ip)
+        next_hop = unicast_route["gateway"]
+        multipaths = unicast_route["multipath"]
+
+        self.rpf_node = next_hop if next_hop is not None else source_ip
+        import ipaddress
+        highest_ip = ipaddress.ip_address("0.0.0.0")
+        for m in multipaths:
+            if m["gateway"] is None:
+                self.rpf_node = source_ip
+                break
+            elif ipaddress.ip_address(m["gateway"]) > highest_ip:
+                highest_ip = ipaddress.ip_address(m["gateway"])
                 self.rpf_node = m["gateway"]
 
         print("RPF_NODE:", UnicastRouting.get_route(source_ip))
@@ -167,6 +183,7 @@ class KernelEntry:
     def network_update(self):
         # TODO TALVEZ OUTRO LOCK PARA BLOQUEAR ENTRADA DE PACOTES
         with self.CHANGE_STATE_LOCK:
+            '''
             next_hop = UnicastRouting.get_route(self.source_ip)["gateway"]
             multipaths = UnicastRouting.get_route(self.source_ip)["multipath"]
 
@@ -178,6 +195,21 @@ class KernelEntry:
                     rpf_node = self.source_ip
                     break
                 else:
+                    rpf_node = m["gateway"]
+            '''
+            unicast_route = UnicastRouting.get_route(self.source_ip)
+            next_hop = unicast_route["gateway"]
+            multipaths = unicast_route["multipath"]
+
+            rpf_node = next_hop if next_hop is not None else self.source_ip
+            import ipaddress
+            highest_ip = ipaddress.ip_address("0.0.0.0")
+            for m in multipaths:
+                if m["gateway"] is None:
+                    rpf_node = self.source_ip
+                    break
+                elif ipaddress.ip_address(m["gateway"]) > highest_ip:
+                    highest_ip = ipaddress.ip_address(m["gateway"])
                     rpf_node = m["gateway"]
 
             print("RPF_NODE:", UnicastRouting.get_route(self.source_ip))

@@ -1,12 +1,11 @@
 import socket
 import struct
+from ipaddress import IPv4Address
+from ctypes import create_string_buffer, addressof
 import netifaces
 from Packet.ReceivedPacket import ReceivedPacket
 from Interface import Interface
-from ctypes import create_string_buffer, addressof
-from ipaddress import IPv4Address
 from utils import Version_1_Membership_Report, Version_2_Membership_Report, Leave_Group, Membership_Query
-import subprocess
 if not hasattr(socket, 'SO_BINDTODEVICE'):
     socket.SO_BINDTODEVICE = 25
 
@@ -24,7 +23,7 @@ class InterfaceIGMP(Interface):
         struct.pack('HBBI', 0x6, 0, 0, 0x00000000),
     ]
 
-    def __init__(self, interface_name: str, vif_index:int):
+    def __init__(self, interface_name: str, vif_index: int):
         # SEND SOCKET
         snd_s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IGMP)
 
@@ -104,3 +103,8 @@ class InterfaceIGMP(Interface):
         Leave_Group: receive_leave_group,
         Membership_Query: receive_membership_query,
     }
+
+    ##################
+    def remove(self):
+        super().remove()
+        self.interface_state.remove()

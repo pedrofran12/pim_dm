@@ -1,18 +1,28 @@
+from threading import Timer
+import logging
+
 from Packet.PacketIGMPHeader import PacketIGMPHeader
 from Packet.ReceivedPacket import ReceivedPacket
-from threading import Timer
 from utils import Membership_Query, QueryResponseInterval, QueryInterval, OtherQuerierPresentInterval, TYPE_CHECKING
+from RWLock.RWLock import RWLockWrite
 from .querier.Querier import Querier
 from .nonquerier.NonQuerier import NonQuerier
 from .GroupState import GroupState
-from RWLock.RWLock import RWLockWrite
 
 if TYPE_CHECKING:
     from InterfaceIGMP import InterfaceIGMP
 
 
 class RouterState(object):
+    ROUTER_STATE_LOGGER = logging.getLogger('pim.igmp.RouterState')
+
     def __init__(self, interface: 'InterfaceIGMP'):
+        #logger
+        logger_extra = dict()
+        logger_extra['vif'] = interface.vif_index
+        logger_extra['interfacename'] = interface.interface_name
+        self.router_state_logger = logging.LoggerAdapter(RouterState.ROUTER_STATE_LOGGER, logger_extra)
+
         # interface of the router connected to the network
         self.interface = interface
 
@@ -75,8 +85,10 @@ class RouterState(object):
     def change_interface_state(self, querier: bool):
         if querier:
             self.interface_state = Querier
+            self.router_state_logger.debug('change querier state to -> Querier')
         else:
             self.interface_state = NonQuerier
+            self.router_state_logger.debug('change querier state to -> NonQuerier')
 
     ############################################
     # group state methods
@@ -126,3 +138,7 @@ class RouterState(object):
             max_response_time = packet.payload.max_resp_time
             #self.group_state[igmp_group].receive_group_specific_query(max_response_time)
             self.get_group_state(igmp_group).receive_group_specific_query(max_response_time)
+
+    def remove(self):
+        for group in self.group_state.values():
+            group.remove()

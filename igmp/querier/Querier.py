@@ -1,9 +1,11 @@
+from ipaddress import IPv4Address
+
+from utils import TYPE_CHECKING
+from utils import Membership_Query, QueryResponseInterval, LastMemberQueryCount, LastMemberQueryInterval
+
 from Packet.PacketIGMPHeader import PacketIGMPHeader
 from Packet.ReceivedPacket import ReceivedPacket
-from utils import Membership_Query, QueryResponseInterval, LastMemberQueryCount, LastMemberQueryInterval
 from . import CheckingMembership, MembersPresent, Version1MembersPresent, NoMembersPresent
-from ipaddress import IPv4Address
-from utils import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..RouterState import RouterState
@@ -12,6 +14,7 @@ if TYPE_CHECKING:
 class Querier:
     @staticmethod
     def general_query_timeout(router_state: 'RouterState'):
+        router_state.router_state_logger.debug('Querier state: general_query_timeout')
         # send general query
         packet = PacketIGMPHeader(type=Membership_Query, max_resp_time=QueryResponseInterval*10)
         router_state.interface.send(packet.bytes())
@@ -21,11 +24,13 @@ class Querier:
 
     @staticmethod
     def other_querier_present_timeout(router_state: 'RouterState'):
+        router_state.router_state_logger.debug('Querier state: other_querier_present_timeout')
         # do nothing
         return
 
     @staticmethod
     def receive_query(router_state: 'RouterState', packet: ReceivedPacket):
+        router_state.router_state_logger.debug('Querier state: receive_query')
         source_ip = packet.ip_header.ip_src
 
         # if source ip of membership query not lower than the ip of the received interface => ignore
