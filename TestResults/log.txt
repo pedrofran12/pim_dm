@@ -1,0 +1,55 @@
+Script started on Mon Jul 23 15:40:59 2018
+root@switch1:~# 
+root@switch1:~# 
+root@switch1:~# tp cpdump -i br0 -w Q in -w /hosh T thome/Desktop/p test_pim/pim/TestResults/s Switch.pcap &
+[1] 1626
+root@switch1:~# tcpdump: listening on br0, link-type EN10MB (Ethernet), capture size 262144 bytes
+
+root@switch1:~# python3 ServerLog.py 
+Test1: Tree creation (10.1.1.100,224.12.12.12)
+Expected: all routers should consider eth0 as their UpstreamInterface
+About to start TCP server...
+pim.KernelEntry.UpstreamInterface                  DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R1 Created UpstreamInterface
+pim.KernelEntry.DownstreamInterface                DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R1 Created DownstreamInterface
+pim.KernelEntry.DownstreamInterface                DEBUG    (10.1.1.100,224.12.12.12)           2  eth2  R1 Created DownstreamInterface
+pim.KernelEntry.DownstreamInterface                DEBUG    (10.1.1.100,224.12.12.12)           3  eth3  R1 Created DownstreamInterface
+pim.KernelEntry.UpstreamInterface                  DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R3 Created UpstreamInterface
+pim.KernelEntry.UpstreamInterface                  DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R4 Created UpstreamInterface
+pim.KernelEntry.UpstreamInterface                  DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R2 Created UpstreamInterface
+pim.KernelEntry.DownstreamInterface                DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 Created DownstreamInterface
+pim.KernelEntry.DownstreamInterface                DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R4 Created DownstreamInterface
+pim.KernelEntry.DownstreamInterface                DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 Created DownstreamInterface
+pim.KernelEntry.DownstreamInterface                DEBUG    (10.1.1.100,224.12.12.12)           2  eth2  R2 Created DownstreamInterface
+pim.KernelEntry.UpstreamInterface                  DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R6 Created UpstreamInterface
+pim.KernelEntry.DownstreamInterface                DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R6 Created DownstreamInterface
+pim.KernelEntry.UpstreamInterface                  DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R5 Created UpstreamInterface
+pim.KernelEntry.DownstreamInterface                DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R5 Created DownstreamInterface
+pim.KernelEntry.DownstreamInterface                DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R7 Created DownstreamInterface
+pim.KernelEntry.DownstreamInterface                DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R7 Created DownstreamInterface
+pim.KernelEntry.UpstreamInterface                  DEBUG    (10.1.1.100,224.12.12.12)           2  eth2  R7 Created UpstreamInterface
+[1;32;40mTest1 Success[0m
+Test2: Change interface eth2 cost of Router R7 to 100
+Expected: Router R7 should change Root<->Non-Root interface
+pim.KernelEntry.DownstreamInterface                DEBUG    (10.1.1.100,224.12.12.12)           2  eth2  R7 Created DownstreamInterface
+pim.KernelEntry.UpstreamInterface                  DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R7 Created UpstreamInterface
+[1;32;40mTest2 Success[0m
+Test3: Fail router 5 (disable its interfaces)
+Expected: Router R7 should change Root<->Non-Root interface
+pim.KernelEntry.DownstreamInterface                DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R5 Created DownstreamInterface
+pim.KernelEntry.DownstreamInterface                DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R7 Created DownstreamInterface
+pim.KernelEntry.UpstreamInterface                  DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R5 Created UpstreamInterface
+pim.KernelEntry.UpstreamInterface                  DEBUG    (10.1.1.100,224.12.12.12)           2  eth2  R7 Created UpstreamInterface
+[1;32;40mTest3 Success[0m
+^CException KeyboardInterrupt: KeyboardInterrupt() in <module 'threading' from '/usr/lib/python3.2/threading.py'> ignored
+root@switch1:~# 
+root@switch1:~# 
+root@switch1:~# 
+root@switch1:~# l ff h g g
+tcpdump -i br0 -Q in -w /hosthome/Desktop/test_pim/pim/TestResults/Switch.pcap
+^C1181 packets captured
+2138 packets received by filter
+29 packets dropped by kernel
+root@switch1:~# exit
+exit
+
+Script done on Mon Jul 23 15:44:15 2018

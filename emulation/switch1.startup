@@ -3,14 +3,12 @@ ip link set dev eth1 up
 ip link set dev eth2 up
 ip link set dev eth3 up
 ip link set dev eth4 up
-ip link set dev eth5 up
 brctl addbr br0
 brctl addif br0 eth0
 brctl addif br0 eth1
 brctl addif br0 eth2
 brctl addif br0 eth3
 brctl addif br0 eth4
-brctl addif br0 eth5
 ip link set dev br0 up
 ip addr add dev br0 10.5.5.7/24
 

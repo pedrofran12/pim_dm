@@ -5,7 +5,8 @@ router4: router1
 switch1: router2 router3 router4
 router5: switch1
 router6: switch1
+router7: router5
 log_server: switch1
-client0: router5
+client0: router7
 client1: router6
 
