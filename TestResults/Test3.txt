@@ -1,0 +1,54 @@
+Script started on Sun Jul 22 18:00:55 2018
+root@switch1:~# exit[2Pfgpython3 ServerLog.py root@switch1:~# tcpdump -i br0 -Q in -w /hosthome/Desktop/test_pim/TestNeighbor2.pcap &[1P[1@3
+[1] 1606
+root@switch1:~# tcpdump: listening on br0, link-type EN10MB (Ethernet), capture size 262144 bytes
+
+root@switch1:~# tcpdump -i br0 -Q in -w /hosthome/Desktop/test_pim/TestNeighbor3.pcap &root@switch1:~# exit[K[2Pfgpython3 ServerLog.py 
+About to start TCP server...
+pim.Interface                       DEBUG    2018-07-22 18:01:13,411   0  eth0  R1 Send Hello message
+pim.Interface                       DEBUG    2018-07-22 18:01:17,640   0  eth0  R2 Send Hello message
+pim.Interface.Neighbor              DEBUG    2018-07-22 18:01:17,656   0  eth0  R1 Monitoring new neighbor 10.0.0.2 with GenerationID: 2817810609; HelloHoldTime: 105; StateRefreshCapable: False
+pim.Interface.Neighbor              DEBUG    2018-07-22 18:01:17,656   0  eth0  R1 Neighbor Liveness Timer reseted of 10.0.0.2
+pim.Interface                       DEBUG    2018-07-22 18:01:19,715   0  eth0  R1 Send Hello message
+pim.Interface.Neighbor              DEBUG    2018-07-22 18:01:19,744   0  eth0  R2 Monitoring new neighbor 10.0.0.1 with GenerationID: 3534546943; HelloHoldTime: 105; StateRefreshCapable: False
+pim.Interface.Neighbor              DEBUG    2018-07-22 18:01:19,744   0  eth0  R2 Neighbor Liveness Timer reseted of 10.0.0.1
+pim.Interface                       DEBUG    2018-07-22 18:01:21,667   0  eth0  R2 Send Hello message
+pim.Interface.Neighbor              DEBUG    2018-07-22 18:01:21,676   0  eth0  R1 Receive Hello message with HelloHoldTime: 105; GenerationID: 2817810609; StateRefreshCapable: False from neighbor 10.0.0.2
+pim.Interface.Neighbor              DEBUG    2018-07-22 18:01:21,676   0  eth0  R1 Neighbor Liveness Timer reseted of 10.0.0.2
+pim.Interface                       DEBUG    2018-07-22 18:01:49,737   0  eth0  R1 Send Hello message
+pim.Interface.Neighbor              DEBUG    2018-07-22 18:01:49,745   0  eth0  R2 Receive Hello message with HelloHoldTime: 105; GenerationID: 3534546943; StateRefreshCapable: False from neighbor 10.0.0.1
+pim.Interface.Neighbor              DEBUG    2018-07-22 18:01:49,754   0  eth0  R2 Neighbor Liveness Timer reseted of 10.0.0.1
+pim.Interface                       DEBUG    2018-07-22 18:01:51,696   0  eth0  R2 Send Hello message
+pim.Interface.Neighbor              DEBUG    2018-07-22 18:01:51,707   0  eth0  R1 Receive Hello message with HelloHoldTime: 105; GenerationID: 2817810609; StateRefreshCapable: False from neighbor 10.0.0.2
+pim.Interface.Neighbor              DEBUG    2018-07-22 18:01:51,708   0  eth0  R1 Neighbor Liveness Timer reseted of 10.0.0.2
+pim.Interface                       DEBUG    2018-07-22 18:02:19,802   0  eth0  R1 Send Hello message
+pim.Interface.Neighbor              DEBUG    2018-07-22 18:02:19,810   0  eth0  R2 Receive Hello message with HelloHoldTime: 105; GenerationID: 3534546943; StateRefreshCapable: False from neighbor 10.0.0.1
+pim.Interface.Neighbor              DEBUG    2018-07-22 18:02:19,812   0  eth0  R2 Neighbor Liveness Timer reseted of 10.0.0.1
+pim.Interface                       DEBUG    2018-07-22 18:02:21,723   0  eth0  R2 Send Hello message
+pim.Interface.Neighbor              DEBUG    2018-07-22 18:02:21,733   0  eth0  R1 Receive Hello message with HelloHoldTime: 105; GenerationID: 2817810609; StateRefreshCapable: False from neighbor 10.0.0.2
+pim.Interface.Neighbor              DEBUG    2018-07-22 18:02:21,733   0  eth0  R1 Neighbor Liveness Timer reseted of 10.0.0.2
+pim.Interface                       DEBUG    2018-07-22 18:02:49,824   0  eth0  R1 Send Hello message
+pim.Interface                       DEBUG    2018-07-22 18:03:19,851   0  eth0  R1 Send Hello message
+pim.Interface                       DEBUG    2018-07-22 18:03:49,873   0  eth0  R1 Send Hello message
+pim.Interface.Neighbor              DEBUG    2018-07-22 18:04:06,757   0  eth0  R1 Neighbor Liveness Timer expired of 10.0.0.2
+pim.Interface                       DEBUG    2018-07-22 18:04:06,760   0  eth0  R1 Remove neighbor: 10.0.0.2
+pim.Interface                       DEBUG    2018-07-22 18:04:19,925   0  eth0  R1 Send Hello message
+pim.Interface                       DEBUG    2018-07-22 18:04:49,945   0  eth0  R1 Send Hello message
+^CTraceback (most recent call last):
+  File "ServerLog.py", line 105, in <module>
+    main()
+  File "ServerLog.py", line 101, in main
+    tcpserver.serve_until_stopped()
+  File "ServerLog.py", line 83, in serve_until_stopped
+    self.timeout)
+KeyboardInterrupt
+^CException KeyboardInterrupt: KeyboardInterrupt() in <module 'threading' from '/usr/lib/python3.2/threading.py'> ignored
+root@switch1:~# fg
+tcpdump -i br0 -Q in -w /hosthome/Desktop/test_pim/TestNeighbor3.pcap
+^C78 packets captured
+121 packets received by filter
+0 packets dropped by kernel
+root@switch1:~# exit
+exit
+
+Script done on Sun Jul 22 18:04:56 2018
