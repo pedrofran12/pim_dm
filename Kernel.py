@@ -8,10 +8,10 @@ import ipaddress
 from RWLock.RWLock import RWLockWrite
 import Main
 
+import UnicastRouting
 from InterfacePIM import InterfacePim
 from InterfaceIGMP import InterfaceIGMP
 from tree.KernelEntry import KernelEntry
-
 
 class Kernel:
     # MRT
@@ -237,6 +237,20 @@ class Kernel:
         struct_mfcctl = struct.pack("4s 4s H " + "B"*Kernel.MAXVIFS + " IIIi", source_ip, group_ip, kernel_entry.inbound_interface_index, *outbound_interfaces_and_other_parameters)
         self.socket.setsockopt(socket.IPPROTO_IP, Kernel.MRT_ADD_MFC, struct_mfcctl)
 
+    def set_flood_multicast_route(self, source_ip, group_ip, inbound_interface_index):
+        source_ip = socket.inet_aton(source_ip)
+        group_ip = socket.inet_aton(group_ip)
+
+        outbound_interfaces = [1]*self.MAXVIFS
+        outbound_interfaces[inbound_interface_index] = 0
+
+        #outbound_interfaces_and_other_parameters = list(kernel_entry.outbound_interfaces) + [0]*4
+        outbound_interfaces_and_other_parameters = outbound_interfaces + [0]*3 + [20]
+
+        #outbound_interfaces, 0, 0, 0, 0 <- only works with python>=3.5
+        #struct_mfcctl = struct.pack("4s 4s H " + "B"*Kernel.MAXVIFS + " IIIi", source_ip, group_ip, inbound_interface_index, *outbound_interfaces, 0, 0, 0, 0)
+        struct_mfcctl = struct.pack("4s 4s H " + "B"*Kernel.MAXVIFS + " IIIi", source_ip, group_ip, inbound_interface_index, *outbound_interfaces_and_other_parameters)
+        self.socket.setsockopt(socket.IPPROTO_IP, Kernel.MRT_ADD_MFC, struct_mfcctl)
 
     def remove_multicast_route(self, kernel_entry: KernelEntry):
         source_ip = socket.inet_aton(kernel_entry.source_ip)
@@ -341,6 +355,8 @@ class Kernel:
                 if ip_src not in self.routing:
                     self.routing[ip_src] = {}
 
+                iif = self.vif_dic.get(UnicastRouting.check_rpf(ip_src))
+                self.set_flood_multicast_route(ip_src, ip_dst, iif)
                 self.routing[ip_src][ip_dst] = kernel_entry
                 return kernel_entry
             else:

@@ -1,10 +1,11 @@
-from abc import ABCMeta, abstractstaticmethod
+from abc import ABCMeta, abstractmethod
 from utils import TYPE_CHECKING
 if TYPE_CHECKING:
     from .tree_if_upstream import TreeInterfaceUpstream
 
 class UpstreamStateABC(metaclass=ABCMeta):
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def dataArrivesRPFinterface_OListNull_PLTstoped(interface: "TreeInterfaceUpstream"):
         """
         Data arrives on RPF_Interface(S) AND
@@ -15,7 +16,8 @@ class UpstreamStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def stateRefreshArrivesRPFnbr_pruneIs1(interface: "TreeInterfaceUpstream"):
         """
         State Refresh(S,G) received from RPF‘(S) AND
@@ -25,7 +27,8 @@ class UpstreamStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped(interface: "TreeInterfaceUpstream"):
         """
         State Refresh(S,G) received from RPF‘(S) AND
@@ -36,7 +39,8 @@ class UpstreamStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def seeJoinToRPFnbr(interface: "TreeInterfaceUpstream"):
         """
         See Join(S,G) to RPF’(S)
@@ -45,7 +49,8 @@ class UpstreamStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def seePrune(interface: "TreeInterfaceUpstream"):
         """
         See Prune(S,G)
@@ -54,7 +59,8 @@ class UpstreamStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def OTexpires(interface: "TreeInterfaceUpstream"):
         """
         OT(S,G) Expires
@@ -63,7 +69,8 @@ class UpstreamStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def olistIsNowNull(interface: "TreeInterfaceUpstream"):
         """
         olist(S,G)->NULL
@@ -72,7 +79,8 @@ class UpstreamStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def olistIsNowNotNull(interface: "TreeInterfaceUpstream"):
         """
         olist(S,G)->non-NULL
@@ -81,7 +89,8 @@ class UpstreamStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def RPFnbrChanges_olistIsNotNull(interface: "TreeInterfaceUpstream"):
         """
         RPF’(S) Changes AND
@@ -92,7 +101,8 @@ class UpstreamStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def RPFnbrChanges_olistIsNull(interface: "TreeInterfaceUpstream"):
         """
         RPF’(S) Changes AND
@@ -102,7 +112,8 @@ class UpstreamStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def sourceIsNowDirectConnect(interface: "TreeInterfaceUpstream"):
         """
         S becomes directly connected
@@ -111,7 +122,8 @@ class UpstreamStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def GRTexpires(interface: "TreeInterfaceUpstream"):
         """
         GRT(S,G) Expires
@@ -120,7 +132,8 @@ class UpstreamStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def recvGraftAckFromRPFnbr(interface: "TreeInterfaceUpstream"):
         """
         Receive GraftAck(S,G) from RPF’(S)
@@ -148,12 +161,11 @@ class Forward(UpstreamStateABC):
         @type interface: TreeInterfaceUpstream
         """
         if not interface.is_S_directly_conn():
+            interface.join_prune_logger.debug("dataArrivesRPFinterface_OListNull_PLTstoped, F -> P")
+
             interface.set_state(UpstreamState.Pruned)
             interface.send_prune()
             interface.set_prune_limit_timer()
-
-            #print("dataArrivesRPFinterface_OListNull_PLTstoped, F -> P")
-            interface.join_prune_logger.debug("dataArrivesRPFinterface_OListNull_PLTstoped, F -> P")
 
     @staticmethod
     def stateRefreshArrivesRPFnbr_pruneIs1(interface: "TreeInterfaceUpstream"):
@@ -164,11 +176,9 @@ class Forward(UpstreamStateABC):
         @type interface: TreeInterfaceUpstream
         """
         # if OT is not running the router must set OT to t_override seconds
+        interface.join_prune_logger.debug('stateRefreshArrivesRPFnbr_pruneIs1, F -> F')
         if not interface.is_override_timer_running():
             interface.set_override_timer()
-
-        #print('stateRefreshArrivesRPFnbr_pruneIs1, F -> F')
-        interface.join_prune_logger.debug('stateRefreshArrivesRPFnbr_pruneIs1, F -> F')
 
     @staticmethod
     def stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped(interface: "TreeInterfaceUpstream"):
@@ -179,7 +189,6 @@ class Forward(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
-        #print('stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F')
         interface.join_prune_logger.debug('stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F')
 
     @staticmethod
@@ -189,10 +198,8 @@ class Forward(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
-        interface.clear_override_timer()
-
-        #print('seeJoinToRPFnbr, F -> F')
         interface.join_prune_logger.debug('seeJoinToRPFnbr, F -> F')
+        interface.clear_override_timer()
 
     @staticmethod
     def seePrune(interface: "TreeInterfaceUpstream"):
@@ -201,11 +208,9 @@ class Forward(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
+        interface.join_prune_logger.debug('seePrune, F -> F')
         if not interface.is_S_directly_conn() and not interface.is_override_timer_running():
             interface.set_override_timer()
-
-        #print('seePrune, F -> F')
-        interface.join_prune_logger.debug('seePrune, F -> F')
 
     @staticmethod
     def OTexpires(interface: "TreeInterfaceUpstream"):
@@ -214,11 +219,9 @@ class Forward(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
+        interface.join_prune_logger.debug('OTexpires, F -> F')
         if not interface.is_S_directly_conn():
             interface.send_join()
-
-        #print('OTexpires, F -> F')
-        interface.join_prune_logger.debug('OTexpires, F -> F')
 
     @staticmethod
     def olistIsNowNull(interface: "TreeInterfaceUpstream"):
@@ -228,14 +231,12 @@ class Forward(UpstreamStateABC):
         @type interface: TreeInterfaceUpstream
         """
         if not interface.is_S_directly_conn():
+            interface.join_prune_logger.debug("olistIsNowNull, F -> P")
+
             interface.set_state(UpstreamState.Pruned)
 
             interface.send_prune()
             interface.set_prune_limit_timer()
-
-            #print("olistIsNowNull, F -> P")
-            interface.join_prune_logger.debug("olistIsNowNull, F -> P")
-
 
     @staticmethod
     def olistIsNowNotNull(interface: "TreeInterfaceUpstream"):
@@ -257,13 +258,12 @@ class Forward(UpstreamStateABC):
         @type interface: TreeInterfaceUpstream
         """
         if not interface.is_S_directly_conn():
+            interface.join_prune_logger.debug('RPFnbrChanges_olistIsNotNull, F -> AP')
+
             interface.set_state(UpstreamState.AckPending)
 
             interface.send_graft()
             interface.set_graft_retry_timer()
-
-            #print('RPFnbrChanges_olistIsNotNull, F -> AP')
-            interface.join_prune_logger.debug('RPFnbrChanges_olistIsNotNull, F -> AP')
 
     @staticmethod
     def RPFnbrChanges_olistIsNull(interface: "TreeInterfaceUpstream"):
@@ -273,10 +273,8 @@ class Forward(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
-        interface.set_state(UpstreamState.Pruned)
-
-        #print('RPFnbrChanges_olistIsNull, F -> P')
         interface.join_prune_logger.debug('RPFnbrChanges_olistIsNull, F -> P')
+        interface.set_state(UpstreamState.Pruned)
 
     @staticmethod
     def sourceIsNowDirectConnect(interface: "TreeInterfaceUpstream"):
@@ -285,7 +283,6 @@ class Forward(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
-        #print("sourceIsNowDirectConnect, F -> F")
         interface.join_prune_logger.debug("sourceIsNowDirectConnect, F -> F")
 
     @staticmethod
@@ -305,11 +302,10 @@ class Forward(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
-        #print('recvGraftAckFromRPFnbr, F -> F')
         interface.join_prune_logger.debug("recvGraftAckFromRPFnbr, F -> F")
 
     def __str__(self):
-        return "F"
+        return "Forwarding"
 
 
 class Pruned(UpstreamStateABC):
@@ -329,11 +325,9 @@ class Pruned(UpstreamStateABC):
         @type interface: TreeInterfaceUpstream
         """
         if not interface.is_S_directly_conn():
+            interface.join_prune_logger.debug("dataArrivesRPFinterface_OListNull_PLTstoped, P -> P")
             interface.set_prune_limit_timer()
             interface.send_prune()
-
-            #print("dataArrivesRPFinterface_OListNull_PLTstoped, P -> P")
-            interface.join_prune_logger.debug("dataArrivesRPFinterface_OListNull_PLTstoped, P -> P")
 
     @staticmethod
     def stateRefreshArrivesRPFnbr_pruneIs1(interface: "TreeInterfaceUpstream"):
@@ -343,9 +337,8 @@ class Pruned(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
-        interface.set_prune_limit_timer()
-        #print('stateRefreshArrivesRPFnbr_pruneIs1, P -> P')
         interface.join_prune_logger.debug('stateRefreshArrivesRPFnbr_pruneIs1, P -> P')
+        interface.set_prune_limit_timer()
 
     @staticmethod
     def stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped(interface: "TreeInterfaceUpstream"):
@@ -356,10 +349,9 @@ class Pruned(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
+        interface.join_prune_logger.debug('stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, P -> P')
         interface.send_prune()
         interface.set_prune_limit_timer()
-        #print('stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, P -> P')
-        interface.join_prune_logger.debug('stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, P -> P')
 
     @staticmethod
     def seeJoinToRPFnbr(interface: "TreeInterfaceUpstream"):
@@ -369,7 +361,6 @@ class Pruned(UpstreamStateABC):
         @type interface: TreeInterfaceUpstream
         """
         # Do nothing
-        #print('seeJoinToRPFnbr, P -> P')
         interface.join_prune_logger.debug('seeJoinToRPFnbr, P -> P')
 
     @staticmethod
@@ -379,10 +370,9 @@ class Pruned(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
+        interface.join_prune_logger.debug('seePrune, P -> P')
         if interface.get_received_prune_holdtime() > interface.remaining_prune_limit_timer():
             interface.set_prune_limit_timer(time=interface.get_received_prune_holdtime())
-        #print('seePrune, P -> P')
-        interface.join_prune_logger.debug('seePrune, P -> P')
 
     @staticmethod
     def OTexpires(interface: "TreeInterfaceUpstream"):
@@ -412,15 +402,14 @@ class Pruned(UpstreamStateABC):
         @type interface: TreeInterfaceUpstream
         """
         if not interface.is_S_directly_conn():
+            interface.join_prune_logger.debug('olistIsNowNotNull, P -> AP')
+
             interface.clear_prune_limit_timer()
 
             interface.set_state(UpstreamState.AckPending)
 
             interface.send_graft()
             interface.set_graft_retry_timer()
-
-            #print('olistIsNowNotNull, P -> AP')
-            interface.join_prune_logger.debug('olistIsNowNotNull, P -> AP')
 
     @staticmethod
     def RPFnbrChanges_olistIsNotNull(interface: "TreeInterfaceUpstream"):
@@ -432,15 +421,14 @@ class Pruned(UpstreamStateABC):
         @type interface: TreeInterfaceUpstream
         """
         if not interface.is_S_directly_conn():
+            interface.join_prune_logger.debug('RPFnbrChanges_olistIsNotNull, P -> AP')
+
             interface.clear_prune_limit_timer()
 
             interface.set_state(UpstreamState.AckPending)
 
             interface.send_graft()
             interface.set_graft_retry_timer()
-
-            #print('RPFnbrChanges_olistIsNotNull, P -> AP')
-            interface.join_prune_logger.debug('RPFnbrChanges_olistIsNotNull, P -> AP')
 
     @staticmethod
     def RPFnbrChanges_olistIsNull(interface: "TreeInterfaceUpstream"):
@@ -451,10 +439,8 @@ class Pruned(UpstreamStateABC):
         @type interface: TreeInterfaceUpstream
         """
         if not interface.is_S_directly_conn():
-            interface.clear_prune_limit_timer()
-
-            #print('RPFnbrChanges_olistIsNull, P -> P')
             interface.join_prune_logger.debug('RPFnbrChanges_olistIsNull, P -> P')
+            interface.clear_prune_limit_timer()
 
     @staticmethod
     def sourceIsNowDirectConnect(interface: "TreeInterfaceUpstream"):
@@ -463,7 +449,6 @@ class Pruned(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
-        #print("sourceIsNowDirectConnect, P -> P")
         interface.join_prune_logger.debug('sourceIsNowDirectConnect, P -> P')
 
     @staticmethod
@@ -483,11 +468,10 @@ class Pruned(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
-        #print('recvGraftAckFromRPFnbr, P -> P')
         interface.join_prune_logger.debug('recvGraftAckFromRPFnbr, P -> P')
 
     def __str__(self):
-        return "P"
+        return "Pruned"
 
 
 class AckPending(UpstreamStateABC):
@@ -521,11 +505,9 @@ class AckPending(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
+        interface.join_prune_logger.debug('stateRefreshArrivesRPFnbr_pruneIs1, AP -> AP')
         if not interface.is_override_timer_running():
             interface.set_override_timer()
-
-        #print('stateRefreshArrivesRPFnbr_pruneIs1, AP -> AP')
-        interface.join_prune_logger.debug('stateRefreshArrivesRPFnbr_pruneIs1, AP -> AP')
 
     @staticmethod
     def stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped(interface: "TreeInterfaceUpstream"):
@@ -536,11 +518,10 @@ class AckPending(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
+        interface.join_prune_logger.debug('stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, AP -> F')
+
         interface.clear_graft_retry_timer()
         interface.set_state(UpstreamState.Forward)
-
-        #print('stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, AP -> F')
-        interface.join_prune_logger.debug('stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, AP -> F')
 
     @staticmethod
     def seeJoinToRPFnbr(interface: "TreeInterfaceUpstream"):
@@ -549,10 +530,8 @@ class AckPending(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
-        interface.clear_override_timer()
-
-        #print('seeJoinToRPFnbr, AP -> AP')
         interface.join_prune_logger.debug('seeJoinToRPFnbr, AP -> AP')
+        interface.clear_override_timer()
 
     @staticmethod
     def seePrune(interface: "TreeInterfaceUpstream"):
@@ -561,11 +540,9 @@ class AckPending(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
+        interface.join_prune_logger.debug('seePrune, AP -> AP')
         if not interface.is_override_timer_running():
             interface.set_override_timer()
-
-        #print('seePrune, AP -> AP')
-        interface.join_prune_logger.debug('seePrune, AP -> AP')
 
     @staticmethod
     def OTexpires(interface: "TreeInterfaceUpstream"):
@@ -574,10 +551,8 @@ class AckPending(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
-        interface.send_join()
-
-        #print('OTexpires, AP -> AP')
         interface.join_prune_logger.debug('OTexpires, AP -> AP')
+        interface.send_join()
 
     @staticmethod
     def olistIsNowNull(interface: "TreeInterfaceUpstream"):
@@ -586,15 +561,13 @@ class AckPending(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
+        interface.join_prune_logger.debug('olistIsNowNull, AP -> P')
         interface.set_state(UpstreamState.Pruned)
 
         interface.send_prune()
 
         interface.clear_graft_retry_timer()
         interface.set_prune_limit_timer()
-
-        #print("olistIsNowNull, AP -> P")
-        interface.join_prune_logger.debug('olistIsNowNull, AP -> P')
 
     @staticmethod
     def olistIsNowNotNull(interface: "TreeInterfaceUpstream"):
@@ -616,11 +589,10 @@ class AckPending(UpstreamStateABC):
         @type interface: TreeInterfaceUpstream
         """
         if not interface.is_S_directly_conn():
+            interface.join_prune_logger.debug('RPFnbrChanges_olistIsNotNull, AP -> AP')
+
             interface.send_graft()
             interface.set_graft_retry_timer()
-
-            #print('RPFnbrChanges_olistIsNotNull, AP -> AP')
-            interface.join_prune_logger.debug('RPFnbrChanges_olistIsNotNull, AP -> AP')
 
     @staticmethod
     def RPFnbrChanges_olistIsNull(interface: "TreeInterfaceUpstream"):
@@ -631,11 +603,10 @@ class AckPending(UpstreamStateABC):
         @type interface: TreeInterfaceUpstream
         """
         if not interface.is_S_directly_conn():
+            interface.join_prune_logger.debug('RPFnbrChanges_olistIsNull, AP -> P')
+
             interface.clear_graft_retry_timer()
             interface.set_state(UpstreamState.Pruned)
-
-            #print('RPFnbrChanges_olistIsNull, AP -> P')
-            interface.join_prune_logger.debug('RPFnbrChanges_olistIsNull, AP -> P')
 
     @staticmethod
     def sourceIsNowDirectConnect(interface: "TreeInterfaceUpstream"):
@@ -644,11 +615,10 @@ class AckPending(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
+        interface.join_prune_logger.debug('sourceIsNowDirectConnect, AP -> F')
+
         interface.set_state(UpstreamState.Forward)
         interface.clear_graft_retry_timer()
-
-        #print("sourceIsNowDirectConnect, AP -> F")
-        interface.join_prune_logger.debug('sourceIsNowDirectConnect, AP -> F')
 
     @staticmethod
     def GRTexpires(interface: "TreeInterfaceUpstream"):
@@ -657,11 +627,10 @@ class AckPending(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
+        interface.join_prune_logger.debug('GRTexpires, AP -> AP')
+
         interface.set_graft_retry_timer()
         interface.send_graft()
-
-        #print('GRTexpires, AP -> AP')
-        interface.join_prune_logger.debug('GRTexpires, AP -> AP')
 
     @staticmethod
     def recvGraftAckFromRPFnbr(interface: "TreeInterfaceUpstream"):
@@ -670,14 +639,13 @@ class AckPending(UpstreamStateABC):
 
         @type interface: TreeInterfaceUpstream
         """
+        interface.join_prune_logger.debug('recvGraftAckFromRPFnbr, AP -> F')
+
         interface.clear_graft_retry_timer()
         interface.set_state(UpstreamState.Forward)
 
-        #print('recvGraftAckFromRPFnbr, AP -> F')
-        interface.join_prune_logger.debug('recvGraftAckFromRPFnbr, AP -> F')
-
     def __str__(self):
-        return "AP"
+        return "AckPending"
 
 class UpstreamState():
     Forward = Forward()

@@ -19,24 +19,9 @@ class KernelEntry:
         self.source_ip = source_ip
         self.group_ip = group_ip
 
-        # ip of neighbor of the rpf
-        #next_hop = UnicastRouting.get_route(source_ip)["gateway"]
-        #self.rpf_node = source_ip if next_hop is None else next_hop
-
-        '''
-        next_hop = UnicastRouting.get_route(source_ip)["gateway"]
-        multipaths = UnicastRouting.get_route(source_ip)["multipath"]
-
-        self.rpf_node = next_hop if next_hop is not None else source_ip
-        print("MUL", multipaths)
-        #self.rpf_node = multipaths[0]["gateway"]
-        for m in multipaths:
-            if m["gateway"] is None:
-                self.rpf_node = source_ip
-                break
-            else:
-                self.rpf_node = m["gateway"]
-        '''
+        # CHECK UNICAST ROUTING INFORMATION###################################################
+        # CHOSE RPC INTERFACE
+        # GET RPC TO SOURCE
         unicast_route = UnicastRouting.get_route(source_ip)
         next_hop = unicast_route["gateway"]
         multipaths = unicast_route["multipath"]

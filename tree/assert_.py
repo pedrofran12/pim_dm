@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractstaticmethod
+from abc import ABCMeta, abstractmethod
 
 import tree.globals as pim_globals
 from .metric import AssertMetric
@@ -8,7 +8,8 @@ if TYPE_CHECKING:
 
 
 class AssertStateABC(metaclass=ABCMeta):
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def receivedDataFromDownstreamIf(interface: "TreeInterfaceDownstream"):
         """
         An (S,G) Data packet received on downstream interface
@@ -17,7 +18,8 @@ class AssertStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def receivedInferiorMetricFromWinner(interface: "TreeInterfaceDownstream"):
         """
         Receive Inferior (Assert OR State Refresh) from Assert Winner
@@ -26,7 +28,8 @@ class AssertStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def receivedInferiorMetricFromNonWinner_couldAssertIsTrue(interface: "TreeInterfaceDownstream"):
         """
         Receive Inferior (Assert OR  State Refresh) from non-Assert Winner
@@ -36,7 +39,8 @@ class AssertStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def receivedPreferedMetric(interface: "TreeInterfaceDownstream", better_metric):
         """
         Receive Preferred Assert OR State Refresh
@@ -46,7 +50,8 @@ class AssertStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def sendStateRefresh(interface: "TreeInterfaceDownstream", time):
         """
         Send State Refresh
@@ -57,7 +62,8 @@ class AssertStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def assertTimerExpires(interface: "TreeInterfaceDownstream"):
         """
         AT(S,G) Expires
@@ -66,7 +72,8 @@ class AssertStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def couldAssertIsNowFalse(interface: "TreeInterfaceDownstream"):
         """
         CouldAssert -> FALSE
@@ -75,7 +82,8 @@ class AssertStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def couldAssertIsNowTrue(interface: "TreeInterfaceDownstream"):
         """
         CouldAssert -> TRUE
@@ -84,7 +92,8 @@ class AssertStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def winnerLivelinessTimerExpires(interface: "TreeInterfaceDownstream"):
         """
         Winner’s NLT(N,I) Expires
@@ -93,7 +102,8 @@ class AssertStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def receivedPruneOrJoinOrGraft(interface: "TreeInterfaceDownstream"):
         """
         Receive Prune(S,G), Join(S,G) or Graft(S,G)
@@ -198,7 +208,7 @@ class NoInfoState(AssertStateABC):
         interface.assert_logger.debug('receivedPruneOrJoinOrGraft, NI -> NI')
 
     def __str__(self) -> str:
-        return "NI"
+        return "NoInfo"
 
 
 class WinnerState(AssertStateABC):
@@ -288,7 +298,7 @@ class WinnerState(AssertStateABC):
         pass
 
     def __str__(self) -> str:
-        return "W"
+        return "Winner"
 
 
 
@@ -383,7 +393,7 @@ class LoserState(AssertStateABC):
         interface.set_assert_state(AssertState.NoInfo)
 
     def __str__(self) -> str:
-        return "L"
+        return "Loser"
 
 class AssertState():
     NoInfo = NoInfoState()

@@ -30,30 +30,25 @@ class Originator(OriginatorStateABC):
         '''
         @type tree: Tree
         '''
+        tree.originator_logger.debug('SRT expired, O -> O')
         tree.set_state_refresh_timer()
         tree.create_state_refresh_msg()
-        #print('SRT expired, O to O')
-        tree.originator_logger.debug('SRT expired, O -> O')
 
     @staticmethod
     def SATexpires(tree):
+        tree.originator_logger.debug('SAT expired, O -> NO')
         tree.clear_state_refresh_timer()
         tree.set_originator_state(OriginatorState.NotOriginator)
 
-        #print('SAT expired, O to NO')
-        tree.originator_logger.debug('SAT expired, O -> NO')
-
     @staticmethod
     def SourceNotConnected(tree):
+        tree.originator_logger.debug('Source no longer directly connected, O -> NO')
         tree.clear_state_refresh_timer()
         tree.clear_source_active_timer()
         tree.set_originator_state(OriginatorState.NotOriginator)
 
-        #print('Source no longer directly connected, O to NO')
-        tree.originator_logger.debug('Source no longer directly connected, O -> NO')
-
     def __str__(self):
-        return 'O'
+        return 'Originator'
 
 class NotOriginator(OriginatorStateABC):
     @staticmethod
@@ -61,13 +56,11 @@ class NotOriginator(OriginatorStateABC):
         '''
         @type interface: Tree
         '''
+        tree.originator_logger.debug('new DataMsg from Source, NO -> O')
         tree.set_originator_state(OriginatorState.Originator)
 
         tree.set_state_refresh_timer()
         tree.set_source_active_timer()
-
-        #print('new DataMsg from Source, NO to O')
-        tree.originator_logger.debug('new DataMsg from Source, NO -> O')
 
     @staticmethod
     def SRTexpires(tree):
@@ -82,7 +75,7 @@ class NotOriginator(OriginatorStateABC):
         return
 
     def __str__(self):
-        return 'NO'
+        return 'NotOriginator'
 
 
 class OriginatorState():

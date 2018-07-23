@@ -1,15 +1,17 @@
-from pyroute2 import IPDB, IPRoute
 import socket
-import RWLock
-import Main
 import ipaddress
+from threading import RLock
+from pyroute2 import IPDB, IPRoute
+import Main
 
 
 def get_route(ip_dst: str):
     return UnicastRouting.get_route(ip_dst)
 
+
 def get_metric(ip_dst: str):
     return UnicastRouting.get_metric(ip_dst)
+
 
 def check_rpf(ip_dst):
     return UnicastRouting.check_rpf(ip_dst)
@@ -18,36 +20,37 @@ def check_rpf(ip_dst):
 class UnicastRouting(object):
     ipr = None
     ipdb = None
+    lock = RLock()
 
     def __init__(self):
         UnicastRouting.ipr = IPRoute()
         UnicastRouting.ipdb = IPDB()
         self._ipdb = UnicastRouting.ipdb
-        self._ipdb.register_callback(UnicastRouting.unicast_changes)
-
+        self._ipdb.register_callback(UnicastRouting.unicast_changes, mode="post")
 
     @staticmethod
     def get_route(ip_dst: str):
-        ipdb = UnicastRouting.ipdb
 
         ip_bytes = socket.inet_aton(ip_dst)
         ip_int = int.from_bytes(ip_bytes, byteorder='big')
         info = None
-        for mask_len in range(32, 0, -1):
-            ip_bytes = (ip_int & (0xFFFFFFFF << (32 - mask_len))).to_bytes(4, "big")
-            ip_dst = socket.inet_ntoa(ip_bytes) + "/" + str(mask_len)
-            print(ip_dst)
-            try:
-                info = ipdb.routes[ip_dst]
-                break
-            except:
-                continue
-        if not info:
-            print("0.0.0.0/0")
-            info = ipdb.routes["default"]
-        print(info)
-        return info
+        with UnicastRouting.lock:
+            ipdb = UnicastRouting.ipdb  # type:IPDB
 
+            for mask_len in range(32, 0, -1):
+                ip_bytes = (ip_int & (0xFFFFFFFF << (32 - mask_len))).to_bytes(4, "big")
+                ip_dst = socket.inet_ntoa(ip_bytes) + "/" + str(mask_len)
+                print(ip_dst)
+                if ip_dst in ipdb.routes:
+                    info = ipdb.routes[ip_dst]
+                    break
+                else:
+                    continue
+            if not info:
+                print("0.0.0.0/0")
+                info = ipdb.routes["default"]
+            print(info)
+            return info
 
     # get metrics (routing preference and cost) to IP ip_dst
     @staticmethod
@@ -59,7 +62,6 @@ class UnicastRouting(object):
         if entry_cost is None:
             entry_cost = 0
         return (entry_protocol, entry_cost, mask)
-
 
     # get output interface IP, used to send data to IP ip_dst
     # (root interface IP to ip_dst)
@@ -74,11 +76,11 @@ class UnicastRouting(object):
         rpf_interface_source = UnicastRouting.ipr.get_routes(family=socket.AF_INET, dst=ip_dst)[0]['attrs'][3][1]
         return rpf_interface_source
 
-
     @staticmethod
     def unicast_changes(ipdb, msg, action):
         print("unicast change?")
         print(action)
+        UnicastRouting.lock.acquire()
         UnicastRouting.ipdb = ipdb
         if action == "RTM_NEWROUTE" or action == "RTM_DELROUTE":
             print(ipdb.routes)
@@ -87,7 +89,7 @@ class UnicastRouting(object):
             attrs = msg["attrs"]
             print(attrs)
             for (key, value) in attrs:
-                print((key,value))
+                print((key, value))
                 if key == "RTA_DST":
                     network_address = value
                     break
@@ -98,8 +100,10 @@ class UnicastRouting(object):
             print(network_address + "/" + str(mask_len))
             subnet = ipaddress.ip_network(network_address + "/" + str(mask_len))
             print(str(subnet))
+            UnicastRouting.lock.release()
             Main.kernel.notify_unicast_changes(subnet)
         elif action == "RTM_NEWADDR" or action == "RTM_DELADDR":
+            UnicastRouting.lock.release()
             # TODO ALTERACOES NA INTERFACE
             '''
             print(action)
@@ -111,11 +115,11 @@ class UnicastRouting(object):
                 if key == "IFA_LABEL":
                     interface_name = value
                     break
-    
+
             Main.kernel.notify_interface_change(interface_name)
             '''
-            pass
-
+        else:
+            UnicastRouting.lock.release()
 
     def stop(self):
         if UnicastRouting.ipr:

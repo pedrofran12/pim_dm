@@ -25,7 +25,7 @@ class TreeInterfaceDownstream(TreeInterface):
         logger = logging.LoggerAdapter(TreeInterfaceDownstream.LOGGER, extra_dict_logger)
         TreeInterface.__init__(self, kernel_entry, interface_id, logger)
         self.logger.debug('Created DownstreamInterface')
-        self.join_prune_logger.debug(str(self._prune_state))
+        self.join_prune_logger.debug('Downstream state transitions to ' + str(self._prune_state))
 
         # Last state refresh message sent (resend in case of new neighbors)
         self._last_state_refresh_message = None
@@ -37,7 +37,7 @@ class TreeInterfaceDownstream(TreeInterface):
         with self.get_state_lock():
             if new_state != self._prune_state:
                 self._prune_state = new_state
-                self.join_prune_logger.debug(str(new_state))
+                self.join_prune_logger.debug('Downstream state transitions to ' + str(new_state))
 
                 self.change_tree()
                 self.evaluate_ingroup()

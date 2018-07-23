@@ -35,7 +35,7 @@ class TreeInterfaceUpstream(TreeInterface):
         self._override_timer = None
         self._prune_limit_timer = None
         self._last_rpf = self.get_neighbor_RPF()
-        self.join_prune_logger.debug(str(self._graft_prune_state))
+        self.join_prune_logger.debug('Upstream state transitions to ' + str(self._graft_prune_state))
 
         # Originator state
         self._originator_state = OriginatorState.NotOriginator
@@ -43,7 +43,7 @@ class TreeInterfaceUpstream(TreeInterface):
         self._source_active_timer = None
         self._prune_now_counter = 0
         self.originator_logger = logging.LoggerAdapter(TreeInterfaceUpstream.LOGGER.getChild('Originator'), extra_dict_logger)
-        self.originator_logger.debug(str(self._originator_state))
+        self.originator_logger.debug('StateRefresh state transitions to ' + str(self._originator_state))
 
         if self.is_S_directly_conn():
             self._graft_prune_state.sourceIsNowDirectConnect(self)
@@ -82,7 +82,7 @@ class TreeInterfaceUpstream(TreeInterface):
         with self.get_state_lock():
             if new_state != self._graft_prune_state:
                 self._graft_prune_state = new_state
-                self.join_prune_logger.debug(str(new_state))
+                self.join_prune_logger.debug('Upstream state transitions to ' + str(new_state))
 
                 self.change_tree()
                 self.evaluate_ingroup()
@@ -90,7 +90,7 @@ class TreeInterfaceUpstream(TreeInterface):
     def set_originator_state(self, new_state: OriginatorStateABC):
         if new_state != self._originator_state:
             self._originator_state = new_state
-            self.originator_logger.debug(str(new_state))
+            self.originator_logger.debug('StateRefresh state transitions to ' + str(new_state))
 
     ##########################################
     # Check timers

@@ -55,7 +55,7 @@ class TreeInterface(metaclass=ABCMeta):
         self._assert_state = AssertState.NoInfo
         self._assert_winner_metric = AssertMetric()
         self._assert_timer = None
-        self.assert_logger.debug("NI")
+        self.assert_logger.debug("Assert state transitions to NoInfo")
 
         # Received prune hold time
         self._received_prune_holdtime = None
@@ -70,7 +70,7 @@ class TreeInterface(metaclass=ABCMeta):
         with self.get_state_lock():
             if new_state != self._assert_state:
                 self._assert_state = new_state
-                self.assert_logger.debug(str(new_state))
+                self.assert_logger.debug('Assert state transitions to ' + str(new_state))
 
                 self.change_tree()
                 self.evaluate_ingroup()
