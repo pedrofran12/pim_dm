@@ -1,0 +1,120 @@
+Script started on Mon Jul 23 18:16:41 2018
+root@switch1:~# tcpdump -i e br0 -Q in /hosh thome/Desktop/test_pim/pim/TestResults/Switch.pcap 
+tcpdump: syntax error
+root@switch1:~# tcpdump -i br0 -Q in /hosthome/Desktop/test_pim/pim/TestResults/Switch.pcap / ) &[1@-[1@w[1@ 
+[1] 1599
+root@switch1:~# tcpdump: listening on br0, link-type EN10MB (Ethernet), capture size 262144 bytes
+
+root@switch1:~# tcpdump -i br0 -Q in -w /hosthome/Desktop/test_pim/pim/TestResults/Switch.pcap &root@switch1:~# tcpdump -i br0 -Q in [4P/hosthome/Desktop/test_pim/pim/TestResults/Switch.pcap root@switch1:~# history -w[Ktcpdump -i br0 -Q in /hosthome/Desktop/test_pim/pim/TestResults/Switch.pcap root@switch1:~# tcpdump -i br0 -Q in -w /hosthome/Desktop/test_pim/pim/TestResults/Switch.pcap &root@switch1:~# [Kpython3 ServerLog.py 
+Test1: No info about (10.1.1.100,224.12.12.12) and data packets are flooded on the network
+Expected: R4 WINNER
+About to start TCP server...
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R3 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R4 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R2 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           2  eth2  R2 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R4 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R6 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R5 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R6 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R5 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 Assert state transitions to Winner
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 Assert state transitions to Winner
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R4 Assert state transitions to Winner
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedDataFromDownstreamIf, NI -> W
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R5 Assert state transitions to Loser
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedDataFromDownstreamIf, NI -> W
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R6 Assert state transitions to Loser
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedDataFromDownstreamIf, NI -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 Assert state transitions to Loser
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 Assert state transitions to Loser
+[1;32;40mTest1 Success[0m
+Test2: Kill Assert Winner and dont send data packets
+Expected: Every AL transitions to NI
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPreferedMetric, W -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R5 receivedPreferedMetric, NI -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPreferedMetric, W -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPruneOrJoinOrGraft, L -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R6 receivedPreferedMetric, NI -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPruneOrJoinOrGraft, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPruneOrJoinOrGraft, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPruneOrJoinOrGraft, L -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R5 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPruneOrJoinOrGraft, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R6 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R5 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R6 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R5 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R6 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 Assert state transitions to NoInfo
+[1;32;40mTest2 Success[0m
+Test3: Source sends data causing the reelection of AW
+Expected: R3 WINNER
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R6 winnerLivelinessTimerExpires, L -> NI
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R5 winnerLivelinessTimerExpires, L -> NI
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 winnerLivelinessTimerExpires, L -> NI
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 winnerLivelinessTimerExpires, L -> NI
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 Assert state transitions to Winner
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 Assert state transitions to Winner
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedDataFromDownstreamIf, NI -> W
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R5 Assert state transitions to Loser
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R6 Assert state transitions to Loser
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedDataFromDownstreamIf, NI -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 Assert state transitions to Loser
+[1;32;40mTest3 Success[0m
+Test4: CouldAssert of AssertWinner(R3) -> False
+Change interface eth0 cost of router R3 to 100, causing eth1 to be considered as the Root interface
+Expected: everyone NI
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPreferedMetric, W -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPruneOrJoinOrGraft, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPruneOrJoinOrGraft, L -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R5 receivedPreferedMetric, NI -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R6 receivedPreferedMetric, NI -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R5 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R6 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R3 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R3 couldAssertIsNowTrue, NI -> NI
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 Assert state transitions to NoInfo
+[1;32;40mTest4 Success[0m
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedInferiorMetricFromWinner, L -> NI
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 couldAssertIsNowFalse, W -> NI
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R5 Assert state transitions to Winner
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R3 Assert state transitions to Winner
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R3 receivedDataFromDownstreamIf, NI -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R5 receivedDataFromDownstreamIf, NI -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R5 Assert state transitions to Loser
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R3 Assert state transitions to Loser
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPruneOrJoinOrGraft, NI -> NI
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R5 receivedPreferedMetric, W -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    (10.1.1.100,224.12.12.12)           0  eth0  R3 receivedPreferedMetric, W -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPruneOrJoinOrGraft, NI -> NI
+^CException KeyboardInterrupt: KeyboardInterrupt() in <module 'threading' from '/usr/lib/python3.2/threading.py'> ignored
+root@switch1:~# fg
+tcpdump -i br0 -Q in -w /hosthome/Desktop/test_pim/pim/TestResults/Switch.pcap
+^C1408 packets captured
+2284 packets received by filter
+49 packets dropped by kernel
+root@switch1:~# exit
+exit
+
+Script done on Mon Jul 23 18:20:30 2018

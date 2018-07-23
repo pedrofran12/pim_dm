@@ -4,8 +4,8 @@ from abc import ABCMeta, abstractmethod
 
 class CustomFilter(logging.Filter):
     def filter(self, record):
-        return record.name in ("pim.KernelEntry.DownstreamInterface.Assert", "pim.KernelEntry.UpstreamInterface.Assert", "pim.KernelInterface") and \
-                record.routername in ["R1", "R2", "R3", "R4", "R5", "R6"]
+        return record.name in ("pim.KernelEntry.DownstreamInterface.Assert", "pim.KernelEntry.UpstreamInterface.Assert") and \
+                record.routername in ["R2", "R3", "R4", "R5", "R6"]
 
 
 class Test(object):
@@ -35,11 +35,11 @@ class Test(object):
 
 class Test1(Test):
     def __init__(self):
-        expectedState = {"R2": {"eth1": "L"},
-                         "R3": {"eth1": "L"},
-                         "R4": {"eth1": "W"},
-                         "R5": {"eth0": "L"},
-                         "R6": {"eth0": "L"},
+        expectedState = {"R2": {"eth1": "Assert state transitions to Loser"},
+                         "R3": {"eth1": "Assert state transitions to Loser"},
+                         "R4": {"eth1": "Assert state transitions to Winner"},
+                         "R5": {"eth0": "Assert state transitions to Loser"},
+                         "R6": {"eth0": "Assert state transitions to Loser"},
                          }
 
         success = {"R2": {"eth1": False},
@@ -52,16 +52,16 @@ class Test1(Test):
         super().__init__("Test1", expectedState, success)
 
     def print_test(self):
-        print("Test1: No info about (10.1.1.100,224.12.12.12)")
+        print("Test1: No info about (10.1.1.100,224.12.12.12) and data packets are flooded on the network")
         print("Expected: R4 WINNER")
 
 
 class Test2(Test):
     def __init__(self):
-        expectedState = {"R2": {"eth1": "NI"},
-                         "R3": {"eth1": "NI"},
-                         "R5": {"eth0": "NI"},
-                         "R6": {"eth0": "NI"},
+        expectedState = {"R2": {"eth1": "Assert state transitions to NoInfo"},
+                         "R3": {"eth1": "Assert state transitions to NoInfo"},
+                         "R5": {"eth0": "Assert state transitions to NoInfo"},
+                         "R6": {"eth0": "Assert state transitions to NoInfo"},
                          }
 
         success = {"R2": {"eth1": False},
@@ -72,16 +72,16 @@ class Test2(Test):
         super().__init__("Test2", expectedState, success)
 
     def print_test(self):
-        print("Test2: Kill assert winner")
+        print("Test2: Kill Assert Winner and dont send data packets")
         print("Expected: Every AL transitions to NI")
 
 
 class Test3(Test):
     def __init__(self):
-        expectedState = {"R2": {"eth1": "L"},
-                         "R3": {"eth1": "W"},
-                         "R5": {"eth0": "L"},
-                         "R6": {"eth0": "L"},
+        expectedState = {"R2": {"eth1": "Assert state transitions to Loser"},
+                         "R3": {"eth1": "Assert state transitions to Winner"},
+                         "R5": {"eth0": "Assert state transitions to Loser"},
+                         "R6": {"eth0": "Assert state transitions to Loser"},
                          }
 
         success = {"R2": {"eth1": False},
@@ -98,8 +98,8 @@ class Test3(Test):
 
 class Test4(Test):
     def __init__(self):
-        expectedState = {"R2": {"eth1": "NI"},
-                         "R3": {"eth1": "NI"},
+        expectedState = {"R2": {"eth1": "Assert state transitions to NoInfo"},
+                         "R3": {"eth1": "Assert state transitions to NoInfo"},
                          }
 
         success = {"R2": {"eth1": False},
@@ -109,5 +109,7 @@ class Test4(Test):
         super().__init__("Test4", expectedState, success)
 
     def print_test(self):
-        print("Test4: CouldAssert of AssertWinner(R3) -> False")
+        print("Test4: CouldAssert of AssertWinner(R3) -> False\n" + 
+	      "Change interface eth0 cost of router R3 to 100, causing eth1 to be considered as the Root interface")
         print("Expected: everyone NI")
+

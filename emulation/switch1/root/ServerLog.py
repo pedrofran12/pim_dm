@@ -105,7 +105,7 @@ def main():
     t = threading.Thread(target=worker)
     t.start()
 
-    tcpserver = LogRecordSocketReceiver(host='10.5.5.100')
+    tcpserver = LogRecordSocketReceiver(host='10.5.5.7')
     print('About to start TCP server...')
     tcpserver.serve_until_stopped()
 

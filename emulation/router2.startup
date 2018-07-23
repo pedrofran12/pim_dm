@@ -2,6 +2,8 @@ ip addr add dev eth0 10.2.2.2/24
 ip link set dev eth0 up
 ip addr add dev eth1 10.5.5.2/24
 ip link set dev eth1 up
+ip addr add dev eth2 10.9.9.2/24
+ip link set dev eth2 up
 
 #default route para obter conectividade internet
 #ip route add 0.0.0.0/0 via 10.2.2.1
