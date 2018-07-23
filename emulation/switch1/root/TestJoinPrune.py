@@ -5,7 +5,7 @@ from abc import ABCMeta, abstractmethod
 class CustomFilter(logging.Filter):
     def filter(self, record):
         return record.name in ("pim.KernelEntry.DownstreamInterface.JoinPrune", "pim.KernelEntry.UpstreamInterface.JoinPrune", "pim.KernelInterface") and \
-                record.routername in ["R1", "R2","R3","R4","R5","R6"]
+                record.routername in ["R1", "R2", "R3", "R4", "R5", "R6", "R7"]
 
 
 class Test(object):
@@ -37,14 +37,17 @@ class Test(object):
 
 class Test1(Test):
     def __init__(self):
-        expectedState = {"R1": {"eth0": "F", "eth1": "P", "eth2": "P", "eth3": "NI"}, # Only downstream interface connected to AssertWinner \
-                                                                                      # in NI state and upstream interface connected to source\
-                                                                                      # in Forward state
-                         "R2": {"eth0": "P"}, # Assert Loser upstream interface in pruned state
-                         "R3": {"eth0": "P"}, # Assert Loser upstream interface in pruned state
-                         "R4": {"eth0": "F", "eth1": "NI"}, # Assert Winner upstream interface in forward state
-                         "R5": {"eth0": "F"}, # Downstream router interested (client0)
-                         "R6": {"eth0": "F"}, # Downstream router interested (client0)
+        expectedState = {"R1": {"eth0": "Upstream state transitions to Forward", "eth1": "Downstream state transitions to Pruned",
+                                "eth2": "Downstream state transitions to Pruned", "eth3": "Downstream state transitions to NoInfo"},
+                                                                            # Only downstream interface connected to AssertWinner \
+                                                                            # in NI state and upstream interface connected to source\
+                                                                            # in Forward state
+                         "R2": {"eth0": "Upstream state transitions to Pruned"}, # Assert Loser upstream interface in pruned state
+                         "R3": {"eth0": "Upstream state transitions to Pruned"}, # Assert Loser upstream interface in pruned state
+                         "R4": {"eth0": "Upstream state transitions to Forward", "eth1": "Downstream state transitions to NoInfo"}, # Assert Winner upstream interface in forward state
+                         "R5": {"eth0": "Upstream state transitions to Forward"}, # Downstream router interested (client0)
+                         "R6": {"eth0": "Upstream state transitions to Forward"}, # Downstream router interested (client1)
+                         "R7": {"eth0": "Upstream state transitions to Forward"}, # Downstream router interested (client0)
                          }
 
         success = {"R1": {"eth0": False, "eth1": False, "eth2": False, "eth3": False},
@@ -53,6 +56,7 @@ class Test1(Test):
                    "R4": {"eth0": False, "eth1": False},
                    "R5": {"eth0": False},
                    "R6": {"eth0": False},
+                   "R7": {"eth0": False},
                    }
 
         super().__init__("Test1", expectedState, success)
@@ -64,8 +68,8 @@ class Test1(Test):
 
 class Test2(Test):
     def __init__(self):
-        expectedState = {"R4": {"eth1": "PP"}, # Assert Winner upstream interface in PP because of Prune msg
-                         "R6": {"eth0": "P"}, # Downstream router not interested
+        expectedState = {"R4": {"eth1": "Downstream state transitions to PrunePending"}, # Assert Winner upstream interface in PP because of Prune msg
+                         "R6": {"eth0": "Upstream state transitions to Pruned"}, # client not interested causes Usptream interface to be Pruned
                          }
 
         success = {"R4": {"eth1": False},
@@ -80,7 +84,7 @@ class Test2(Test):
 
 class Test3(Test):
     def __init__(self):
-        expectedState = {"R4": {"eth1": "NI"}, # Assert Winner upstream interface in PP because of Join msg
+        expectedState = {"R4": {"eth1": "Downstream state transitions to NoInfo"}, # Assert Winner upstream interface in PP because of Join msg
                          }
 
         success = {"R4": {"eth1": False},
@@ -95,11 +99,11 @@ class Test3(Test):
 
 class Test4(Test):
     def __init__(self):
-        expectedState = {"R1": {"eth3": "P"}, # Only interface eth3 changes to Pruned state... eth1 is directly connected so it should stay in a Forward state
+        expectedState = {"R1": {"eth3": "Downstream state transitions to Pruned"}, # Only interface eth3 changes to Pruned state... eth1 is directly connected so it should stay in a Forward state
                          #"R2": {"eth0": "P"}, #R2 already in a Pruned state
                          #"R3": {"eth0": "P"}, #R3 already in a Pruned state
-                         "R4": {"eth0": "P", "eth1": "P"}, # Assert Winner upstream interface in forward state
-                         "R5": {"eth0": "P"}, # Downstream router interested (client0)
+                         "R4": {"eth0": "Upstream state transitions to Pruned", "eth1": "Downstream state transitions to Pruned"}, # Assert Winner upstream interface in forward state
+                         "R5": {"eth0": "Upstream state transitions to Pruned"}, # Downstream router interested (client0)
                          #"R6": {"eth0": "P"}, # R6 already in a Pruned state
                          }
 
@@ -117,18 +121,18 @@ class Test4(Test):
 
 class Test5(Test):
     def __init__(self):
-        expectedState = {"R1": {"eth3": "NI"}, # R4 grafted this interface
-                         "R4": {"eth0": "F", "eth1": "NI"}, # R5 grafted this interface
-                         "R5": {"eth0": "F"}, # client0 interested
+        expectedState = {"R1": {"eth3": "Downstream state transitions to NoInfo"}, # R4 grafted this interface
+                         "R4": {"eth0": "Upstream state transitions to Forward", "eth1": "Downstream state transitions to NoInfo"}, # R5 grafted this interface
+                         "R6": {"eth0": "Upstream state transitions to Forward"}, # client0 interested
                          }
 
         success = {"R1": {"eth3": False},
                    "R4": {"eth0": False, "eth1": False},
-                   "R5": {"eth0": False},
+                   "R6": {"eth0": False},
                    }
 
         super().__init__("Test5", expectedState, success)
 
     def print_test(self):
-        print("Test5: client0 interested in receiving traffic")
+        print("Test5: client1 interested in receiving traffic")
         print("Graft tree")

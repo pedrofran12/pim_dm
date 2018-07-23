@@ -1,0 +1,224 @@
+Script started on Tue Jul 24 16:01:13 2018
+root@switch1:~# 
+root@switch1:~# y tcpdump -i et  br0 -Q in -w /hosthome/Desktop/test_pim/pim/TestResults/Switch.pcap &
+[1] 1594
+root@switch1:~# tcpdump: listening on br0, link-type EN10MB (Ethernet), capture size 262144 bytes
+
+root@switch1:~# t python3 ServerLogJoinPrune.py 
+Test1: Formation of (S,G) Broadcast Tree
+Having Client0 and Client1 interested
+About to start TCP server...
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:09,030   (10.1.1.100,224.12.12.12)           0  eth0  R1 Upstream state transitions to Forward
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:09,031   (10.1.1.100,224.12.12.12)           0  eth0  R1 sourceIsNowDirectConnect, F -> F
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:09,130   (10.1.1.100,224.12.12.12)           1  eth1  R1 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:09,131   (10.1.1.100,224.12.12.12)           2  eth2  R1 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:09,133   (10.1.1.100,224.12.12.12)           3  eth3  R1 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:09,255   (10.1.1.100,224.12.12.12)           0  eth0  R3 Upstream state transitions to Forward
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:09,282   (10.1.1.100,224.12.12.12)           0  eth0  R4 Upstream state transitions to Forward
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:09,290   (10.1.1.100,224.12.12.12)           0  eth0  R2 Upstream state transitions to Forward
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:09,391   (10.1.1.100,224.12.12.12)           1  eth1  R3 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:09,442   (10.1.1.100,224.12.12.12)           1  eth1  R2 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:09,445   (10.1.1.100,224.12.12.12)           2  eth2  R2 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:09,468   (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:09,528   (10.1.1.100,224.12.12.12)           0  eth0  R5 Upstream state transitions to Forward
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:09,549   (10.1.1.100,224.12.12.12)           0  eth0  R6 Upstream state transitions to Forward
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:09,596   (10.1.1.100,224.12.12.12)           0  eth0  R7 Upstream state transitions to Forward
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:09,689   (10.1.1.100,224.12.12.12)           1  eth1  R6 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:09,694   (10.1.1.100,224.12.12.12)           1  eth1  R5 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:09,739   (10.1.1.100,224.12.12.12)           1  eth1  R7 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:09,740   (10.1.1.100,224.12.12.12)           2  eth2  R7 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:09,797   (10.1.1.100,224.12.12.12)           2  eth2  R2 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:09,798   (10.1.1.100,224.12.12.12)           2  eth2  R2 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:09,814   (10.1.1.100,224.12.12.12)           2  eth2  R2 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:09,816   (10.1.1.100,224.12.12.12)           2  eth2  R2 Downstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,140   (10.1.1.100,224.12.12.12)           0  eth0  R5 RPFnbrChanges_olistIsNotNull, F -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,140   (10.1.1.100,224.12.12.12)           0  eth0  R5 Upstream state transitions to AckPending
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,158   (10.1.1.100,224.12.12.12)           0  eth0  R2 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,159   (10.1.1.100,224.12.12.12)           0  eth0  R2 Upstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,156   (10.1.1.100,224.12.12.12)           0  eth0  R6 RPFnbrChanges_olistIsNotNull, F -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,157   (10.1.1.100,224.12.12.12)           0  eth0  R6 Upstream state transitions to AckPending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,195   (10.1.1.100,224.12.12.12)           1  eth1  R1 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,196   (10.1.1.100,224.12.12.12)           1  eth1  R1 Downstream state transitions to PrunePending
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,207   (10.1.1.100,224.12.12.12)           0  eth0  R3 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,209   (10.1.1.100,224.12.12.12)           0  eth0  R3 Upstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,221   (10.1.1.100,224.12.12.12)           0  eth0  R5 RPFnbrChanges_olistIsNotNull, AP -> AP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,234   (10.1.1.100,224.12.12.12)           1  eth1  R1 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,237   (10.1.1.100,224.12.12.12)           1  eth1  R1 Downstream state transitions to Pruned
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,266   (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedGraft, NI -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,270   (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedGraft, NI -> NI
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,275   (10.1.1.100,224.12.12.12)           0  eth0  R5 RPFnbrChanges_olistIsNotNull, AP -> AP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,278   (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,279   (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,281   (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,282   (10.1.1.100,224.12.12.12)           1  eth1  R3 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,300   (10.1.1.100,224.12.12.12)           2  eth2  R1 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,303   (10.1.1.100,224.12.12.12)           2  eth2  R1 Downstream state transitions to PrunePending
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,312   (10.1.1.100,224.12.12.12)           0  eth0  R6 RPFnbrChanges_olistIsNotNull, AP -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,315   (10.1.1.100,224.12.12.12)           0  eth0  R5 seePrune, AP -> AP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,327   (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedGraft, NI -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,329   (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedGraft, PP -> NI
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,342   (10.1.1.100,224.12.12.12)           0  eth0  R5 seePrune, AP -> AP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,343   (10.1.1.100,224.12.12.12)           1  eth1  R3 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,348   (10.1.1.100,224.12.12.12)           0  eth0  R5 seePrune, AP -> AP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,361   (10.1.1.100,224.12.12.12)           2  eth2  R1 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,363   (10.1.1.100,224.12.12.12)           2  eth2  R1 Downstream state transitions to Pruned
+[1;32;40mTest1 Success[0m
+Test2: Client1 not interested in receiving traffic destined to group G
+R6 sends a Prune and R5 overrides the prune
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,402   (10.1.1.100,224.12.12.12)           0  eth0  R6 RPFnbrChanges_olistIsNotNull, AP -> AP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,418   (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedGraft, PP -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,419   (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,425   (10.1.1.100,224.12.12.12)           0  eth0  R5 recvGraftAckFromRPFnbr, AP -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,426   (10.1.1.100,224.12.12.12)           0  eth0  R5 Upstream state transitions to Forward
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,477   (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,478   (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to PrunePending
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,486   (10.1.1.100,224.12.12.12)           0  eth0  R6 seePrune, AP -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,503   (10.1.1.100,224.12.12.12)           0  eth0  R6 seePrune, AP -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,515   (10.1.1.100,224.12.12.12)           0  eth0  R6 seePrune, AP -> AP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,571   (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedGraft, PP -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,573   (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,577   (10.1.1.100,224.12.12.12)           0  eth0  R6 recvGraftAckFromRPFnbr, AP -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,579   (10.1.1.100,224.12.12.12)           0  eth0  R6 Upstream state transitions to Forward
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,962   (10.1.1.100,224.12.12.12)           0  eth0  R5 OTexpires, F -> F
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:34,973   (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedJoin, NI -> NI
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:34,980   (10.1.1.100,224.12.12.12)           0  eth0  R6 seeJoinToRPFnbr, F -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:48,937   (10.1.1.100,224.12.12.12)           0  eth0  R6 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:48,939   (10.1.1.100,224.12.12.12)           0  eth0  R6 Upstream state transitions to Pruned
+[1;32;40mTest2 Success[0m
+Test3: R5 overrides prune via Join
+R4 should transition to Forward state
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:48,955   (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:48,957   (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to PrunePending
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:48,964   (10.1.1.100,224.12.12.12)           0  eth0  R5 seePrune, F -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:50,980   (10.1.1.100,224.12.12.12)           0  eth0  R5 OTexpires, F -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:02:50,992   (10.1.1.100,224.12.12.12)           0  eth0  R6 seeJoinToRPFnbr, P -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:51,003   (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedJoin, PP -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:02:51,005   (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to NoInfo
+[1;32;40mTest3 Success[0m
+Test4: No client interested
+Prune tree
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:18,046   (10.1.1.100,224.12.12.12)           0  eth0  R7 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:18,048   (10.1.1.100,224.12.12.12)           0  eth0  R7 Upstream state transitions to Pruned
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:03:18,099   (10.1.1.100,224.12.12.12)           1  eth1  R5 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:03:18,100   (10.1.1.100,224.12.12.12)           1  eth1  R5 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:03:18,121   (10.1.1.100,224.12.12.12)           1  eth1  R5 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:03:18,122   (10.1.1.100,224.12.12.12)           1  eth1  R5 Downstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:18,123   (10.1.1.100,224.12.12.12)           0  eth0  R5 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:18,124   (10.1.1.100,224.12.12.12)           0  eth0  R5 Upstream state transitions to Pruned
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:03:18,130   (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:03:18,131   (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to PrunePending
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:18,130   (10.1.1.100,224.12.12.12)           0  eth0  R6 seePrune, P -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:03:21,160   (10.1.1.100,224.12.12.12)           1  eth1  R4 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:03:21,161   (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:21,165   (10.1.1.100,224.12.12.12)           0  eth0  R4 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:21,167   (10.1.1.100,224.12.12.12)           0  eth0  R4 Upstream state transitions to Pruned
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:03:21,178   (10.1.1.100,224.12.12.12)           3  eth3  R1 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:03:21,183   (10.1.1.100,224.12.12.12)           3  eth3  R1 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:03:21,269   (10.1.1.100,224.12.12.12)           3  eth3  R1 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:03:21,277   (10.1.1.100,224.12.12.12)           3  eth3  R1 Downstream state transitions to Pruned
+[1;32;40mTest4 Success[0m
+Test5: client1 interested in receiving traffic
+Graft tree
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:21,293   (10.1.1.100,224.12.12.12)           0  eth0  R6 seePrune, P -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:21,294   (10.1.1.100,224.12.12.12)           0  eth0  R5 seePrune, P -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:46,677   (10.1.1.100,224.12.12.12)           0  eth0  R6 olistIsNowNotNull, P -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:46,677   (10.1.1.100,224.12.12.12)           0  eth0  R6 Upstream state transitions to AckPending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:03:46,684   (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedGraft, P -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:03:46,687   (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:46,689   (10.1.1.100,224.12.12.12)           0  eth0  R4 olistIsNowNotNull, P -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:46,690   (10.1.1.100,224.12.12.12)           0  eth0  R4 Upstream state transitions to AckPending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:03:46,691   (10.1.1.100,224.12.12.12)           3  eth3  R1 receivedGraft, P -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:03:46,692   (10.1.1.100,224.12.12.12)           3  eth3  R1 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:46,707   (10.1.1.100,224.12.12.12)           0  eth0  R4 recvGraftAckFromRPFnbr, AP -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:46,708   (10.1.1.100,224.12.12.12)           0  eth0  R4 Upstream state transitions to Forward
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:46,709   (10.1.1.100,224.12.12.12)           0  eth0  R6 recvGraftAckFromRPFnbr, AP -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:03:46,710   (10.1.1.100,224.12.12.12)           0  eth0  R6 Upstream state transitions to Forward
+[1;32;40mTest5 Success[0m
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:06,845   (10.1.1.100,224.12.12.12)           2  eth2  R2 PTexpires, P -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:06,847   (10.1.1.100,224.12.12.12)           2  eth2  R2 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:06,873   (10.1.1.100,224.12.12.12)           0  eth0  R2 olistIsNowNotNull, P -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:06,876   (10.1.1.100,224.12.12.12)           0  eth0  R2 Upstream state transitions to AckPending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:06,928   (10.1.1.100,224.12.12.12)           1  eth1  R1 receivedGraft, P -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:06,930   (10.1.1.100,224.12.12.12)           1  eth1  R1 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:06,979   (10.1.1.100,224.12.12.12)           0  eth0  R2 recvGraftAckFromRPFnbr, AP -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:06,986   (10.1.1.100,224.12.12.12)           0  eth0  R2 Upstream state transitions to Forward
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:09,844   (10.1.1.100,224.12.12.12)           0  eth0  R7 olistIsNowNotNull, P -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:09,850   (10.1.1.100,224.12.12.12)           0  eth0  R7 Upstream state transitions to AckPending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:09,913   (10.1.1.100,224.12.12.12)           1  eth1  R5 receivedGraft, P -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:09,916   (10.1.1.100,224.12.12.12)           1  eth1  R5 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:09,945   (10.1.1.100,224.12.12.12)           0  eth0  R5 olistIsNowNotNull, P -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:09,947   (10.1.1.100,224.12.12.12)           0  eth0  R5 Upstream state transitions to AckPending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:09,970   (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedGraft, NI -> NI
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:09,986   (10.1.1.100,224.12.12.12)           0  eth0  R7 recvGraftAckFromRPFnbr, AP -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:09,986   (10.1.1.100,224.12.12.12)           0  eth0  R7 Upstream state transitions to Forward
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:09,982   (10.1.1.100,224.12.12.12)           0  eth0  R5 recvGraftAckFromRPFnbr, AP -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:09,987   (10.1.1.100,224.12.12.12)           0  eth0  R5 Upstream state transitions to Forward
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:34,226   (10.1.1.100,224.12.12.12)           0  eth0  R3 olistIsNowNotNull, P -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:34,228   (10.1.1.100,224.12.12.12)           0  eth0  R3 Upstream state transitions to AckPending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:34,252   (10.1.1.100,224.12.12.12)           2  eth2  R1 receivedGraft, P -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:34,257   (10.1.1.100,224.12.12.12)           2  eth2  R1 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:34,352   (10.1.1.100,224.12.12.12)           0  eth0  R3 recvGraftAckFromRPFnbr, AP -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:34,354   (10.1.1.100,224.12.12.12)           0  eth0  R3 Upstream state transitions to Forward
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,516   (10.1.1.100,224.12.12.12)           0  eth0  R5 RPFnbrChanges_olistIsNotNull, F -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,518   (10.1.1.100,224.12.12.12)           0  eth0  R5 Upstream state transitions to AckPending
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,523   (10.1.1.100,224.12.12.12)           0  eth0  R6 RPFnbrChanges_olistIsNotNull, F -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,525   (10.1.1.100,224.12.12.12)           0  eth0  R6 Upstream state transitions to AckPending
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,553   (10.1.1.100,224.12.12.12)           0  eth0  R3 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,554   (10.1.1.100,224.12.12.12)           0  eth0  R3 Upstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,576   (10.1.1.100,224.12.12.12)           0  eth0  R5 RPFnbrChanges_olistIsNotNull, AP -> AP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,579   (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedGraft, NI -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,584   (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,585   (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,562   (10.1.1.100,224.12.12.12)           2  eth2  R1 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,563   (10.1.1.100,224.12.12.12)           2  eth2  R1 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,605   (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedPrune, PP -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,599   (10.1.1.100,224.12.12.12)           2  eth2  R1 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,608   (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedGraft, NI -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,603   (10.1.1.100,224.12.12.12)           2  eth2  R1 Downstream state transitions to Pruned
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,618   (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedGraft, NI -> NI
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,620   (10.1.1.100,224.12.12.12)           0  eth0  R5 recvGraftAckFromRPFnbr, AP -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,621   (10.1.1.100,224.12.12.12)           0  eth0  R5 Upstream state transitions to Forward
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,626   (10.1.1.100,224.12.12.12)           0  eth0  R7 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,628   (10.1.1.100,224.12.12.12)           0  eth0  R7 Upstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,636   (10.1.1.100,224.12.12.12)           0  eth0  R6 RPFnbrChanges_olistIsNotNull, AP -> AP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,641   (10.1.1.100,224.12.12.12)           1  eth1  R5 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,646   (10.1.1.100,224.12.12.12)           1  eth1  R5 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,670   (10.1.1.100,224.12.12.12)           2  eth2  R2 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,670   (10.1.1.100,224.12.12.12)           2  eth2  R2 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,683   (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedGraft, PP -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,682   (10.1.1.100,224.12.12.12)           1  eth1  R5 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,683   (10.1.1.100,224.12.12.12)           1  eth1  R5 Downstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,685   (10.1.1.100,224.12.12.12)           0  eth0  R5 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,687   (10.1.1.100,224.12.12.12)           0  eth0  R5 Upstream state transitions to Pruned
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,686   (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,694   (10.1.1.100,224.12.12.12)           0  eth0  R6 seePrune, AP -> AP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,697   (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,698   (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,717   (10.1.1.100,224.12.12.12)           2  eth2  R2 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,718   (10.1.1.100,224.12.12.12)           2  eth2  R2 Downstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,731   (10.1.1.100,224.12.12.12)           0  eth0  R2 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,728   (10.1.1.100,224.12.12.12)           0  eth0  R6 seePrune, AP -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,733   (10.1.1.100,224.12.12.12)           0  eth0  R2 Upstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,741   (10.1.1.100,224.12.12.12)           0  eth0  R6 seePrune, AP -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,743   (10.1.1.100,224.12.12.12)           0  eth0  R6 recvGraftAckFromRPFnbr, AP -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,745   (10.1.1.100,224.12.12.12)           0  eth0  R6 Upstream state transitions to Forward
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,744   (10.1.1.100,224.12.12.12)           1  eth1  R1 receivedPrune, NI -> PP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,755   (10.1.1.100,224.12.12.12)           0  eth0  R5 seePrune, P -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,762   (10.1.1.100,224.12.12.12)           0  eth0  R5 seePrune, P -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,745   (10.1.1.100,224.12.12.12)           1  eth1  R1 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,780   (10.1.1.100,224.12.12.12)           1  eth1  R1 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,781   (10.1.1.100,224.12.12.12)           1  eth1  R1 Downstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,962   (10.1.1.100,224.12.12.12)           0  eth0  R6 OTexpires, F -> F
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,977   (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedJoin, PP -> NI
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2018-07-24 16:05:49,979   (10.1.1.100,224.12.12.12)           0  eth0  R5 seeJoinToRPFnbr, P -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2018-07-24 16:05:49,986   (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to NoInfo
+^CException KeyboardInterrupt: KeyboardInterrupt() in <module 'threading' from '/usr/lib/python3.2/threading.py'> ignored
+root@switch1:~# fg
+tcpdump -i br0 -Q in -w /hosthome/Desktop/test_pim/pim/TestResults/Switch.pcap
+^C1613 packets captured
+2848 packets received by filter
+100 packets dropped by kernel
+root@switch1:~# exit
+exit
+
+Script done on Tue Jul 24 16:06:02 2018
