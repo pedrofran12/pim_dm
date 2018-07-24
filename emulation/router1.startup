@@ -9,7 +9,7 @@ ip link set dev eth3 up
 
 
 #NAT for private ip's
-iptables -t nat -A POSTROUTING -s 0.0.0.0/0 -o eth4 -j MASQUERADE
+#iptables -t nat -A POSTROUTING -s 0.0.0.0/0 -o eth4 -j MASQUERADE
 
 # Zebra and OSPF
 /etc/init.d/quagga restart

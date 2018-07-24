@@ -96,7 +96,7 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
 
 def main():
     handler = TestHandler(sys.stdout)
-    formatter = logging.Formatter('%(name)-50s %(levelname)-8s %(tree)-35s %(vif)-2s %(interfacename)-5s %(routername)-2s %(message)s')
+    formatter = logging.Formatter('%(name)-50s %(levelname)-8s %(asctime)-25s %(tree)-35s %(vif)-2s %(interfacename)-5s %(routername)-2s %(message)s')
     handler.setFormatter(formatter)
     logging.getLogger('my_logger').addHandler(handler)
     logging.getLogger('my_logger').addFilter(CustomFilter())
@@ -104,7 +104,7 @@ def main():
     t = threading.Thread(target=worker)
     t.start()
 
-    tcpserver = LogRecordSocketReceiver(host='10.5.5.100')
+    tcpserver = LogRecordSocketReceiver(host='10.5.5.7')
     print('About to start TCP server...')
     tcpserver.serve_until_stopped()
 

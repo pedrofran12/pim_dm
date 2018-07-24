@@ -3,8 +3,13 @@ from abc import ABCMeta
 
 class CustomFilter(logging.Filter):
     def filter(self, record):
-        return record.name in ("pim.KernelEntry.UpstreamInterface.Originator", "pim.KernelEntry.DownstreamInterface.JoinPrune", "pim.KernelEntry.UpstreamInterface.JoinPrune", "pim.KernelInterface") and \
-                record.routername in ["R1", "R2","R3","R4","R5","R6"]
+        return record.name in ("pim.KernelEntry.UpstreamInterface.Originator",
+                               "pim.KernelEntry.DownstreamInterface.JoinPrune",
+                               "pim.KernelEntry.UpstreamInterface.JoinPrune",
+                               "pim.KernelInterface",
+                               "pim.KernelEntry.DownstreamInterface.Assert",
+                               "pim.KernelEntry.UpstreamInterface.Assert") and\
+                record.routername in ["R1", "R2", "R3", "R4", "R5", "R6", "R7"]
 
 
 class Test():
@@ -32,12 +37,13 @@ class Test():
 
 class Test1(Test):
     def __init__(self):
-        expectedState = {"R1": {"eth0": "O"},
-                         "R2": {"eth0": "NO"},
-                         "R3": {"eth0": "NO"},
-                         "R4": {"eth0": "NO"},
-                         "R5": {"eth0": "NO"},
-                         "R6": {"eth0": "NO"},
+        expectedState = {"R1": {"eth0": "StateRefresh state transitions to Originator"},
+                         "R2": {"eth0": "StateRefresh state transitions to NotOriginator"},
+                         "R3": {"eth0": "StateRefresh state transitions to NotOriginator"},
+                         "R4": {"eth0": "StateRefresh state transitions to NotOriginator"},
+                         "R5": {"eth0": "StateRefresh state transitions to NotOriginator"},
+                         "R6": {"eth0": "StateRefresh state transitions to NotOriginator"},
+                         "R7": {"eth0": "StateRefresh state transitions to NotOriginator"},
                          }
 
         success = {"R1": {"eth0": False},
@@ -46,6 +52,7 @@ class Test1(Test):
                    "R4": {"eth0": False},
                    "R5": {"eth0": False},
                    "R6": {"eth0": False},
+                   "R7": {"eth0": False},
                    }
 
         super().__init__("Test1", expectedState, success)
@@ -55,10 +62,9 @@ class Test1(Test):
         print("Having Client0 and Client1 interested")
 
 
-
 class Test2(Test):
     def __init__(self):
-        expectedState = {"R1": {"eth0": "NO"}
+        expectedState = {"R1": {"eth0": "StateRefresh state transitions to NotOriginator"}
                          }
 
         success = {"R1": {"eth0": False},
@@ -68,9 +74,10 @@ class Test2(Test):
     def print_test(self):
         print("Test2: After some time without source sending data... router originator should transition to NO")
 
+
 class Test3(Test):
     def __init__(self):
-        expectedState = {"R1": {"eth0": "O"}
+        expectedState = {"R1": {"eth0": "StateRefresh state transitions to Originator"}
                          }
 
         success = {"R1": {"eth0": False},
