@@ -22,6 +22,10 @@ class AssertMetric(object):
     def is_worse(self, other):
         return not self.is_better_than(other)
 
+    def equal_metric(self, other):
+        return self.metric_preference == other.metric_preference and self.metric_preference == other.metric_preference \
+               and self.ip_address == other.ip_address
+
     @staticmethod
     def infinite_assert_metric():
         '''

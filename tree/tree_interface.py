@@ -114,17 +114,18 @@ class TreeInterface(metaclass=ABCMeta):
         pass
 
     def recv_assert_msg(self, received_metric: AssertMetric):
-        if self.my_assert_metric().is_better_than(received_metric):
-            # received inferior assert
-            if self._assert_winner_metric.ip_address == received_metric.ip_address:
-                # received from assert winner
-                self._assert_state.receivedInferiorMetricFromWinner(self)
-            elif self.could_assert():
-                # received from non assert winner and could_assert
-                self._assert_state.receivedInferiorMetricFromNonWinner_couldAssertIsTrue(self)
-        elif received_metric.is_better_than(self._assert_winner_metric):
+        if self._assert_winner_metric.is_better_than(received_metric) and \
+                self._assert_winner_metric.ip_address == received_metric.ip_address:
+            # received inferior assert from Assert Winner
+            self._assert_state.receivedInferiorMetricFromWinner(self)
+        elif self.my_assert_metric().is_better_than(received_metric) and self.could_assert():
+            # received inferior assert from non assert winner and could_assert
+            self._assert_state.receivedInferiorMetricFromNonWinner_couldAssertIsTrue(self)
+        elif received_metric.is_better_than(self._assert_winner_metric) or \
+                received_metric.equal_metric(self._assert_winner_metric):
             #received preferred assert
-            self._assert_state.receivedPreferedMetric(self, received_metric)
+            equal_metric = received_metric.equal_metric(self._assert_winner_metric)
+            self._assert_state.receivedPreferedMetric(self, received_metric, equal_metric)
 
     def recv_prune_msg(self, upstream_neighbor_address, holdtime):
         if upstream_neighbor_address == self.get_ip():
