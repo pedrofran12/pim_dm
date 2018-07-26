@@ -100,10 +100,14 @@ class Test4(Test):
     def __init__(self):
         expectedState = {"R2": {"eth1": "Assert state transitions to NoInfo"},
                          "R3": {"eth1": "Assert state transitions to NoInfo"},
+                         "R5": {"eth0": "Assert state transitions to NoInfo"},
+                         "R6": {"eth0": "Assert state transitions to NoInfo"},
                          }
 
         success = {"R2": {"eth1": False},
                    "R3": {"eth1": False},
+                   "R5": {"eth0": False},
+                   "R6": {"eth0": False},
                    }
 
         super().__init__("Test4", expectedState, success)
