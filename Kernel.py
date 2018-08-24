@@ -355,7 +355,7 @@ class Kernel:
                 if ip_src not in self.routing:
                     self.routing[ip_src] = {}
 
-                iif = self.vif_dic.get(UnicastRouting.check_rpf(ip_src))
+                iif = UnicastRouting.check_rpf(ip_src)
                 self.set_flood_multicast_route(ip_src, ip_dst, iif)
                 self.routing[ip_src][ip_dst] = kernel_entry
                 return kernel_entry
