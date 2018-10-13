@@ -15,7 +15,7 @@ This repository stores the implementation of this protocol. The implementation i
 You may need sudo permitions, in order to run this protocol. This is required because we use raw sockets to exchange control messages. For this reason, some sockets to work properly need to have super user permissions.
 
 First clone this repository:
-  `git clone https://github.com/pedrofran12/pim.git`
+  `git clone https://github.com/pedrofran12/pim_dm.git`
 
 Then enter in the cloned repository and install all dependencies:
    `pip3 install -r requirements.txt`
