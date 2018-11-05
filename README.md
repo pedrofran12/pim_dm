@@ -12,15 +12,15 @@ This repository stores the implementation of this protocol. The implementation i
 
 
 # Installation
-You may need sudo permitions, in order to run this protocol. This is required because we use raw sockets to exchange control messages. For this reason, some sockets to work properly need to have super user permissions.
+You may need sudo permissions, in order to run this protocol. This is required because we use raw sockets to exchange control messages. For this reason, some sockets to work properly need to have super user permissions.
 
 First clone this repository:
   `git clone https://github.com/pedrofran12/pim_dm.git`
 
 Then enter in the cloned repository and install all dependencies:
    `pip3 install -r requirements.txt`
- 
-And thats it :D
+
+And that's it :D
 
 
 # Run protocol
@@ -64,7 +64,7 @@ If you want to stop the protocol process, and stop the daemon process, you need 
 ## Commands for monitoring the protocol process
 We have built some list commands that can be used to check the "internals" of the implementation.
 
- - List neighbors: 
+ - List neighbors:
 	 Verify neighbors that have established a neighborhood relationship
 	`sudo python3 Run.py -ln`
 
