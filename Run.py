@@ -15,7 +15,7 @@ def client_socket(data_to_send):
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
     # Connect the socket to the port where the server is listening
-    server_address = './uds_socket'
+    server_address = '/tmp/pim_uds_socket'
     #print('connecting to %s' % server_address)
     try:
         sock.connect(server_address)
@@ -33,7 +33,7 @@ def client_socket(data_to_send):
 class MyDaemon(Daemon):
     def run(self):
         Main.main()
-        server_address = './uds_socket'
+        server_address = '/tmp/pim_uds_socket'
 
         # Make sure the socket does not already exist
         try:
@@ -92,10 +92,11 @@ class MyDaemon(Daemon):
                 connection.close()
 
 
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='PIM')
+def main():
+    """
+    Entry point for PIM-DM
+    """
+    parser = argparse.ArgumentParser(description='PIM-DM protocol')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-start", "--start", action="store_true", default=False, help="Start PIM")
     group.add_argument("-stop", "--stop", action="store_true", default=False, help="Stop PIM")
@@ -113,7 +114,7 @@ if __name__ == "__main__":
     group.add_argument("-t", "--test", nargs=2, metavar=('ROUTER_NAME', 'SERVER_LOG_IP'), help="Tester... send log information to SERVER_LOG_IP. Set the router name to ROUTER_NAME")
     args = parser.parse_args()
 
-    print(parser.parse_args())
+    #print(parser.parse_args())
 
     daemon = MyDaemon('/tmp/Daemon-pim.pid')
     if args.start:
@@ -128,7 +129,7 @@ if __name__ == "__main__":
         daemon.restart()
         sys.exit(0)
     elif args.verbose:
-        os.system("tailf stdout")
+        os.system("tail -f stdout")
         sys.exit(0)
     elif args.multicast_routes:
         os.system("ip mroute show")
@@ -139,3 +140,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     client_socket(args)
+
+
+if __name__ == "__main__":
+    main()

@@ -17,47 +17,56 @@ You may need sudo permissions, in order to run this protocol. This is required b
 First clone this repository:
   `git clone https://github.com/pedrofran12/pim_dm.git`
 
-Then enter in the cloned repository and install all dependencies:
-   `pip3 install -r requirements.txt`
+Then enter in the cloned repository and install the protocol:
+   `sudo python3 setup.py install`
 
 And that's it :D
 
 
 # Run protocol
 
-In order to interact with the protocol you need to allways execute Run.py file. You can interact with the protocol by executing this file and specifying a command and corresponding arguments:
+To interact with the protocol you need to execute the `pim-dm` command. You may need to specify a command and corresponding arguments:
 
-   `sudo python3 Run.py -COMMAND ARGUMENTS`
+   `pim-dm -COMMAND ARGUMENTS`
 
 In order to determine which commands are available you can call the help command:
-	`sudo python3 Run.py -h`
-    or
-	`sudo python3 Run.py --help`
+   
+   `pim-dm -h`
+   
+   or
+	
+   `pim-dm --help`
 
 In order to start the protocol you first need to explicitly start it. This will start a daemon process, which will be running in the background. The command is the following:
-	`sudo python3 Run.py -start`
+	
+   `sudo pim-dm -start`
 
 Then you can enable the protocol in specific interfaces. You need to specify which interfaces will have IGMP enabled and which interfaces will have the PIM-DM enabled.
 To enable PIM-DM, without State-Refresh, in a given interface, you need to run the following command:
-	`sudo python3 Run.py -ai INTERFACE_NAME`
+
+   `sudo pim-dm -ai INTERFACE_NAME`
 
 To enable PIM-DM, with State-Refresh, in a given interface, you need to run the following command:
-	`sudo python3 Run.py -aisf INTERFACE_NAME`
+
+   `sudo pim-dm -aisf INTERFACE_NAME`
 
 To enable IGMP in a given interface, you need to run the following command:
-	`sudo python3 Run.py -aiigmp INTERFACE_NAME`
+	
+   `sudo pim-dm -aiigmp INTERFACE_NAME`
 
 If you have previously enabled an interface without State-Refresh and want to enable it, in the same interface, you first need to disable this interface, and the run the command -aisr. The same happens when you want to disable State Refresh in a previously enabled StateRefresh interface.  
 
 To remove a previously added interface, you need run the following commands:
 To remove a previously added PIM-DM interface:
-	`sudo python3 Run.py -ri INTERFACE_NAME`
+   `sudo pim-dm -ri INTERFACE_NAME`
 
 To remove a previously added IGMP interface:
-	`sudo python3 Run.py -riigmp INTERFACE_NAME`
+   
+   `sudo pim-dm -riigmp INTERFACE_NAME`
 
 If you want to stop the protocol process, and stop the daemon process, you need to explicitly run this command:
-	`sudo python3 Run.py -stop`
+	
+   `sudo pim-dm -stop`
 
 
 
@@ -66,15 +75,15 @@ We have built some list commands that can be used to check the "internals" of th
 
  - List neighbors:
 	 Verify neighbors that have established a neighborhood relationship
-	`sudo python3 Run.py -ln`
+	`sudo pim-dm -ln`
 
  - List state:
     List all state machines and corresponding state of all trees that are being monitored. Also list IGMP state for each group being monitored.
-	`sudo python3 Run.py -ls`
+	`sudo pim-dm -ls`
 
  - Multicast Routing Table:
    List Linux Multicast Routing Table (equivalent to ip mroute -show)
-	`sudo python3 Run.py -mr`
+	`sudo pim-dm -mr`
 
 ## Change settings
 

@@ -2,4 +2,3 @@ PrettyTable
 netifaces
 ipaddress
 pyroute2
-rpyc
