@@ -92,6 +92,14 @@ If you want to stop the protocol process, and stop the daemon process, you need 
 ## Commands for monitoring the protocol process
 We have built some list commands that can be used to check the "internals" of the implementation.
 
+ - #### List interfaces:
+
+	 Show all router interfaces and which ones have PIM-DM and IGMP enabled. For IGMP enabled interfaces check the IGMP Querier state.
+
+   ```
+   sudo pim-dm -li
+   ```
+
  - #### List neighbors
 	 Verify neighbors that have established a neighborhood relationship.
 
