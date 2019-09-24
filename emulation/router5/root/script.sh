@@ -1,7 +1,4 @@
-rm -rf MulticastRouting/
-cp -rf /hosthome/Desktop/pim/ MulticastRouting/
-cd MulticastRouting
-#pip-3.2 install --index-url=https://pypi.python.org/simple/ -r requirements.txt
+cd pim_dm
 
 python3 Run.py -stop
 python3 Run.py -start
