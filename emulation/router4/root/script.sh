@@ -1,6 +1,4 @@
-rm -rf MulticastRouting/
-cp -rf /hosthome/Desktop/pim/ MulticastRouting/
-cd MulticastRouting
+cd pim_dm
 
 
 python3 Run.py -stop

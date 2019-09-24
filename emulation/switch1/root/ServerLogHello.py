@@ -3,8 +3,7 @@ import logging
 import logging.handlers
 import socketserver
 import struct
-import sys
-import threading
+from TestHello import CustomFilter, Test1, Test2, Test3
 from queue import Queue
 
 q = Queue()
@@ -21,12 +20,20 @@ def worker():
 
 
 class TestHandler(logging.StreamHandler):
+    currentTest = Test1()
+    currentTest.print_test()
+    nextTests = [Test2(), Test3()]
+    main = None
+
     def emit(self, record):
         super().emit(record)
-
-class CustomFilter(logging.Filter):
-    def filter(self, record):
-        return record.name in ("pim.Interface.Neighbor", 'pim.Interface') and record.routername in ["R1", "R2"]
+        if TestHandler.currentTest and TestHandler.currentTest.test(record):
+            if len(TestHandler.nextTests) > 0:
+                TestHandler.currentTest = TestHandler.nextTests.pop(0)
+                TestHandler.currentTest.print_test()
+            else:
+                TestHandler.currentTest = None
+                TestHandler.main.abort = True
 
 
 class LogRecordStreamHandler(socketserver.StreamRequestHandler):
@@ -72,7 +79,6 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
         socketserver.ThreadingTCPServer.__init__(self, (host, port), handler)
         self.abort = 0
         self.timeout = 1
-        self.logname = None
 
     def serve_until_stopped(self):
         import select
@@ -87,12 +93,14 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
 
 
 def main():
+    import sys
     handler = TestHandler(sys.stdout)
-    formatter = logging.Formatter('%(name)-35s %(levelname)-8s %(asctime)-25s %(vif)-2s %(interfacename)-5s %(routername)-2s %(message)s')
+    formatter = logging.Formatter('%(name)-50s %(levelname)-8s %(tree)-35s %(vif)-2s %(interfacename)-5s %(routername)-2s %(message)s')
     handler.setFormatter(formatter)
     logging.getLogger('my_logger').addHandler(handler)
     logging.getLogger('my_logger').addFilter(CustomFilter())
 
+    import threading
     t = threading.Thread(target=worker)
     t.start()
 
