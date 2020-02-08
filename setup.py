@@ -1,7 +1,5 @@
 import sys
 from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
-
 
 # we only support Python 3 version >= 3.4
 #if len(sys.argv) >= 2 and sys.argv[1] == "install" and sys.version_info < (3, 4):
@@ -9,21 +7,21 @@ from setuptools.command.test import test as TestCommand
 
 
 dependencies = open("requirements.txt", "r").read().splitlines()
-
 setup(
     name="pim-dm",
-    version="1.0",
-    url="http://github.com/pedrofran12/pim_dm",
-    license="MIT",
     description="PIM-DM protocol",
     long_description=open("README.md", "r").read(),
+    long_description_content_type="text/markdown",
+    version="1.0.1",
+    url="http://github.com/pedrofran12/pim_dm",
+    author='Pedro Oliveira',
+    author_email='pedro.francisco.oliveira@tecnico.ulisboa.pt',
+    license="MIT",
     install_requires=dependencies,
     packages=find_packages(exclude=["docs"]),
-    py_modules=["Run", "Interface", "InterfaceIGMP", "InterfacePIM", "Kernel", "Main", "Neighbor",
-                "TestLogger", "UnicastRouting", "utils"],
     entry_points={
         "console_scripts": [
-            "pim-dm = Run:main",
+            "pim-dm = pimdm.Run:main",
         ]
     },
     include_package_data=True,
@@ -39,7 +37,13 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.2",
+        "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
+    python_requires='>=3.2',
 )
