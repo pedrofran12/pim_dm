@@ -9,21 +9,20 @@ This repository stores the implementation of this protocol. The implementation i
  - Linux machine
  - Python3 (we have written all code to be compatible with at least Python v3.2)
  - pip (to install all dependencies)
+ - tcpdump
 
 
 # Installation
+
+  ```
+  pip3 install pim-dm
+  ```
+
+
+
+# Run PIM-DM protocol
+
 You may need sudo permissions, in order to run this protocol. This is required because we use raw sockets to exchange control messages. For this reason, some sockets to work properly need to have super user permissions.
-
-First clone this repository:
-  `git clone https://github.com/pedrofran12/pim_dm.git`
-
-Then enter in the cloned repository and install the protocol:
-   `sudo python3 setup.py install`
-
-And that's it :D
-
-
-# Run protocol
 
 To interact with the protocol you need to execute the `pim-dm` command. You may need to specify a command and corresponding arguments:
 

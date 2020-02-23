@@ -9,6 +9,7 @@ import os
 import argparse
 import traceback
 
+VERSION = "1.0.2"
 
 def client_socket(data_to_send):
     # Create a UDS socket
@@ -96,7 +97,7 @@ def main():
     """
     Entry point for PIM-DM
     """
-    parser = argparse.ArgumentParser(description='PIM-DM protocol')
+    parser = argparse.ArgumentParser(description='PIM-DM protocol', prog='pim-dm')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-start", "--start", action="store_true", default=False, help="Start PIM")
     group.add_argument("-stop", "--stop", action="store_true", default=False, help="Stop PIM")
@@ -112,6 +113,7 @@ def main():
     group.add_argument("-riigmp", "--remove_interface_igmp", nargs=1, metavar='INTERFACE_NAME', help="Remove IGMP interface")
     group.add_argument("-v", "--verbose", action="store_true", default=False, help="Verbose (print all debug messages)")
     group.add_argument("-t", "--test", nargs=2, metavar=('ROUTER_NAME', 'SERVER_LOG_IP'), help="Tester... send log information to SERVER_LOG_IP. Set the router name to ROUTER_NAME")
+    group.add_argument("--version", action='version', version='%(prog)s ' + VERSION)
     args = parser.parse_args()
 
     #print(parser.parse_args())
