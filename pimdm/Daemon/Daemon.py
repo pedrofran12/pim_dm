@@ -22,7 +22,7 @@ class Daemon:
             sys.exit(1)
 
         # decouple from parent environment
-        os.makedirs('/var/log/pimdm/')
+        os.makedirs('/var/log/pimdm/', exist_ok=True)
         os.chdir('/var/log/pimdm/')
         os.setsid()
         os.umask(0)
