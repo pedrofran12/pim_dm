@@ -82,7 +82,6 @@ class InterfacePim(Interface):
         super()._enable()
         self.force_send_hello()
 
-
     def get_ip(self):
         return self.ip_interface
 
@@ -91,10 +90,8 @@ class InterfacePim(Interface):
             packet = ReceivedPacket(raw_bytes, self)
             self.PKT_FUNCTIONS[packet.payload.get_pim_type()](self, packet)
 
-
     def send(self, data: bytes, group_ip: str=MCAST_GRP):
         super().send(data=data, group_ip=group_ip)
-
 
     #Random interval for initial Hello message on bootup or triggered Hello message to a rebooting neighbor
     def force_send_hello(self):
@@ -142,7 +139,6 @@ class InterfacePim(Interface):
         Main.kernel.interface_change_number_of_neighbors()
         super().remove()
 
-
     def check_number_of_neighbors(self):
         has_neighbors = len(self.neighbors) > 0
         if has_neighbors != self._had_neighbors:
@@ -177,6 +173,8 @@ class InterfacePim(Interface):
             self.interface_logger.debug("Remove neighbor: " + ip)
             self.check_number_of_neighbors()
 
+    def set_state_refresh_capable(self, value):
+        self._state_refresh_capable = value
 
     def is_state_refresh_enabled(self):
         return self._state_refresh_capable
@@ -245,7 +243,6 @@ class InterfacePim(Interface):
 
         neighbor.receive_hello(generation_id, hello_hold_time, state_refresh_capable)
 
-
     def receive_assert(self, packet):
         pkt_assert = packet.payload.payload  # type: PacketPimAssert
         source = pkt_assert.source_address
@@ -256,7 +253,6 @@ class InterfacePim(Interface):
             Main.kernel.get_routing_entry(source_group).recv_assert_msg(self.vif_index, packet)
         except:
             traceback.print_exc()
-
 
     def receive_join_prune(self, packet):
         pkt_join_prune = packet.payload.payload  # type: PacketPimJoinPrune
@@ -299,7 +295,6 @@ class InterfacePim(Interface):
                     traceback.print_exc()
                     continue
 
-
     def receive_graft_ack(self, packet):
         pkt_join_prune = packet.payload.payload  # type: PacketPimGraftAck
 
@@ -328,7 +323,6 @@ class InterfacePim(Interface):
             Main.kernel.get_routing_entry(source_group).recv_state_refresh_msg(self.vif_index, packet)
         except:
             traceback.print_exc()
-
 
 
     PKT_FUNCTIONS = {

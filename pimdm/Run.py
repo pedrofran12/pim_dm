@@ -9,7 +9,7 @@ import os
 import argparse
 import traceback
 
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 
 def client_socket(data_to_send):
     # Create a UDS socket

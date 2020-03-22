@@ -1,6 +1,7 @@
 # PIM-DM
 
-We have implemented the specification of PIM-DM ([RFC3973](https://tools.ietf.org/html/rfc3973)).
+We have implemented PIM-DM specification ([RFC3973](https://tools.ietf.org/html/rfc3973)).
+
 This repository stores the implementation of this protocol. The implementation is written in Python language and is destined to Linux systems.
 
 
@@ -58,8 +59,6 @@ After starting the protocol process you can enable the protocol in specific inte
    ```
    sudo pim-dm -aiigmp INTERFACE_NAME
    ```
-
-If you have previously enabled PIM-DM on an interface without State-Refresh and want to enable it, you first need to disable this interface, and then run the command -aisr. The same happens when you want to disable State Refresh in a previously enabled StateRefresh interface.
 
 #### Remove interface
 

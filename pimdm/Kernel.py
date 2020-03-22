@@ -128,6 +128,7 @@ class Kernel:
             vif_already_exists = pim_interface or igmp_interface
             if pim_interface:
                 # already exists
+                pim_interface.set_state_refresh_capable(state_refresh_capable)
                 return
             elif igmp_interface:
                 index = igmp_interface.vif_index

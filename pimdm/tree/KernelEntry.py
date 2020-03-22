@@ -112,9 +112,7 @@ class KernelEntry:
         prune_indicator_flag = packet.payload.payload.prune_indicator_flag #P
         interval = packet.payload.payload.interval
         received_metric = AssertMetric(metric_preference=metric_preference, route_metric=metric, ip_address=source_of_state_refresh, state_refresh_interval=interval)
-
         self.interface_state[index].recv_state_refresh_msg(received_metric, prune_indicator_flag)
-
 
         iif = packet.interface.vif_index
         if iif != self.inbound_interface_index:
