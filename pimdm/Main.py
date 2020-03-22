@@ -79,7 +79,7 @@ def list_neighbors():
 def list_enabled_interfaces():
     global interfaces
 
-    t = PrettyTable(['Interface', 'IP', 'PIM/IGMP Enabled', 'IGMP State'])
+    t = PrettyTable(['Interface', 'IP', 'PIM/IGMP Enabled', 'State Refresh Enabled', 'IGMP State'])
     for interface in netifaces.interfaces():
         try:
             # TODO: fix same interface with multiple ips
@@ -87,11 +87,13 @@ def list_enabled_interfaces():
             pim_enabled = interface in interfaces
             igmp_enabled = interface in igmp_interfaces
             enabled = str(pim_enabled) + "/" + str(igmp_enabled)
+            state_refresh_enabled = "-"
+            if pim_enabled:
+                state_refresh_enabled = interfaces[interface].is_state_refresh_enabled()
+            igmp_state = "-"
             if igmp_enabled:
-                state = igmp_interfaces[interface].interface_state.print_state()
-            else:
-                state = "-"
-            t.add_row([interface, ip, enabled, state])
+                igmp_state = igmp_interfaces[interface].interface_state.print_state()
+            t.add_row([interface, ip, enabled, state_refresh_enabled, igmp_state])
         except Exception:
             continue
     print(t)
