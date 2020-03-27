@@ -1,8 +1,8 @@
 # PIM-DM
 
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pim-dm)
-![PyPI](https://img.shields.io/pypi/v/pim-dm)
-![PyPI - License](https://img.shields.io/pypi/l/pim-dm)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pim-dm)](https://pypi.org/project/pim-dm/)
+[![PyPI](https://img.shields.io/pypi/v/pim-dm)](https://pypi.org/project/pim-dm/)
+[![PyPI - License](https://img.shields.io/pypi/l/pim-dm)](https://github.com/pedrofran12/pim_dm/blob/master/LICENSE)
 
 We have implemented PIM-DM specification ([RFC3973](https://tools.ietf.org/html/rfc3973)).
 
