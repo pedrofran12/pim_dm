@@ -1,5 +1,9 @@
 # PIM-DM
 
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pim-dm)
+![PyPI](https://img.shields.io/pypi/v/pim-dm)
+![PyPI - License](https://img.shields.io/pypi/l/pim-dm)
+
 We have implemented PIM-DM specification ([RFC3973](https://tools.ietf.org/html/rfc3973)).
 
 This repository stores the implementation of this protocol. The implementation is written in Python language and is destined to Linux systems.
