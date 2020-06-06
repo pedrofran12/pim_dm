@@ -4,7 +4,7 @@ from ipaddress import IPv4Address
 from ctypes import create_string_buffer, addressof
 import netifaces
 from pimdm.Interface import Interface
-from pimdm.Packet.ReceivedPacket import ReceivedPacket
+from pimdm.packet.ReceivedPacket import ReceivedPacket
 from pimdm.igmp.igmp_globals import Version_1_Membership_Report, Version_2_Membership_Report, Leave_Group, Membership_Query
 if not hasattr(socket, 'SO_BINDTODEVICE'):
     socket.SO_BINDTODEVICE = 25
@@ -48,18 +48,20 @@ class InterfaceIGMP(Interface):
         self.interface_state = RouterState(self)
         super()._enable()
 
-
     def get_ip(self):
         return netifaces.ifaddresses(self.interface_name)[netifaces.AF_INET][0]['addr']
 
     @property
     def ip_interface(self):
+        """
+        Get IP of this interface
+        """
         return self.get_ip()
 
     def send(self, data: bytes, address: str="224.0.0.1"):
         super().send(data, address)
 
-    def _receive(self, raw_bytes):
+    def _receive(self, raw_bytes, ancdata, src_addr):
         if raw_bytes:
             raw_bytes = raw_bytes[14:]
             packet = ReceivedPacket(raw_bytes, self)
@@ -91,7 +93,8 @@ class InterfaceIGMP(Interface):
     def receive_membership_query(self, packet):
         ip_dst = packet.ip_header.ip_dst
         igmp_group = packet.payload.group_address
-        if ip_dst == igmp_group or (ip_dst == "224.0.0.1" and igmp_group == "0.0.0.0"):
+        if (IPv4Address(igmp_group).is_multicast and ip_dst == igmp_group) or \
+                (ip_dst == "224.0.0.1" and igmp_group == "0.0.0.0"):
             self.interface_state.receive_query(packet)
 
     def receive_unknown_type(self, packet):

@@ -1,4 +1,4 @@
-from pimdm.Packet.PacketIGMPHeader import PacketIGMPHeader
+from pimdm.packet.PacketIGMPHeader import PacketIGMPHeader
 from pimdm.utils import TYPE_CHECKING
 from ..igmp_globals import Membership_Query, LastMemberQueryInterval
 from ..wrapper import Version1MembersPresent, CheckingMembership, NoMembersPresent

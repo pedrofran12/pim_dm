@@ -1,22 +1,16 @@
-'''
-Created on Jul 16, 2015
-
-@author: alex
-'''
 from .tree_interface import TreeInterface
 from .upstream_prune import UpstreamState
 from threading import Timer
-from pimdm.CustomTimer.RemainingTimer import RemainingTimer
+from pimdm.custom_timer.RemainingTimer import RemainingTimer
 from .globals import *
 import random
 from .metric import AssertMetric
 from .originator import OriginatorState, OriginatorStateABC
-from pimdm.Packet.PacketPimStateRefresh import PacketPimStateRefresh
+from pimdm.packet.PacketPimStateRefresh import PacketPimStateRefresh
 import traceback
-from . import DataPacketsSocket
+from . import data_packets_socket
 import threading
 import logging
-from .. import Main
 
 
 class TreeInterfaceUpstream(TreeInterface):
@@ -25,7 +19,7 @@ class TreeInterfaceUpstream(TreeInterface):
     def __init__(self, kernel_entry, interface_id):
         extra_dict_logger = kernel_entry.kernel_entry_logger.extra.copy()
         extra_dict_logger['vif'] = interface_id
-        extra_dict_logger['interfacename'] = Main.kernel.vif_index_to_name_dic[interface_id]
+        extra_dict_logger['interfacename'] = kernel_entry.get_interface_name(interface_id)
         logger = logging.LoggerAdapter(TreeInterfaceUpstream.LOGGER, extra_dict_logger)
         TreeInterface.__init__(self, kernel_entry, interface_id, logger)
 
@@ -47,15 +41,16 @@ class TreeInterfaceUpstream(TreeInterface):
 
         if self.is_S_directly_conn():
             self._graft_prune_state.sourceIsNowDirectConnect(self)
-            if self.get_interface().is_state_refresh_enabled():
+            interface = self.get_interface()
+            if interface is not None and interface.is_state_refresh_enabled():
                 self._originator_state.recvDataMsgFromSource(self)
 
 
         # TODO TESTE SOCKET RECV DATA PCKTS
         self.socket_is_enabled = True
-        (s,g) = self.get_tree_id()
-        interface_name = self.get_interface().interface_name
-        self.socket_pkt = DataPacketsSocket.get_s_g_bpf_filter_code(s, g, interface_name)
+        (s, g) = self.get_tree_id()
+        interface_name = self.get_interface_name()
+        self.socket_pkt = data_packets_socket.get_s_g_bpf_filter_code(s, g, interface_name)
 
         # run receive method in background
         receive_thread = threading.Thread(target=self.socket_recv)
@@ -182,8 +177,10 @@ class TreeInterfaceUpstream(TreeInterface):
     def recv_data_msg(self):
         if not self.is_prune_limit_timer_running() and not self.is_S_directly_conn() and self.is_olist_null():
             self._graft_prune_state.dataArrivesRPFinterface_OListNull_PLTstoped(self)
-        elif self.is_S_directly_conn() and self.get_interface().is_state_refresh_enabled():
-            self._originator_state.recvDataMsgFromSource(self)
+        elif self.is_S_directly_conn():
+            interface = self.get_interface()
+            if interface is not None and  interface.is_state_refresh_enabled():
+                self._originator_state.recvDataMsgFromSource(self)
 
 
     def recv_join_msg(self, upstream_neighbor_address):

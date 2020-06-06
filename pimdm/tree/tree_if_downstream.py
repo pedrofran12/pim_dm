@@ -1,19 +1,13 @@
-'''
-Created on Jul 16, 2015
-
-@author: alex
-'''
 from threading import Timer
-from pimdm.CustomTimer.RemainingTimer import RemainingTimer
-from .assert_ import AssertState
+from pimdm.custom_timer.RemainingTimer import RemainingTimer
+from .assert_state import AssertState
 from .downstream_prune import DownstreamState, DownstreamStateABS
 from .tree_interface import TreeInterface
-from pimdm.Packet.PacketPimStateRefresh import PacketPimStateRefresh
-from pimdm.Packet.Packet import Packet
-from pimdm.Packet.PacketPimHeader import PacketPimHeader
+from pimdm.packet.PacketPimStateRefresh import PacketPimStateRefresh
+from pimdm.packet.Packet import Packet
+from pimdm.packet.PacketPimHeader import PacketPimHeader
 import traceback
 import logging
-from .. import Main
 
 
 class TreeInterfaceDownstream(TreeInterface):
@@ -22,7 +16,7 @@ class TreeInterfaceDownstream(TreeInterface):
     def __init__(self, kernel_entry, interface_id):
         extra_dict_logger = kernel_entry.kernel_entry_logger.extra.copy()
         extra_dict_logger['vif'] = interface_id
-        extra_dict_logger['interfacename'] = Main.kernel.vif_index_to_name_dic[interface_id]
+        extra_dict_logger['interfacename'] = kernel_entry.get_interface_name(interface_id)
         logger = logging.LoggerAdapter(TreeInterfaceDownstream.LOGGER, extra_dict_logger)
         TreeInterface.__init__(self, kernel_entry, interface_id, logger)
         self.logger.debug('Created DownstreamInterface')

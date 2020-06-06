@@ -1,22 +1,26 @@
+import logging
+from time import time
+from threading import Lock, RLock
+
+from pimdm import UnicastRouting
+from .metric import AssertMetric
 from .tree_if_upstream import TreeInterfaceUpstream
 from .tree_if_downstream import TreeInterfaceDownstream
 from .tree_interface import TreeInterface
-from threading import Lock, RLock
-from .metric import AssertMetric
-from pimdm import UnicastRouting, Main
-from time import time
-import logging
+
 
 class KernelEntry:
-    TREE_TIMEOUT = 180
     KERNEL_LOGGER = logging.getLogger('pim.KernelEntry')
 
-    def __init__(self, source_ip: str, group_ip: str):
-        self.kernel_entry_logger = logging.LoggerAdapter(KernelEntry.KERNEL_LOGGER, {'tree': '(' + source_ip + ',' + group_ip + ')'})
+    def __init__(self, source_ip: str, group_ip: str, kernel_entry_interface):
+        self.kernel_entry_logger = logging.LoggerAdapter(KernelEntry.KERNEL_LOGGER,
+                                                         {'tree': '(' + source_ip + ',' + group_ip + ')'})
         self.kernel_entry_logger.debug('Create KernelEntry')
 
         self.source_ip = source_ip
         self.group_ip = group_ip
+
+        self._kernel_entry_interface = kernel_entry_interface
 
         # OBTAIN UNICAST ROUTING INFORMATION###################################################
         (metric_administrative_distance, metric_cost, rpf_node, root_if, mask) = \
@@ -38,7 +42,7 @@ class KernelEntry:
 
         self.interface_state = {}  # type: Dict[int, TreeInterface]
         with self.CHANGE_STATE_LOCK:
-            for i in Main.kernel.vif_index_to_name_dic.keys():
+            for i in self.get_kernel().vif_index_to_name_dic.keys():
                 try:
                     if i == self.inbound_interface_index:
                         self.interface_state[i] = TreeInterfaceUpstream(self, i)
@@ -55,22 +59,31 @@ class KernelEntry:
         print('Tree created')
 
     def get_inbound_interface_index(self):
+        """
+        Get VIF of root interface of this tree
+        """
         return self.inbound_interface_index
 
     def get_outbound_interfaces_indexes(self):
-        outbound_indexes = [0] * Main.kernel.MAXVIFS
-        for (index, state) in self.interface_state.items():
-            outbound_indexes[index] = state.is_forwarding()
-        return outbound_indexes
+        """
+        Get OIL of this tree
+        """
+        return self._kernel_entry_interface.get_outbound_interfaces_indexes(self)
 
     ################################################
     # Receive (S,G) data packets or control packets
     ################################################
     def recv_data_msg(self, index):
+        """
+        Receive data packet regarding this tree in interface with VIF index
+        """
         print("recv data")
         self.interface_state[index].recv_data_msg()
 
     def recv_assert_msg(self, index, packet):
+        """
+        Receive assert packet regarding this tree in interface with VIF index
+        """
         print("recv assert")
         pkt_assert = packet.payload.payload
         metric = pkt_assert.metric
@@ -81,28 +94,43 @@ class KernelEntry:
         self.interface_state[index].recv_assert_msg(received_metric)
 
     def recv_prune_msg(self, index, packet):
+        """
+        Receive Prune packet regarding this tree in interface with VIF index
+        """
         print("recv prune msg")
         holdtime = packet.payload.payload.hold_time
         upstream_neighbor_address = packet.payload.payload.upstream_neighbor_address
         self.interface_state[index].recv_prune_msg(upstream_neighbor_address=upstream_neighbor_address, holdtime=holdtime)
 
     def recv_join_msg(self, index, packet):
+        """
+        Receive Join packet regarding this tree in interface with VIF index
+        """
         print("recv join msg")
         upstream_neighbor_address = packet.payload.payload.upstream_neighbor_address
         self.interface_state[index].recv_join_msg(upstream_neighbor_address)
 
     def recv_graft_msg(self, index, packet):
+        """
+        Receive Graft packet regarding this tree in interface with VIF index
+        """
         print("recv graft msg")
         upstream_neighbor_address = packet.payload.payload.upstream_neighbor_address
         source_ip = packet.ip_header.ip_src
         self.interface_state[index].recv_graft_msg(upstream_neighbor_address, source_ip)
 
     def recv_graft_ack_msg(self, index, packet):
+        """
+        Receive GraftAck packet regarding this tree in interface with VIF index
+        """
         print("recv graft ack msg")
         source_ip = packet.ip_header.ip_src
         self.interface_state[index].recv_graft_ack_msg(source_ip)
 
     def recv_state_refresh_msg(self, index, packet):
+        """
+        Receive StateRefresh packet regarding this tree in interface with VIF index
+        """
         print("recv state refresh msg")
         source_of_state_refresh = packet.ip_header.ip_src
 
@@ -129,11 +157,13 @@ class KernelEntry:
 
         self.forward_state_refresh_msg(packet.payload.payload)
 
-
     ################################################
     # Send state refresh msg
     ################################################
     def forward_state_refresh_msg(self, state_refresh_packet):
+        """
+        Forward StateRefresh packet through all interfaces
+        """
         for interface in self.interface_state.values():
             interface.send_state_refresh(state_refresh_packet)
 
@@ -142,6 +172,9 @@ class KernelEntry:
     # Unicast Changes to RPF
     ###############################################################
     def network_update(self):
+        """
+        Unicast routing table suffered an update and this tree might be affected by it
+        """
         # TODO TALVEZ OUTRO LOCK PARA BLOQUEAR ENTRADA DE PACOTES
         with self.CHANGE_STATE_LOCK:
 
@@ -184,24 +217,34 @@ class KernelEntry:
                 self.rpf_node = rpf_node
                 self.interface_state[self.inbound_interface_index].change_on_unicast_routing()
 
-
-    # check if add/removal of neighbors from interface afects olist and forward/prune state of interface
     def change_at_number_of_neighbors(self):
+        """
+        Check if modification of number of neighbors causes changes to OIL and interest of interface
+        """
         with self.CHANGE_STATE_LOCK:
             self.change()
             self.evaluate_olist_change()
 
     def new_or_reset_neighbor(self, if_index, neighbor_ip):
+        """
+        An interface identified by if_index has a new neighbor
+        """
         # todo maybe lock de interfaces
         self.interface_state[if_index].new_or_reset_neighbor(neighbor_ip)
 
     def is_olist_null(self):
+        """
+        Check if olist is null
+        """
         for interface in self.interface_state.values():
             if interface.is_forwarding():
                 return False
         return True
 
     def evaluate_olist_change(self):
+        """
+        React to changes on the olist
+        """
         with self._lock_test2:
             is_olist_null = self.is_olist_null()
 
@@ -214,33 +257,74 @@ class KernelEntry:
                 self._was_olist_null = is_olist_null
 
     def get_source(self):
+        """
+        Get source IP of multicast source
+        """
         return self.source_ip
 
     def get_group(self):
+        """
+        Get group IP of multicast tree
+        """
         return self.group_ip
 
     def change(self):
+        """
+        Trigger an update on the multicast routing table
+        """
         with self._multicast_change:
-            Main.kernel.set_multicast_route(self)
+            self.get_kernel().set_multicast_route(self)
 
     def delete(self):
+        """
+        Remove kernel entry
+        """
         with self._multicast_change:
             for state in self.interface_state.values():
                 state.delete()
 
-            Main.kernel.remove_multicast_route(self)
+            self.get_kernel().remove_multicast_route(self)
 
+    def get_interface_name(self, interface_id):
+        """
+        Get interface name of interface identified by interface_id
+        """
+        return self._kernel_entry_interface.get_interface_name(interface_id)
+
+    def get_interface(self, interface_id):
+        """
+        Get PIM interface
+        """
+        return self._kernel_entry_interface.get_interface(self, interface_id)
+
+    def get_membership_interface(self, interface_id):
+        """
+        Get IGMP/MLD interface
+        """
+        return self._kernel_entry_interface.get_membership_interface(self, interface_id)
+
+    def get_kernel(self):
+        """
+        Get kernel
+        """
+        return self._kernel_entry_interface.get_kernel()
 
     ######################################
     # Interface change
     #######################################
     def new_interface(self, index):
+        """
+        React to a new interface that was added and in which a tree was already built
+        """
         with self.CHANGE_STATE_LOCK:
             self.interface_state[index] = TreeInterfaceDownstream(self, index)
             self.change()
             self.evaluate_olist_change()
 
     def remove_interface(self, index):
+        """
+        React to removal of an interface of a tree that was already built
+        """
         with self.CHANGE_STATE_LOCK:
             #check if removed interface is root interface
             if self.inbound_interface_index == index:

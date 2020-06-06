@@ -1,69 +1,67 @@
 import sys
 import time
 import netifaces
-import logging, logging.handlers
+import logging
+import logging.handlers
 from prettytable import PrettyTable
-from pimdm.TestLogger import RootFilter
-from pimdm import UnicastRouting
 
+from pimdm import UnicastRouting
+from pimdm.TestLogger import RootFilter
 
 interfaces = {}  # interfaces with multicast routing enabled
 igmp_interfaces = {}  # igmp interfaces
+interfaces_v6 = {}  # pim v6 interfaces
+mld_interfaces = {}  # mld interfaces
 kernel = None
+kernel_v6 = None
 unicast_routing = None
 logger = None
 
-def add_pim_interface(interface_name, state_refresh_capable:bool=False):
-    kernel.create_pim_interface(interface_name=interface_name, state_refresh_capable=state_refresh_capable)
+
+def add_pim_interface(interface_name, state_refresh_capable: bool = False, ipv4=True, ipv6=False):
+    if interface_name == "*":
+        for interface_name in netifaces.interfaces():
+            add_pim_interface(interface_name, ipv4, ipv6)
+        return
+
+    if ipv4 and kernel is not None:
+        kernel.create_pim_interface(interface_name=interface_name, state_refresh_capable=state_refresh_capable)
+    if ipv6 and kernel_v6 is not None:
+        kernel_v6.create_pim_interface(interface_name=interface_name, state_refresh_capable=state_refresh_capable)
 
 
-def add_igmp_interface(interface_name):
-    kernel.create_igmp_interface(interface_name=interface_name)
+def add_membership_interface(interface_name, ipv4=True, ipv6=False):
+    if interface_name == "*":
+        for interface_name in netifaces.interfaces():
+            add_membership_interface(interface_name, ipv4, ipv6)
+        return
 
-'''
-def add_interface(interface_name, pim=False, igmp=False):
-    #if pim is True and interface_name not in interfaces:
-    #    interface = InterfacePim(interface_name)
-    #    interfaces[interface_name] = interface
-    #    interface.create_virtual_interface()
-    #if igmp is True and interface_name not in igmp_interfaces:
-    #    interface = InterfaceIGMP(interface_name)
-    #    igmp_interfaces[interface_name] = interface
-    kernel.create_interface(interface_name=interface_name, pim=pim, igmp=igmp)
-    #if pim:
-    #    interfaces[interface_name] = kernel.pim_interface[interface_name]
-    #if igmp:
-    #    igmp_interfaces[interface_name] = kernel.igmp_interface[interface_name]
-'''
+    if ipv4 and kernel is not None:
+        kernel.create_membership_interface(interface_name=interface_name)
+    if ipv6 and kernel_v6 is not None:
+        kernel_v6.create_membership_interface(interface_name=interface_name)
 
-def remove_interface(interface_name, pim=False, igmp=False):
-    #if pim is True and ((interface_name in interfaces) or interface_name == "*"):
-    #    if interface_name == "*":
-    #        interface_name_list = list(interfaces.keys())
-    #    else:
-    #        interface_name_list = [interface_name]
-    #    for if_name in interface_name_list:
-    #        interface_obj = interfaces.pop(if_name)
-    #        interface_obj.remove()
-    #        #interfaces[if_name].remove()
-    #        #del interfaces[if_name]
-    #    print("removido interface")
-    #    print(interfaces)
 
-    #if igmp is True and ((interface_name in igmp_interfaces) or interface_name == "*"):
-    #    if interface_name == "*":
-    #        interface_name_list = list(igmp_interfaces.keys())
-    #    else:
-    #        interface_name_list = [interface_name]
-    #    for if_name in interface_name_list:
-    #        igmp_interfaces[if_name].remove()
-    #        del igmp_interfaces[if_name]
-    #    print("removido interface")
-    #    print(igmp_interfaces)
-    kernel.remove_interface(interface_name, pim=pim, igmp=igmp)
+def remove_interface(interface_name, pim=False, membership=False, ipv4=True, ipv6=False):
+    if interface_name == "*":
+        for interface_name in netifaces.interfaces():
+            remove_interface(interface_name, pim, membership, ipv4, ipv6)
+        return
 
-def list_neighbors():
-    interfaces_list = interfaces.values()
+    if ipv4 and kernel is not None:
+        kernel.remove_interface(interface_name, pim=pim, membership=membership)
+    if ipv6 and kernel_v6 is not None:
+        kernel_v6.remove_interface(interface_name, pim=pim, membership=membership)
+
+
+def list_neighbors(ipv4=False, ipv6=False):
+    if ipv4:
+        interfaces_list = interfaces.values()
+    elif ipv6:
+        interfaces_list = interfaces_v6.values()
+    else:
+        return "Unknown IP family"
+
     t = PrettyTable(['Interface', 'Neighbor IP', 'Hello Hold Time', "Generation ID", "Uptime"])
     check_time = time.time()
     for interface in interfaces_list:
@@ -76,38 +74,62 @@ def list_neighbors():
     print(t)
     return str(t)
 
-def list_enabled_interfaces():
-    global interfaces
 
-    t = PrettyTable(['Interface', 'IP', 'PIM/IGMP Enabled', 'State Refresh Enabled', 'IGMP State'])
+def list_enabled_interfaces(ipv4=False, ipv6=False):
+    if ipv4:
+        t = PrettyTable(['Interface', 'IP', 'PIM/IGMP Enabled', 'State Refresh Enabled', 'IGMP State'])
+        family = netifaces.AF_INET
+        pim_interfaces = interfaces
+        membership_interfaces = igmp_interfaces
+    elif ipv6:
+        t = PrettyTable(['Interface', 'IP', 'PIM/MLD Enabled', 'State Refresh Enabled', 'MLD State'])
+        family = netifaces.AF_INET6
+        pim_interfaces = interfaces_v6
+        membership_interfaces = mld_interfaces
+    else:
+        return "Unknown IP family"
+
     for interface in netifaces.interfaces():
         try:
             # TODO: fix same interface with multiple ips
-            ip = netifaces.ifaddresses(interface)[netifaces.AF_INET][0]['addr']
-            pim_enabled = interface in interfaces
-            igmp_enabled = interface in igmp_interfaces
-            enabled = str(pim_enabled) + "/" + str(igmp_enabled)
+            ip = netifaces.ifaddresses(interface)[family][0]['addr']
+            pim_enabled = interface in pim_interfaces
+            membership_enabled = interface in membership_interfaces
+            enabled = str(pim_enabled) + "/" + str(membership_enabled)
             state_refresh_enabled = "-"
             if pim_enabled:
-                state_refresh_enabled = interfaces[interface].is_state_refresh_enabled()
-            igmp_state = "-"
-            if igmp_enabled:
-                igmp_state = igmp_interfaces[interface].interface_state.print_state()
-            t.add_row([interface, ip, enabled, state_refresh_enabled, igmp_state])
+                state_refresh_enabled = pim_interfaces[interface].is_state_refresh_enabled()
+            membership_state = "-"
+            if membership_enabled:
+                membership_state = membership_interfaces[interface].interface_state.print_state()
+            t.add_row([interface, ip, enabled, state_refresh_enabled, membership_state])
         except Exception:
             continue
     print(t)
     return str(t)
 
 
-def list_state():
-    state_text = "IGMP State:\n" + list_igmp_state() + "\n\n\n\n" + "Multicast Routing State:\n" + list_routing_state()
-    return state_text
+def list_state(ipv4=True, ipv6=False):
+    state_text = ""
+    if ipv4:
+        state_text = "IGMP State:\n{}\n\n\n\nMulticast Routing State:\n{}"
+    elif ipv6:
+        state_text = "MLD State:\n{}\n\n\n\nMulticast Routing State:\n{}"
+    else:
+        return state_text
+    return state_text.format(list_membership_state(ipv4, ipv6), list_routing_state(ipv4, ipv6))
 
 
-def list_igmp_state():
+def list_membership_state(ipv4=True, ipv6=False):
     t = PrettyTable(['Interface', 'RouterState', 'Group Adress', 'GroupState'])
-    for (interface_name, interface_obj) in list(igmp_interfaces.items()):
+    if ipv4:
+        membership_interfaces = igmp_interfaces
+    elif ipv6:
+        membership_interfaces = mld_interfaces
+    else:
+        membership_interfaces = {}
+
+    for (interface_name, interface_obj) in list(membership_interfaces.items()):
         interface_state = interface_obj.interface_state
         state_txt = interface_state.print_state()
         print(interface_state.group_state.items())
@@ -119,12 +141,22 @@ def list_igmp_state():
     return str(t)
 
 
-def list_routing_state():
+def list_routing_state(ipv4=False, ipv6=False):
+    if ipv4:
+        routes = kernel.routing.values()
+        vif_indexes = kernel.vif_index_to_name_dic.keys()
+        dict_index_to_name = kernel.vif_index_to_name_dic
+    elif ipv6:
+        routes = kernel_v6.routing.values()
+        vif_indexes = kernel_v6.vif_index_to_name_dic.keys()
+        dict_index_to_name = kernel_v6.vif_index_to_name_dic
+    else:
+        raise Exception("Unknown IP family")
+
     routing_entries = []
-    for a in list(kernel.routing.values()):
+    for a in list(routes):
         for b in list(a.values()):
             routing_entries.append(b)
-    vif_indexes = kernel.vif_index_to_name_dic.keys()
 
     t = PrettyTable(['SourceIP', 'GroupIP', 'Interface', 'PruneState', 'AssertState', 'LocalMembership', "Is Forwarding?"])
     for entry in routing_entries:
@@ -134,7 +166,7 @@ def list_routing_state():
 
         for index in vif_indexes:
             interface_state = entry.interface_state[index]
-            interface_name = kernel.vif_index_to_name_dic[index]
+            interface_name = dict_index_to_name[index]
             local_membership = type(interface_state._local_membership_state).__name__
             try:
                 assert_state = type(interface_state._assert_state).__name__
@@ -154,8 +186,11 @@ def list_routing_state():
 
 
 def stop():
-    remove_interface("*", pim=True, igmp=True)
-    kernel.exit()
+    remove_interface("*", pim=True, membership=True, ipv4=True, ipv6=True)
+    if kernel is not None:
+        kernel.exit()
+    if kernel_v6 is not None:
+        kernel_v6.exit()
     unicast_routing.stop()
 
 
@@ -169,6 +204,22 @@ def test(router_name, server_logger_ip):
     logger.addHandler(socketHandler)
 
 
+def enable_ipv6_kernel():
+    """
+    Function to explicitly enable IPv6 Multicast Routing stack.
+    This may not be enabled by default due to some old linux kernels that may not have IPv6 stack or do not have
+    IPv6 multicast routing support
+    """
+    global kernel_v6
+    from pimdm.Kernel import Kernel6
+    kernel_v6 = Kernel6()
+
+    global interfaces_v6
+    global mld_interfaces
+    interfaces_v6 = kernel_v6.pim_interface
+    mld_interfaces = kernel_v6.membership_interface
+
+
 def main():
     # logging
     global logger
@@ -177,8 +228,8 @@ def main():
     logger.addHandler(logging.StreamHandler(sys.stdout))
 
     global kernel
-    from pimdm.Kernel import Kernel
-    kernel = Kernel()
+    from pimdm.Kernel import Kernel4
+    kernel = Kernel4()
 
     global unicast_routing
     unicast_routing = UnicastRouting.UnicastRouting()
@@ -186,4 +237,9 @@ def main():
     global interfaces
     global igmp_interfaces
     interfaces = kernel.pim_interface
-    igmp_interfaces = kernel.igmp_interface
+    igmp_interfaces = kernel.membership_interface
+
+    try:
+        enable_ipv6_kernel()
+    except:
+        pass

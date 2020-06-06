@@ -1,20 +1,24 @@
-from abc import ABCMeta, abstractstaticmethod
+from abc import ABCMeta, abstractmethod
 
 
 class OriginatorStateABC(metaclass=ABCMeta):
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def recvDataMsgFromSource(tree):
         pass
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def SRTexpires(tree):
         pass
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def SATexpires(tree):
         pass
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def SourceNotConnected(tree):
         pass
 

@@ -1,30 +1,25 @@
-'''
-Created on Jul 16, 2015
-
-@author: alex
-'''
 from abc import ABCMeta, abstractmethod
-from .. import Main
 from threading import RLock
 import traceback
 
 from .downstream_prune import DownstreamState
-from .assert_ import AssertState, AssertStateABC
+from .assert_state import AssertState, AssertStateABC
 
-from pimdm.Packet.PacketPimGraft import PacketPimGraft
-from pimdm.Packet.PacketPimGraftAck import PacketPimGraftAck
-from pimdm.Packet.PacketPimJoinPruneMulticastGroup import PacketPimJoinPruneMulticastGroup
-from pimdm.Packet.PacketPimHeader import PacketPimHeader
-from pimdm.Packet.Packet import Packet
+from pimdm.packet.PacketPimGraft import PacketPimGraft
+from pimdm.packet.PacketPimGraftAck import PacketPimGraftAck
+from pimdm.packet.PacketPimJoinPruneMulticastGroup import PacketPimJoinPruneMulticastGroup
+from pimdm.packet.PacketPimHeader import PacketPimHeader
+from pimdm.packet.Packet import Packet
 
-from pimdm.Packet.PacketPimJoinPrune import PacketPimJoinPrune
-from pimdm.Packet.PacketPimAssert import PacketPimAssert
-from pimdm.Packet.PacketPimStateRefresh import PacketPimStateRefresh
+from pimdm.packet.PacketPimJoinPrune import PacketPimJoinPrune
+from pimdm.packet.PacketPimAssert import PacketPimAssert
+from pimdm.packet.PacketPimStateRefresh import PacketPimStateRefresh
 from .metric import AssertMetric
 from threading import Timer
 from .local_membership import LocalMembership
-from .globals import *
+from .globals import T_LIMIT
 import logging
+
 
 class TreeInterface(metaclass=ABCMeta):
     def __init__(self, kernel_entry, interface_id, logger: logging.LoggerAdapter):
@@ -36,9 +31,8 @@ class TreeInterface(metaclass=ABCMeta):
 
         # Local Membership State
         try:
-            interface_name = Main.kernel.vif_index_to_name_dic[interface_id]
-            igmp_interface = Main.igmp_interfaces[interface_name]  # type: InterfaceIGMP
-            group_state = igmp_interface.interface_state.get_group_state(kernel_entry.group_ip)
+            membership_interface = self.get_membership_interface()
+            group_state = membership_interface.interface_state.get_group_state(kernel_entry.group_ip)
             #self._igmp_has_members = group_state.add_multicast_routing_entry(self)
             igmp_has_members = group_state.add_multicast_routing_entry(self)
             self._local_membership_state = LocalMembership.Include if igmp_has_members else LocalMembership.NoInfo
@@ -60,8 +54,7 @@ class TreeInterface(metaclass=ABCMeta):
         # Received prune hold time
         self._received_prune_holdtime = None
 
-        self._igmp_lock = RLock()
-
+        self._membership_lock = RLock()
 
     ############################################
     # Set ASSERT State
@@ -90,7 +83,6 @@ class TreeInterface(metaclass=ABCMeta):
             finally:
                 self._assert_winner_metric = new_assert_metric
 
-
     ############################################
     # ASSERT Timer
     ############################################
@@ -105,7 +97,6 @@ class TreeInterface(metaclass=ABCMeta):
 
     def assert_timeout(self):
         self._assert_state.assertTimerExpires(self)
-
 
     ###########################################
     # Recv packets
@@ -145,7 +136,6 @@ class TreeInterface(metaclass=ABCMeta):
     def recv_state_refresh_msg(self, received_metric: AssertMetric, prune_indicator):
         self.recv_assert_msg(received_metric)
 
-
     ######################################
     # Send messages
     ######################################
@@ -163,7 +153,6 @@ class TreeInterface(metaclass=ABCMeta):
             traceback.print_exc()
             return
 
-
     def send_graft_ack(self, ip_sender):
         print("send graft ack")
         try:
@@ -176,7 +165,6 @@ class TreeInterface(metaclass=ABCMeta):
         except:
             traceback.print_exc()
             return
-
 
     def send_prune(self, holdtime=None):
         if holdtime is None:
@@ -195,7 +183,6 @@ class TreeInterface(metaclass=ABCMeta):
             traceback.print_exc()
             return
 
-
     def send_pruneecho(self):
         holdtime = T_LIMIT
         try:
@@ -209,7 +196,6 @@ class TreeInterface(metaclass=ABCMeta):
         except:
             traceback.print_exc()
             return
-
 
     def send_join(self):
         print("send join")
@@ -225,7 +211,6 @@ class TreeInterface(metaclass=ABCMeta):
             traceback.print_exc()
             return
 
-
     def send_assert(self):
         print("send assert")
 
@@ -240,7 +225,6 @@ class TreeInterface(metaclass=ABCMeta):
             traceback.print_exc()
             return
 
-
     def send_assert_cancel(self):
         print("send assert cancel")
 
@@ -253,7 +237,6 @@ class TreeInterface(metaclass=ABCMeta):
         except:
             traceback.print_exc()
             return
-
 
     def send_state_refresh(self, state_refresh_msg_received: PacketPimStateRefresh):
         pass
@@ -282,9 +265,8 @@ class TreeInterface(metaclass=ABCMeta):
         (s, g) = self.get_tree_id()
         # unsubscribe igmp information
         try:
-            interface_name = Main.kernel.vif_index_to_name_dic[self._interface_id]
-            igmp_interface = Main.igmp_interfaces[interface_name]  # type: InterfaceIGMP
-            group_state = igmp_interface.interface_state.get_group_state(g)
+            membership_interface = self.get_membership_interface()
+            group_state = membership_interface.interface_state.get_group_state(g)
             group_state.remove_multicast_routing_entry(self)
         except:
             pass
@@ -306,29 +288,29 @@ class TreeInterface(metaclass=ABCMeta):
     def evaluate_ingroup(self):
         self._kernel_entry.evaluate_olist_change()
 
-
     #############################################################
     # Local Membership (IGMP)
     ############################################################
-    def notify_igmp(self, has_members: bool):
+    def notify_membership(self, has_members: bool):
         with self.get_state_lock():
-            with self._igmp_lock:
+            with self._membership_lock:
                 if has_members != self._local_membership_state.has_members():
                     self._local_membership_state = LocalMembership.Include if has_members else LocalMembership.NoInfo
                     self.change_tree()
                     self.evaluate_ingroup()
 
-
     def igmp_has_members(self):
-        with self._igmp_lock:
+        with self._membership_lock:
             return self._local_membership_state.has_members()
 
-    def get_interface(self):
-        kernel = Main.kernel
-        interface_name = kernel.vif_index_to_name_dic[self._interface_id]
-        interface = Main.interfaces[interface_name]
-        return interface
+    def get_interface_name(self):
+        return self._kernel_entry.get_interface_name(self._interface_id)
 
+    def get_interface(self):
+        return self._kernel_entry.get_interface(self._interface_id)
+
+    def get_membership_interface(self):
+        return self._kernel_entry.get_membership_interface(self._interface_id)
 
     def get_ip(self):
         ip = self.get_interface().get_ip()
@@ -353,9 +335,6 @@ class TreeInterface(metaclass=ABCMeta):
     def is_downstream(self):
         raise NotImplementedError()
 
-
-
-
     # obtain ip of RPF'(S)
     def get_neighbor_RPF(self):
         '''
@@ -374,8 +353,6 @@ class TreeInterface(metaclass=ABCMeta):
 
     def get_received_prune_holdtime(self):
         return self._received_prune_holdtime
-
-
 
     ###################################################
     # ASSERT
