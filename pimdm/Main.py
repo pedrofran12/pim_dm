@@ -42,11 +42,16 @@ def add_membership_interface(interface_name, ipv4=True, ipv6=False):
         kernel_v6.create_membership_interface(interface_name=interface_name)
 
 
-def remove_interface(interface_name, pim=False, igmp=False, ipv4=True, ipv6=False):
+def remove_interface(interface_name, pim=False, membership=False, ipv4=True, ipv6=False):
+    if interface_name == "*":
+        for interface_name in netifaces.interfaces():
+            remove_interface(interface_name, pim, membership, ipv4, ipv6)
+        return
+
     if ipv4 and kernel is not None:
-        kernel.remove_interface(interface_name, pim=pim, igmp=igmp)
+        kernel.remove_interface(interface_name, pim=pim, membership=membership)
     if ipv6 and kernel_v6 is not None:
-        kernel_v6.remove_interface(interface_name, pim=pim, mld=igmp)
+        kernel_v6.remove_interface(interface_name, pim=pim, membership=membership)
 
 
 def list_neighbors(ipv4=False, ipv6=False):
@@ -181,9 +186,11 @@ def list_routing_state(ipv4=False, ipv6=False):
 
 
 def stop():
-    remove_interface("*", pim=True, igmp=True, ipv4=True, ipv6=True)
-    kernel.exit()
-    kernel_v6.exit()
+    remove_interface("*", pim=True, membership=True, ipv4=True, ipv6=True)
+    if kernel is not None:
+        kernel.exit()
+    if kernel_v6 is not None:
+        kernel_v6.exit()
     unicast_routing.stop()
 
 

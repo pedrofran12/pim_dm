@@ -86,10 +86,10 @@ class MyDaemon(Daemon):
                     Main.remove_interface(args.remove_interface[0], pim=True, ipv4=args.ipv4, ipv6=args.ipv6)
                     connection.shutdown(socket.SHUT_RDWR)
                 elif 'remove_interface_igmp' in args and args.remove_interface_igmp:
-                    Main.remove_interface(args.remove_interface_igmp[0], igmp=True, ipv4=True, ipv6=False)
+                    Main.remove_interface(args.remove_interface_igmp[0], membership=True, ipv4=True, ipv6=False)
                     connection.shutdown(socket.SHUT_RDWR)
                 elif 'remove_interface_mld' in args and args.remove_interface_mld:
-                    Main.remove_interface(args.remove_interface_mld[0], igmp=True, ipv4=False, ipv6=True)
+                    Main.remove_interface(args.remove_interface_mld[0], membership=True, ipv4=False, ipv6=True)
                     connection.shutdown(socket.SHUT_RDWR)
                 elif 'stop' in args and args.stop:
                     Main.stop()

@@ -124,16 +124,16 @@ class Kernel(metaclass=ABCMeta):
     def _create_membership_interface_object(self, interface_name, index):
         raise NotImplementedError
 
-    def remove_interface(self, interface_name, igmp:bool=False, pim:bool=False):
+    def remove_interface(self, interface_name, membership: bool = False, pim: bool = False):
         with self.interface_lock:
             pim_interface = self.pim_interface.get(interface_name)
             membership_interface = self.membership_interface.get(interface_name)
-            if (igmp and not membership_interface) or (pim and not pim_interface) or (not igmp and not pim):
+            if (membership and not membership_interface) or (pim and not pim_interface) or (not membership and not pim):
                 return
             if pim:
                 pim_interface = self.pim_interface.pop(interface_name)
                 pim_interface.remove()
-            elif igmp:
+            elif membership:
                 membership_interface = self.membership_interface.pop(interface_name)
                 membership_interface.remove()
 

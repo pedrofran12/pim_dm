@@ -194,7 +194,7 @@ class UnicastRouting(object):
                 print(if_name + ": " + operation)
             UnicastRouting.lock.release()
             if operation == 'DOWN':
-                Main.kernel.remove_interface(if_name, igmp=True, pim=True)
+                Main.kernel.remove_interface(if_name, membership=True, pim=True)
             subnet = ipaddress.ip_network("0.0.0.0/0")
             Main.kernel.notify_unicast_changes(subnet)
             '''
