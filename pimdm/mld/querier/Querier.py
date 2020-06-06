@@ -1,11 +1,11 @@
-from ipaddress import IPv4Address
+from ipaddress import IPv6Address
 
 from pimdm.utils import TYPE_CHECKING
-from ..igmp_globals import Membership_Query, QueryResponseInterval, LastMemberQueryCount, LastMemberQueryInterval
+from ..mld_globals import LastListenerQueryInterval, LastListenerQueryCount, QueryResponseInterval
 
-from pimdm.packet.PacketIGMPHeader import PacketIGMPHeader
+from pimdm.packet.PacketMLDHeader import PacketMLDHeader
 from pimdm.packet.ReceivedPacket import ReceivedPacket
-from . import CheckingMembership, MembersPresent, Version1MembersPresent, NoMembersPresent
+from . import CheckingListeners, ListenersPresent, NoListenersPresent
 
 if TYPE_CHECKING:
     from ..RouterState import RouterState
@@ -16,17 +16,12 @@ class Querier:
     def general_query_timeout(router_state: 'RouterState'):
         router_state.router_state_logger.debug('Querier state: general_query_timeout')
         # send general query
-        packet = PacketIGMPHeader(type=Membership_Query, max_resp_time=QueryResponseInterval*10)
+        packet = PacketMLDHeader(type=PacketMLDHeader.MULTICAST_LISTENER_QUERY_TYPE,
+                                 max_resp_delay=QueryResponseInterval*1000)
         router_state.interface.send(packet.bytes())
 
         # set general query timer
         router_state.set_general_query_timer()
-
-    @staticmethod
-    def other_querier_present_timeout(router_state: 'RouterState'):
-        router_state.router_state_logger.debug('Querier state: other_querier_present_timeout')
-        # do nothing
-        return
 
     @staticmethod
     def receive_query(router_state: 'RouterState', packet: ReceivedPacket):
@@ -34,7 +29,7 @@ class Querier:
         source_ip = packet.ip_header.ip_src
 
         # if source ip of membership query not lower than the ip of the received interface => ignore
-        if IPv4Address(source_ip) >= IPv4Address(router_state.interface.get_ip()):
+        if IPv6Address(source_ip) >= IPv6Address(router_state.interface.get_ip()):
             return
 
         # if source ip of membership query lower than the ip of the received interface => change state
@@ -46,6 +41,11 @@ class Querier:
         router_state.clear_general_query_timer()
         router_state.set_other_querier_present_timer()
 
+    @staticmethod
+    def other_querier_present_timeout(router_state: 'RouterState'):
+        router_state.router_state_logger.debug('Querier state: other_querier_present_timeout')
+        # do nothing
+        return
 
     # TODO ver se existe uma melhor maneira de fazer isto
     @staticmethod
@@ -54,22 +54,17 @@ class Querier:
 
     @staticmethod
     def get_group_membership_time(max_response_time: int):
-        return LastMemberQueryInterval * LastMemberQueryCount
-
+        return LastListenerQueryInterval * LastListenerQueryCount
 
     # State
     @staticmethod
-    def get_checking_membership_state():
-        return CheckingMembership
+    def get_checking_listeners_state():
+        return CheckingListeners
 
     @staticmethod
-    def get_members_present_state():
-        return MembersPresent
+    def get_listeners_present_state():
+        return ListenersPresent
 
     @staticmethod
-    def get_no_members_present_state():
-        return NoMembersPresent
-
-    @staticmethod
-    def get_version_1_members_present_state():
-        return Version1MembersPresent
+    def get_no_listeners_present_state():
+        return NoListenersPresent

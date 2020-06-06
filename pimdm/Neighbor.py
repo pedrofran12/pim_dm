@@ -1,15 +1,16 @@
-from threading import Timer
 import time
-from pimdm.utils import HELLO_HOLD_TIME_NO_TIMEOUT, HELLO_HOLD_TIME_TIMEOUT, TYPE_CHECKING
-from threading import Lock, RLock
 import logging
+from threading import Timer
+from threading import Lock, RLock
+
+from pimdm.tree.globals import HELLO_HOLD_TIME_NO_TIMEOUT, HELLO_HOLD_TIME_TIMEOUT
+from pimdm.utils import TYPE_CHECKING
 if TYPE_CHECKING:
     from pimdm.InterfacePIM import InterfacePim
 
 
 class Neighbor:
     LOGGER = logging.getLogger('pim.Interface.Neighbor')
-
 
     def __init__(self, contact_interface: "InterfacePim", ip, generation_id: int, hello_hold_time: int,
                  state_refresh_capable: bool):
@@ -36,7 +37,6 @@ class Neighbor:
 
         self.tree_interface_nlt_subscribers = []
         self.tree_interface_nlt_subscribers_lock = RLock()
-
 
     def set_hello_hold_time(self, hello_hold_time: int):
         self.hello_hold_time = hello_hold_time
@@ -85,10 +85,8 @@ class Neighbor:
             for tree_if in self.tree_interface_nlt_subscribers:
                 tree_if.assert_winner_nlt_expires()
 
-
     def reset(self):
         self.contact_interface.new_or_reset_neighbor(self.ip)
-
 
     def receive_hello(self, generation_id, hello_hold_time, state_refresh_capable):
         self.neighbor_logger.debug('Receive Hello message with HelloHoldTime: ' + str(hello_hold_time) +

@@ -46,7 +46,7 @@ class PacketPimEncodedUnicastAddress:
         elif version == 6:
             return (PacketPimEncodedUnicastAddress.IPV6_HDR, PacketPimEncodedUnicastAddress.FAMILY_IPV6, socket.AF_INET6)
         else:
-            raise Exception
+            raise Exception("Unknown address family")
 
     def __len__(self):
         version = ipaddress.ip_address(self.unicast_address).version
@@ -55,7 +55,7 @@ class PacketPimEncodedUnicastAddress:
         elif version == 6:
             return self.PIM_ENCODED_UNICAST_ADDRESS_HDR_LEN_IPV6
         else:
-            raise Exception
+            raise Exception("Unknown address family")
 
     @staticmethod
     def parse_bytes(data: bytes):
@@ -69,6 +69,8 @@ class PacketPimEncodedUnicastAddress:
         elif addr_family == PacketPimEncodedUnicastAddress.FAMILY_IPV6:
             (ip,) = struct.unpack("! " + PacketPimEncodedUnicastAddress.IPV6_HDR, data_unicast_addr[:16])
             ip = socket.inet_ntop(socket.AF_INET6, ip)
+        else:
+            raise Exception("Unknown address family")
 
         if encoding != 0:
             print("unknown encoding")

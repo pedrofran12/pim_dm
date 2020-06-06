@@ -3,15 +3,15 @@ from threading import Lock
 from threading import Timer
 
 from pimdm.utils import TYPE_CHECKING
-from .wrapper import NoMembersPresent
-from .igmp_globals import GroupMembershipInterval, LastMemberQueryInterval
+from .wrapper import NoListenersPresent
+from .mld_globals import MulticastListenerInterval, LastListenerQueryInterval
 
 if TYPE_CHECKING:
     from .RouterState import RouterState
 
 
 class GroupState(object):
-    LOGGER = logging.getLogger('pim.igmp.RouterState.GroupState')
+    LOGGER = logging.getLogger('pim.mld.RouterState.GroupState')
 
     def __init__(self, router_state: 'RouterState', group_ip: str):
         #logger
@@ -22,9 +22,8 @@ class GroupState(object):
         #timers and state
         self.router_state = router_state
         self.group_ip = group_ip
-        self.state = NoMembersPresent
+        self.state = NoListenersPresent
         self.timer = None
-        self.v1_host_timer = None
         self.retransmit_timer = None
         # lock
         self.lock = Lock()
@@ -49,7 +48,7 @@ class GroupState(object):
     def set_timer(self, alternative: bool=False, max_response_time: int=None):
         self.clear_timer()
         if not alternative:
-            time = GroupMembershipInterval
+            time = MulticastListenerInterval
         else:
             time = self.router_state.interface_state.get_group_membership_time(max_response_time)
 
@@ -61,19 +60,9 @@ class GroupState(object):
         if self.timer is not None:
             self.timer.cancel()
 
-    def set_v1_host_timer(self):
-        self.clear_v1_host_timer()
-        v1_host_timer = Timer(GroupMembershipInterval, self.group_membership_v1_timeout)
-        v1_host_timer.start()
-        self.v1_host_timer = v1_host_timer
-
-    def clear_v1_host_timer(self):
-        if self.v1_host_timer is not None:
-            self.v1_host_timer.cancel()
-
     def set_retransmit_timer(self):
         self.clear_retransmit_timer()
-        retransmit_timer = Timer(LastMemberQueryInterval, self.retransmit_timeout)
+        retransmit_timer = Timer(LastListenerQueryInterval, self.retransmit_timeout)
         retransmit_timer.start()
         self.retransmit_timer = retransmit_timer
 
@@ -95,10 +84,6 @@ class GroupState(object):
         with self.lock:
             self.get_interface_group_state().group_membership_timeout(self)
 
-    def group_membership_v1_timeout(self):
-        with self.lock:
-            self.get_interface_group_state().group_membership_v1_timeout(self)
-
     def retransmit_timeout(self):
         with self.lock:
             self.get_interface_group_state().retransmit_timeout(self)
@@ -106,17 +91,13 @@ class GroupState(object):
     ###########################################
     # Receive Packets
     ###########################################
-    def receive_v1_membership_report(self):
+    def receive_report(self):
         with self.lock:
-            self.get_interface_group_state().receive_v1_membership_report(self)
+            self.get_interface_group_state().receive_report(self)
 
-    def receive_v2_membership_report(self):
+    def receive_done(self):
         with self.lock:
-            self.get_interface_group_state().receive_v2_membership_report(self)
-
-    def receive_leave_group(self):
-        with self.lock:
-            self.get_interface_group_state().receive_leave_group(self)
+            self.get_interface_group_state().receive_done(self)
 
     def receive_group_specific_query(self, max_response_time: int):
         with self.lock:
@@ -147,13 +128,12 @@ class GroupState(object):
             self.multicast_interface_state.remove(kernel_entry)
 
     def has_members(self):
-        return self.state is not NoMembersPresent
+        return self.state is not NoListenersPresent
 
     def remove(self):
         with self.multicast_interface_state_lock:
             self.clear_retransmit_timer()
             self.clear_timer()
-            self.clear_v1_host_timer()
             for interface_state in self.multicast_interface_state:
                 interface_state.notify_membership(has_members=False)
             del self.multicast_interface_state[:]

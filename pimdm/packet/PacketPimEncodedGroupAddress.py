@@ -55,7 +55,7 @@ class PacketPimEncodedGroupAddress:
         elif version == 6:
             return (PacketPimEncodedGroupAddress.IPV6_HDR, PacketPimEncodedGroupAddress.FAMILY_IPV6, socket.AF_INET6)
         else:
-            raise Exception
+            raise Exception("Unknown address family")
 
     def __len__(self):
         version = ipaddress.ip_address(self.group_address).version
@@ -64,7 +64,7 @@ class PacketPimEncodedGroupAddress:
         elif version == 6:
             return self.PIM_ENCODED_GROUP_ADDRESS_HDR_LEN_IPv6
         else:
-            raise Exception
+            raise Exception("Unknown address family")
 
     @staticmethod
     def parse_bytes(data: bytes):
@@ -72,13 +72,14 @@ class PacketPimEncodedGroupAddress:
         (addr_family, encoding, _, mask_len) = struct.unpack(PacketPimEncodedGroupAddress.PIM_ENCODED_GROUP_ADDRESS_HDR_WITHOUT_GROUP_MULTICAST_ADDRESS, data_without_group_addr)
 
         data_group_addr = data[PacketPimEncodedGroupAddress.PIM_ENCODED_GROUP_ADDRESS_HDR_WITHOUT_GROUP_ADDRESS_LEN:]
-        ip = None
         if addr_family == PacketPimEncodedGroupAddress.FAMILY_IPV4:
             (ip,) = struct.unpack("! " + PacketPimEncodedGroupAddress.IPV4_HDR, data_group_addr[:4])
             ip = socket.inet_ntop(socket.AF_INET, ip)
         elif addr_family == PacketPimEncodedGroupAddress.FAMILY_IPV6:
             (ip,) = struct.unpack("! " + PacketPimEncodedGroupAddress.IPV6_HDR, data_group_addr[:16])
             ip = socket.inet_ntop(socket.AF_INET6, ip)
+        else:
+            raise Exception("Unknown address family")
 
         if encoding != 0:
             print("unknown encoding")

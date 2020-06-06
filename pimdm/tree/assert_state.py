@@ -112,11 +112,9 @@ class AssertStateABC(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-
     def _sendAssert_setAT(interface: "TreeInterfaceDownstream"):
         interface.set_assert_timer(pim_globals.ASSERT_TIME)
         interface.send_assert()
-
 
     # Override
     def __str__(self) -> str:
@@ -289,7 +287,6 @@ class WinnerState(AssertStateABC):
         return "Winner"
 
 
-
 class LoserState(AssertStateABC):
     '''
     I am Assert Loser (L)
@@ -369,6 +366,7 @@ class LoserState(AssertStateABC):
 
     def __str__(self) -> str:
         return "Loser"
+
 
 class AssertState():
     NoInfo = NoInfoState()

@@ -1,19 +1,19 @@
-import random
-from pimdm.Interface import Interface
-from pimdm.Packet.ReceivedPacket import ReceivedPacket
-from pimdm import Main
-import traceback
-from pimdm.RWLock.RWLock import RWLockWrite
-from pimdm.Packet.PacketPimHelloOptions import *
-from pimdm.Packet.PacketPimHello import PacketPimHello
-from pimdm.Packet.PacketPimHeader import PacketPimHeader
-from pimdm.Packet.Packet import Packet
-from pimdm.utils import HELLO_HOLD_TIME_TIMEOUT
-from threading import Timer
-from pimdm.tree.globals import REFRESH_INTERVAL
 import socket
-import netifaces
+import random
 import logging
+import netifaces
+import traceback
+from threading import Timer
+
+from pimdm.Interface import Interface
+from pimdm.packet.ReceivedPacket import ReceivedPacket
+from pimdm import Main
+from pimdm.rwlock.RWLock import RWLockWrite
+from pimdm.packet.PacketPimHelloOptions import *
+from pimdm.packet.PacketPimHello import PacketPimHello
+from pimdm.packet.PacketPimHeader import PacketPimHeader
+from pimdm.packet.Packet import Packet
+from pimdm.tree.globals import HELLO_HOLD_TIME_TIMEOUT, REFRESH_INTERVAL
 
 
 class InterfacePim(Interface):
@@ -83,18 +83,37 @@ class InterfacePim(Interface):
         self.force_send_hello()
 
     def get_ip(self):
+        """
+        Get IP of this interface
+        """
         return self.ip_interface
 
-    def _receive(self, raw_bytes):
+    @staticmethod
+    def get_kernel():
+        """
+        Get Kernel object
+        """
+        return Main.kernel
+
+    def _receive(self, raw_bytes, ancdata, src_addr):
+        """
+        Interface received a new control packet
+        """
         if raw_bytes:
             packet = ReceivedPacket(raw_bytes, self)
-            self.PKT_FUNCTIONS[packet.payload.get_pim_type()](self, packet)
+            self.PKT_FUNCTIONS.get(packet.payload.get_pim_type(), InterfacePim.receive_unknown)(self, packet)
 
     def send(self, data: bytes, group_ip: str=MCAST_GRP):
+        """
+        Send a new packet destined to group_ip IP
+        """
         super().send(data=data, group_ip=group_ip)
 
     #Random interval for initial Hello message on bootup or triggered Hello message to a rebooting neighbor
     def force_send_hello(self):
+        """
+        Force the transmission of a new Hello message
+        """
         if self.hello_timer is not None:
             self.hello_timer.cancel()
 
@@ -103,6 +122,10 @@ class InterfacePim(Interface):
         self.hello_timer.start()
 
     def send_hello(self):
+        """
+        Send a new Hello message
+        Include in it the HelloHoldTime and GenerationID
+        """
         self.interface_logger.debug('Send Hello message')
         self.hello_timer.cancel()
 
@@ -125,6 +148,10 @@ class InterfacePim(Interface):
         self.hello_timer.start()
 
     def remove(self):
+        """
+        Remove this interface
+        Clear all state
+        """
         self.hello_timer.cancel()
         self.hello_timer = None
 
@@ -136,17 +163,20 @@ class InterfacePim(Interface):
         packet = Packet(payload=ph)
         self.send(packet.bytes())
 
-        Main.kernel.interface_change_number_of_neighbors()
+        self.get_kernel().interface_change_number_of_neighbors()
         super().remove()
 
     def check_number_of_neighbors(self):
         has_neighbors = len(self.neighbors) > 0
         if has_neighbors != self._had_neighbors:
             self._had_neighbors = has_neighbors
-            Main.kernel.interface_change_number_of_neighbors()
+            self.get_kernel().interface_change_number_of_neighbors()
 
     def new_or_reset_neighbor(self, neighbor_ip):
-        Main.kernel.new_or_reset_neighbor(self.vif_index, neighbor_ip)
+        """
+        React to new neighbor or restart of known neighbor
+        """
+        self.get_kernel().new_or_reset_neighbor(self.vif_index, neighbor_ip)
 
     '''
     def add_neighbor(self, ip, random_number, hello_hold_time):
@@ -160,27 +190,44 @@ class InterfacePim(Interface):
     '''
 
     def get_neighbors(self):
+        """
+        Get list of known neighbors
+        """
         with self.neighbors_lock.genRlock():
             return self.neighbors.values()
 
     def get_neighbor(self, ip):
+        """
+        Get specific neighbor by its IP
+        """
         with self.neighbors_lock.genRlock():
             return self.neighbors.get(ip)
 
     def remove_neighbor(self, ip):
+        """
+        Remove known neighbor
+        """
         with self.neighbors_lock.genWlock():
             del self.neighbors[ip]
             self.interface_logger.debug("Remove neighbor: " + ip)
             self.check_number_of_neighbors()
 
     def set_state_refresh_capable(self, value):
+        """
+        Change StateRefresh capability of interface
+        """
         self._state_refresh_capable = value
 
     def is_state_refresh_enabled(self):
+        """
+        Check if state refresh is enabled
+        """
         return self._state_refresh_capable
 
-    # check if Interface is StateRefreshCapable
     def is_state_refresh_capable(self):
+        """
+        Check StateRefresh capability of interface neighbors
+        """
         with self.neighbors_lock.genWlock():
             if len(self.neighbors) == 0:
                 return False
@@ -214,6 +261,9 @@ class InterfacePim(Interface):
     # Recv packets
     ###########################################
     def receive_hello(self, packet):
+        """
+        Receive an Hello packet
+        """
         ip = packet.ip_header.ip_src
         print("ip = ", ip)
         options = packet.payload.payload.get_options()
@@ -225,7 +275,6 @@ class InterfacePim(Interface):
             raise Exception
 
         state_refresh_capable = (21 in options)
-
 
         with self.neighbors_lock.genWlock():
             if ip not in self.neighbors:
@@ -244,17 +293,23 @@ class InterfacePim(Interface):
         neighbor.receive_hello(generation_id, hello_hold_time, state_refresh_capable)
 
     def receive_assert(self, packet):
+        """
+        Receive an Assert packet
+        """
         pkt_assert = packet.payload.payload  # type: PacketPimAssert
         source = pkt_assert.source_address
         group = pkt_assert.multicast_group_address
         source_group = (source, group)
 
         try:
-            Main.kernel.get_routing_entry(source_group).recv_assert_msg(self.vif_index, packet)
+            self.get_kernel().get_routing_entry(source_group).recv_assert_msg(self.vif_index, packet)
         except:
             traceback.print_exc()
 
     def receive_join_prune(self, packet):
+        """
+        Receive Join/Prune packet
+        """
         pkt_join_prune = packet.payload.payload  # type: PacketPimJoinPrune
 
         join_prune_groups = pkt_join_prune.groups
@@ -266,7 +321,7 @@ class InterfacePim(Interface):
             for source_address in joined_src_addresses:
                 source_group = (source_address, multicast_group)
                 try:
-                    Main.kernel.get_routing_entry(source_group).recv_join_msg(self.vif_index, packet)
+                    self.get_kernel().get_routing_entry(source_group).recv_join_msg(self.vif_index, packet)
                 except:
                     traceback.print_exc()
                     continue
@@ -274,12 +329,15 @@ class InterfacePim(Interface):
             for source_address in pruned_src_addresses:
                 source_group = (source_address, multicast_group)
                 try:
-                    Main.kernel.get_routing_entry(source_group).recv_prune_msg(self.vif_index, packet)
+                    self.get_kernel().get_routing_entry(source_group).recv_prune_msg(self.vif_index, packet)
                 except:
                     traceback.print_exc()
                     continue
 
     def receive_graft(self, packet):
+        """
+        Receive Graft packet
+        """
         pkt_join_prune = packet.payload.payload  # type: PacketPimGraft
 
         join_prune_groups = pkt_join_prune.groups
@@ -290,12 +348,15 @@ class InterfacePim(Interface):
             for source_address in joined_src_addresses:
                 source_group = (source_address, multicast_group)
                 try:
-                    Main.kernel.get_routing_entry(source_group).recv_graft_msg(self.vif_index, packet)
+                    self.get_kernel().get_routing_entry(source_group).recv_graft_msg(self.vif_index, packet)
                 except:
                     traceback.print_exc()
                     continue
 
     def receive_graft_ack(self, packet):
+        """
+        Receive an GraftAck packet
+        """
         pkt_join_prune = packet.payload.payload  # type: PacketPimGraftAck
 
         join_prune_groups = pkt_join_prune.groups
@@ -306,12 +367,15 @@ class InterfacePim(Interface):
             for source_address in joined_src_addresses:
                 source_group = (source_address, multicast_group)
                 try:
-                    Main.kernel.get_routing_entry(source_group).recv_graft_ack_msg(self.vif_index, packet)
+                    self.get_kernel().get_routing_entry(source_group).recv_graft_ack_msg(self.vif_index, packet)
                 except:
                     traceback.print_exc()
                     continue
 
     def receive_state_refresh(self, packet):
+        """
+        Receive an StateRefresh packet
+        """
         if not self.is_state_refresh_enabled():
             return
         pkt_state_refresh = packet.payload.payload # type: PacketPimStateRefresh
@@ -320,10 +384,15 @@ class InterfacePim(Interface):
         group = pkt_state_refresh.multicast_group_adress
         source_group = (source, group)
         try:
-            Main.kernel.get_routing_entry(source_group).recv_state_refresh_msg(self.vif_index, packet)
+            self.get_kernel().get_routing_entry(source_group).recv_state_refresh_msg(self.vif_index, packet)
         except:
             traceback.print_exc()
 
+    def receive_unknown(self, packet):
+        """
+        Receive an unknown packet
+        """
+        raise Exception("Unknown PIM type: " + str(packet.payload.get_pim_type()))
 
     PKT_FUNCTIONS = {
         0: receive_hello,
