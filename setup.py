@@ -1,9 +1,9 @@
 import sys
 from setuptools import setup, find_packages
 
-# we only support Python 3 version >= 3.4
-#if len(sys.argv) >= 2 and sys.argv[1] == "install" and sys.version_info < (3, 4):
-#    raise SystemExit("Python 3.4 or higher is required")
+# we only support Python 3 version >= 3.3
+if len(sys.argv) >= 2 and sys.argv[1] == "install" and sys.version_info < (3, 3):
+    raise SystemExit("Python 3.3 or higher is required")
 
 
 dependencies = open("requirements.txt", "r").read().splitlines()
@@ -13,7 +13,7 @@ setup(
     long_description=open("README.md", "r").read(),
     long_description_content_type="text/markdown",
     keywords="PIM-DM Multicast Routing Protocol Dense-Mode Router RFC3973 IPv4 IPv6",
-    version="1.1",
+    version="1.1.1",
     url="http://github.com/pedrofran12/pim_dm",
     author="Pedro Oliveira",
     author_email="pedro.francisco.oliveira@tecnico.ulisboa.pt",

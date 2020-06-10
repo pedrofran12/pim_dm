@@ -2,6 +2,7 @@ from pimdm.utils import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..RouterState import RouterState
 
+
 def get_state(router_state: 'RouterState'):
     return router_state.interface_state.get_no_members_present_state()
 

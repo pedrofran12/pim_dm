@@ -3,6 +3,7 @@ import ipaddress
 from threading import RLock
 from socket import if_indextoname
 from pyroute2 import IPDB
+from pimdm.tree.globals import UNICAST_TABLE_ID
 
 
 def get_route(ip_dst: str):
@@ -64,17 +65,18 @@ class UnicastRouting(object):
                 dst_network = str(ipaddress.ip_interface(ip_dst + "/" + str(mask_len)).network)
 
                 print(dst_network)
-                if dst_network in ipdb.routes:
+                if dst_network in ipdb.routes.tables[UNICAST_TABLE_ID]:
                     print(info)
-                    if ipdb.routes[{'dst': dst_network, 'family': family}]['ipdb_scope'] != 'gc':
-                        info = ipdb.routes[dst_network]
+                    if ipdb.routes[{'dst': dst_network, 'family': family,
+                                    'table': UNICAST_TABLE_ID}]['ipdb_scope'] != 'gc':
+                        info = ipdb.routes[{'dst': dst_network, 'family': family, 'table': UNICAST_TABLE_ID}]
                     break
                 else:
                     continue
             if not info:
                 print("0.0.0.0/0 or ::/0")
-                if "default" in ipdb.routes:
-                    info = ipdb.routes[{'dst': 'default', 'family': family}]
+                if "default" in ipdb.routes.tables[UNICAST_TABLE_ID]:
+                    info = ipdb.routes[{'dst': 'default', 'family': family, 'table': UNICAST_TABLE_ID}]
             print(info)
             return info
 

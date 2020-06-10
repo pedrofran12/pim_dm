@@ -9,8 +9,9 @@ import _pickle as pickle
 
 from pimdm import Main
 from pimdm.daemon.Daemon import Daemon
+from pimdm.tree.globals import MULTICAST_TABLE_ID
 
-VERSION = "1.1"
+VERSION = "1.1.1"
 
 
 def client_socket(data_to_send):
@@ -162,9 +163,9 @@ def main():
         sys.exit(0)
     elif args.multicast_routes:
         if args.ipv4 or not args.ipv6:
-            os.system("ip mroute show")
+            os.system("ip mroute show table " + str(MULTICAST_TABLE_ID))
         elif args.ipv6:
-            os.system("ip -6 mroute show")
+            os.system("ip -6 mroute show table " + str(MULTICAST_TABLE_ID))
         sys.exit(0)
     elif not daemon.is_running():
         print("PIM-DM is not running")

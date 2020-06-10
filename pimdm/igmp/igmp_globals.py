@@ -1,20 +1,20 @@
 # IGMP timers (in seconds)
-RobustnessVariable = 2
-QueryInterval = 125
-QueryResponseInterval = 10
-MaxResponseTime_QueryResponseInterval = QueryResponseInterval*10
-GroupMembershipInterval = RobustnessVariable * QueryInterval + QueryResponseInterval
-OtherQuerierPresentInterval = RobustnessVariable * QueryInterval + QueryResponseInterval/2
-StartupQueryInterval = QueryInterval / 4
-StartupQueryCount = RobustnessVariable
-LastMemberQueryInterval = 1
-MaxResponseTime_LastMemberQueryInterval = LastMemberQueryInterval*10
-LastMemberQueryCount = RobustnessVariable
-UnsolicitedReportInterval = 10
-Version1RouterPresentTimeout = 400
+ROBUSTNESS_VARIABLE = 2
+QUERY_INTERVAL = 125
+QUERY_RESPONSE_INTERVAL = 10
+MAX_RESPONSE_TIME_QUERY_RESPONSE_INTERVAL = QUERY_RESPONSE_INTERVAL * 10
+GROUP_MEMBERSHIP_INTERVAL = ROBUSTNESS_VARIABLE * QUERY_INTERVAL + QUERY_RESPONSE_INTERVAL
+OTHER_QUERIER_PRESENT_INTERVAL = ROBUSTNESS_VARIABLE * QUERY_INTERVAL + QUERY_RESPONSE_INTERVAL / 2
+STARTUP_QUERY_INTERVAL = QUERY_INTERVAL / 4
+STARTUP_QUERY_COUNT = ROBUSTNESS_VARIABLE
+LAST_MEMBER_QUERY_INTERVAL = 1
+MAX_RESPONSE_TIME_LAST_MEMBER_QUERY_INTERVAL = LAST_MEMBER_QUERY_INTERVAL * 10
+LAST_MEMBER_QUERY_COUNT = ROBUSTNESS_VARIABLE
+UNSOLICITED_REPORT_INTERVAL = 10
+VERSION_1_ROUTER_PRESENT_TIMEOUT = 400
 
 # IGMP msg type
-Membership_Query = 0x11
-Version_1_Membership_Report = 0x12
-Version_2_Membership_Report = 0x16
-Leave_Group = 0x17
+MEMBERSHIP_QUERY = 0x11
+VERSION_1_MEMBERSHIP_REPORT = 0x12
+VERSION_2_MEMBERSHIP_REPORT = 0x16
+LEAVE_GROUP = 0x17
