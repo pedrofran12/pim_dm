@@ -8,6 +8,7 @@ from abc import abstractmethod, ABCMeta
 
 from pimdm import UnicastRouting, Main
 from pimdm.rwlock.RWLock import RWLockWrite
+from pimdm.tree.globals import MULTICAST_TABLE_ID
 
 from pimdm.InterfaceMLD import InterfaceMLD
 from pimdm.InterfaceIGMP import InterfaceIGMP
@@ -276,6 +277,13 @@ class Kernel4(Kernel):
     def __init__(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IGMP)
 
+        # MRT TABLE
+        if MULTICAST_TABLE_ID != 0:
+            try:
+                s.setsockopt(socket.IPPROTO_IP, self.MRT_TABLE, MULTICAST_TABLE_ID)
+            except:
+                traceback.print_exc()
+
         # MRT INIT
         s.setsockopt(socket.IPPROTO_IP, self.MRT_INIT, 1)
 
@@ -512,6 +520,13 @@ class Kernel6(Kernel):
 
     def __init__(self):
         s = socket.socket(socket.AF_INET6, socket.SOCK_RAW, socket.IPPROTO_ICMPV6)
+
+        # MRT TABLE
+        if MULTICAST_TABLE_ID != 0:
+            try:
+                s.setsockopt(socket.IPPROTO_IPV6, self.MRT6_TABLE, MULTICAST_TABLE_ID)
+            except:
+                traceback.print_exc()
 
         # MRT INIT
         s.setsockopt(socket.IPPROTO_IPV6, self.MRT6_INIT, 1)

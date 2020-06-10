@@ -1,14 +1,14 @@
-#MLD timers (in seconds)
-RobustnessVariable = 2
-QueryInterval = 125
-QueryResponseInterval = 10
-MulticastListenerInterval = (RobustnessVariable * QueryInterval) + (QueryResponseInterval)
-OtherQuerierPresentInterval = (RobustnessVariable * QueryInterval) + 0.5 * QueryResponseInterval
-StartupQueryInterval = (1/4) * QueryInterval
-StartupQueryCount = RobustnessVariable
-LastListenerQueryInterval = 1
-LastListenerQueryCount = RobustnessVariable
-UnsolicitedReportInterval = 10
+# MLD timers (in seconds)
+ROBUSTNESS_VARIABLE = 2
+QUERY_INTERVAL = 125
+QUERY_RESPONSE_INTERVAL = 10
+MULTICAST_LISTENER_INTERVAL = (ROBUSTNESS_VARIABLE * QUERY_INTERVAL) + (QUERY_RESPONSE_INTERVAL)
+OTHER_QUERIER_PRESENT_INTERVAL = (ROBUSTNESS_VARIABLE * QUERY_INTERVAL) + 0.5 * QUERY_RESPONSE_INTERVAL
+STARTUP_QUERY_INTERVAL = (1 / 4) * QUERY_INTERVAL
+STARTUP_QUERY_COUNT = ROBUSTNESS_VARIABLE
+LAST_LISTENER_QUERY_INTERVAL = 1
+LAST_LISTENER_QUERY_COUNT = ROBUSTNESS_VARIABLE
+UNSOLICITED_REPORT_INTERVAL = 10
 
 
 # MLD msg type

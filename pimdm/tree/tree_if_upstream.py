@@ -59,12 +59,11 @@ class TreeInterfaceUpstream(TreeInterface):
 
         self.logger.debug('Created UpstreamInterface')
 
-
     def socket_recv(self):
         while self.socket_is_enabled:
             try:
                 self.socket_pkt.recvfrom(0)
-                print("PACOTE DADOS RECEBIDO")
+                print("DATA RECEIVED")
                 self.recv_data_msg()
             except:
                 traceback.print_exc()
@@ -151,7 +150,6 @@ class TreeInterfaceUpstream(TreeInterface):
         if self._source_active_timer is not None:
             self._source_active_timer.cancel()
 
-
     ###########################################
     # Timer timeout
     ###########################################
@@ -182,7 +180,6 @@ class TreeInterfaceUpstream(TreeInterface):
             if interface is not None and  interface.is_state_refresh_enabled():
                 self._originator_state.recvDataMsgFromSource(self)
 
-
     def recv_join_msg(self, upstream_neighbor_address):
         super().recv_join_msg(upstream_neighbor_address)
         if upstream_neighbor_address == self.get_neighbor_RPF():
@@ -207,7 +204,6 @@ class TreeInterfaceUpstream(TreeInterface):
             self._graft_prune_state.stateRefreshArrivesRPFnbr_pruneIs1(self)
         elif prune_indicator == 0 and not self.is_prune_limit_timer_running():
             self._graft_prune_state.stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped(self)
-
 
     ####################################
     def create_state_refresh_msg(self):
@@ -234,7 +230,6 @@ class TreeInterfaceUpstream(TreeInterface):
 
     def olist_is_not_null(self):
         self._graft_prune_state.olistIsNowNotNull(self)
-
 
     ###########################################
     # Changes to RPF'(s)
@@ -264,7 +259,6 @@ class TreeInterfaceUpstream(TreeInterface):
                 self._graft_prune_state.RPFnbrChanges_olistIsNull(self)
             else:
                 self._graft_prune_state.RPFnbrChanges_olistIsNotNull(self)
-
 
     ####################################################################
     #Override
@@ -300,10 +294,9 @@ class TreeInterfaceUpstream(TreeInterface):
     def is_originator(self):
         return self._originator_state == OriginatorState.Originator
 
-    #-------------------------------------------------------------------------
+    #########################################################################
     # Properties
-    #-------------------------------------------------------------------------
-
+    #########################################################################
     @property
     def t_override(self):
         oi = self.get_interface()._override_interval

@@ -1,7 +1,8 @@
 from ipaddress import IPv4Address
 
 from pimdm.utils import TYPE_CHECKING
-from ..igmp_globals import Membership_Query, QueryResponseInterval, LastMemberQueryCount, LastMemberQueryInterval
+from ..igmp_globals import MEMBERSHIP_QUERY, QUERY_RESPONSE_INTERVAL, LAST_MEMBER_QUERY_COUNT, \
+    LAST_MEMBER_QUERY_INTERVAL
 
 from pimdm.packet.PacketIGMPHeader import PacketIGMPHeader
 from pimdm.packet.ReceivedPacket import ReceivedPacket
@@ -14,9 +15,12 @@ if TYPE_CHECKING:
 class Querier:
     @staticmethod
     def general_query_timeout(router_state: 'RouterState'):
+        """
+        General Query timer has expired
+        """
         router_state.router_state_logger.debug('Querier state: general_query_timeout')
         # send general query
-        packet = PacketIGMPHeader(type=Membership_Query, max_resp_time=QueryResponseInterval*10)
+        packet = PacketIGMPHeader(type=MEMBERSHIP_QUERY, max_resp_time=QUERY_RESPONSE_INTERVAL * 10)
         router_state.interface.send(packet.bytes())
 
         # set general query timer
@@ -24,12 +28,18 @@ class Querier:
 
     @staticmethod
     def other_querier_present_timeout(router_state: 'RouterState'):
+        """
+        Other Querier Present timer has expired
+        """
         router_state.router_state_logger.debug('Querier state: other_querier_present_timeout')
         # do nothing
         return
 
     @staticmethod
     def receive_query(router_state: 'RouterState', packet: ReceivedPacket):
+        """
+        Interface associated with RouterState is Querier and received a Query packet
+        """
         router_state.router_state_logger.debug('Querier state: receive_query')
         source_ip = packet.ip_header.ip_src
 
@@ -54,22 +64,37 @@ class Querier:
 
     @staticmethod
     def get_group_membership_time(max_response_time: int):
-        return LastMemberQueryInterval * LastMemberQueryCount
+        """
+        Get time to set timer*
+        """
+        return LAST_MEMBER_QUERY_INTERVAL * LAST_MEMBER_QUERY_COUNT
 
 
     # State
     @staticmethod
     def get_checking_membership_state():
+        """
+        Get implementation of CheckingMembership state machine of interface in Querier state
+        """
         return CheckingMembership
 
     @staticmethod
     def get_members_present_state():
+        """
+        Get implementation of MembersPresent state machine of interface in Querier state
+        """
         return MembersPresent
 
     @staticmethod
     def get_no_members_present_state():
+        """
+        Get implementation of NoMembersPresent state machine of interface in Querier state
+        """
         return NoMembersPresent
 
     @staticmethod
     def get_version_1_members_present_state():
+        """
+        Get implementation of Version1MembersPresent state machine of interface in Querier state
+        """
         return Version1MembersPresent
