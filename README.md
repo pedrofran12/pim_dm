@@ -1,19 +1,28 @@
-# pim
+# PIM-DM - Test Broadcast Tree formation
 
 ### Topology
 ![topology](topology.png)
 
 
-### Execute test
+### Requirements
+
+- Kathara (https://www.kathara.org/)
+- Docker
+- gnome-terminal
+
+
+### Execute lab test
+
 
 ```sh
 $ . script.sh
 ```
 
-### Close test
+This script file will clone pim-dm repository to get the most updated version on the lab environment. Then will start the VMs through Kathara and change some settings on the virtual bridges that connect the VMs.
+
+### Close lab test
 
 ```sh
-$ cd emulation/
-$ lcrash
+$ kathara wipe
 ```
 

@@ -4,6 +4,8 @@ import sys
 import netifaces
 import traceback
 import signal
+import argparse
+import time
 
 is_running = True
 sock = None
@@ -47,21 +49,43 @@ ttl = struct.pack('b', 12)
 sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
 
 
-interface_name = chooseInterface()
-ip_interface = netifaces.ifaddresses(interface_name)[netifaces.AF_INET][0]['addr']
+def main(interface_name, auto):
+    ip_interface = netifaces.ifaddresses(interface_name)[netifaces.AF_INET][0]['addr']
 
-sock.bind((ip_interface, 10000))
-try:
-    # Look for responses from all recipients
-    while is_running:
-        input_msg = input('msg --> ')
-        try:
-            sock.sendto(input_msg.encode("utf-8"), multicast_group)
-        except:
-            traceback.print_exc()
-            continue
-            #print >>sys.stderr, 'received "%s" from %s' % (data, server)
+    sock.bind((ip_interface, 10000))
+    i = 0
+    try:
+        # Look for responses from all recipients
+        while is_running:
+            if auto:
+                input_msg = str(i)
+                print("msg --> : " + str(input_msg))
+                i += 1
+                time.sleep(1)
+            else:
+                input_msg = input('msg --> ')
 
-finally:
-    #print >>sys.stderr, 'closing socket'
-    sock.close()
+            try:
+                sock.sendto(input_msg.encode("utf-8"), multicast_group)
+            except:
+                traceback.print_exc()
+                continue
+                #print >>sys.stderr, 'received "%s" from %s' % (data, server)
+
+    finally:
+        #print >>sys.stderr, 'closing socket'
+        sock.close()
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Multicast source')
+    parser.add_argument("-i", "--interface", nargs=1, metavar='INTERFACE_NAME',
+                       help="Set source interface")
+    parser.add_argument("-a", "--auto", action="store_true", default=False, help="Automatically send data packets")
+    args = parser.parse_args()
+
+    if args.interface:
+        interface_name = args.interface[0]
+    else:
+        interface_name = chooseInterface()
+    main(interface_name, args.auto)
