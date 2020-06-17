@@ -1,0 +1,275 @@
+Test1: Originator
+Having Client0 and Client1 interested AND source transmitting
+About to start TCP server...
+tests                                              DEBUG    2020-06-17 19:10:03,811                                              R2 python3 Run.py -start
+tests                                              DEBUG    2020-06-17 19:10:03,814                                              R3 python3 Run.py -start
+tests                                              DEBUG    2020-06-17 19:10:03,830                                              R5 python3 Run.py -start
+tests                                              DEBUG    2020-06-17 19:10:03,843                                              R4 python3 Run.py -start
+tests                                              DEBUG    2020-06-17 19:10:03,853                                              R6 python3 Run.py -start
+tests                                              DEBUG    2020-06-17 19:10:03,874                                              R1 python3 Run.py -start
+tests                                              DEBUG    2020-06-17 19:10:03,894                                              R7 python3 Run.py -start
+tests                                              DEBUG    2020-06-17 19:10:04,502                                              R5 python3 Run.py -t R5 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:10:04,618                                              R3 python3 Run.py -t R3 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:10:04,639                                              R2 python3 Run.py -t R2 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:10:04,662                                              R4 python3 Run.py -t R4 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:10:04,718                                              R6 python3 Run.py -t R6 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:10:04,865                                              R1 python3 Run.py -t R1 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:10:05,019                                              R7 python3 Run.py -t R7 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:10:05,229                                              R3 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:10:05,419                                              R5 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:10:05,480                                              R6 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:10:05,488                                              R2 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:10:05,531                                              R4 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:10:05,705                                              R1 python3 Run.py -aisr eth0
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:05,786                                              R3 Create virtual interface: eth0 -> 0
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:05,855                                              R6 Create virtual interface: eth0 -> 0
+tests                                              DEBUG    2020-06-17 19:10:05,858                                              R7 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:10:05,913                                              R3 python3 Run.py -aiigmp eth0
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:05,939                                              R5 Create virtual interface: eth0 -> 0
+tests                                              DEBUG    2020-06-17 19:10:05,962                                              R6 python3 Run.py -aiigmp eth0
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:06,063                                              R4 Create virtual interface: eth0 -> 0
+tests                                              DEBUG    2020-06-17 19:10:06,081                                              R5 python3 Run.py -aiigmp eth0
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:06,097                                              R2 Create virtual interface: eth0 -> 0
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:06,136                                              R1 Create virtual interface: eth0 -> 0
+tests                                              DEBUG    2020-06-17 19:10:06,199                                              R1 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:10:06,216                                              R4 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:10:06,251                                              R2 python3 Run.py -aiigmp eth0
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:06,326                                              R7 Create virtual interface: eth0 -> 0
+tests                                              DEBUG    2020-06-17 19:10:06,459                                              R7 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:10:06,690                                              R3 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:10:06,714                                              R6 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:10:06,720                                              R5 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:10:06,890                                              R1 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:10:06,921                                              R2 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:10:06,938                                              R4 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:10:07,098                                              R7 python3 Run.py -aisr eth1
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:07,203                                              R6 Create virtual interface: eth1 -> 1
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:07,218                                              R3 Create virtual interface: eth1 -> 1
+tests                                              DEBUG    2020-06-17 19:10:07,270                                              R6 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:10:07,356                                              R3 python3 Run.py -aiigmp eth1
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:07,366                                              R5 Create virtual interface: eth1 -> 1
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:07,399                                              R4 Create virtual interface: eth1 -> 1
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:07,401                                              R2 Create virtual interface: eth1 -> 1
+tests                                              DEBUG    2020-06-17 19:10:07,480                                              R5 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:10:07,486                                              R2 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:10:07,493                                              R4 python3 Run.py -aiigmp eth1
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:07,494                                              R1 Create virtual interface: eth1 -> 1
+tests                                              DEBUG    2020-06-17 19:10:07,556                                              R1 python3 Run.py -aiigmp eth1
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:07,670                                              R7 Create virtual interface: eth1 -> 1
+tests                                              DEBUG    2020-06-17 19:10:07,722                                              R7 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:10:07,983                                              R2 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:10:08,167                                              R1 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:10:08,207                                              R7 python3 Run.py -aisr eth2
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:08,279                                              R2 Create virtual interface: eth2 -> 2
+tests                                              DEBUG    2020-06-17 19:10:08,324                                              R2 python3 Run.py -aiigmp eth2
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:08,435                                              R7 Create virtual interface: eth2 -> 2
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:08,442                                              R1 Create virtual interface: eth2 -> 2
+tests                                              DEBUG    2020-06-17 19:10:08,475                                              R7 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:10:08,491                                              R1 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:10:08,754                                              R1 python3 Run.py -aisr eth3
+pim.KernelInterface                                DEBUG    2020-06-17 19:10:08,937                                              R1 Create virtual interface: eth3 -> 3
+tests                                              DEBUG    2020-06-17 19:10:08,967                                              R1 python3 Run.py -aiigmp eth3
+tests                                              DEBUG    2020-06-17 19:10:13,178                                              SOURCE python3 server.py -i eth0 -a
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:14,368 (10.1.1.100,224.12.12.12)           0  eth0  R1 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:14,368 (10.1.1.100,224.12.12.12)           0  eth0  R1 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:10:14,368 (10.1.1.100,224.12.12.12)           0  eth0  R1 StateRefresh state transitions to NotOriginator
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:14,369 (10.1.1.100,224.12.12.12)           0  eth0  R1 sourceIsNowDirectConnect, F -> F
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:10:14,369 (10.1.1.100,224.12.12.12)           0  eth0  R1 new DataMsg from Source, NO -> O
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:10:14,369 (10.1.1.100,224.12.12.12)           0  eth0  R1 StateRefresh state transitions to Originator
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,075 (10.1.1.100,224.12.12.12)           1  eth1  R1 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:15,075 (10.1.1.100,224.12.12.12)           1  eth1  R1 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,075 (10.1.1.100,224.12.12.12)           2  eth2  R1 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:15,076 (10.1.1.100,224.12.12.12)           2  eth2  R1 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,076 (10.1.1.100,224.12.12.12)           3  eth3  R1 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:15,076 (10.1.1.100,224.12.12.12)           3  eth3  R1 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:15,158 (10.1.1.100,224.12.12.12)           0  eth0  R4 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:15,158 (10.1.1.100,224.12.12.12)           0  eth0  R4 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:10:15,158 (10.1.1.100,224.12.12.12)           0  eth0  R4 StateRefresh state transitions to NotOriginator
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:15,199 (10.1.1.100,224.12.12.12)           0  eth0  R3 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:15,199 (10.1.1.100,224.12.12.12)           0  eth0  R3 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:10:15,199 (10.1.1.100,224.12.12.12)           0  eth0  R3 StateRefresh state transitions to NotOriginator
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:15,217 (10.1.1.100,224.12.12.12)           0  eth0  R2 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:15,217 (10.1.1.100,224.12.12.12)           0  eth0  R2 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:10:15,217 (10.1.1.100,224.12.12.12)           0  eth0  R2 StateRefresh state transitions to NotOriginator
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,696 (10.1.1.100,224.12.12.12)           1  eth1  R4 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:15,696 (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,716 (10.1.1.100,224.12.12.12)           1  eth1  R3 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:15,717 (10.1.1.100,224.12.12.12)           1  eth1  R3 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,722 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedDataFromDownstreamIf, NI -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,725 (10.1.1.100,224.12.12.12)           1  eth1  R4 Assert state transitions to Winner
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,732 (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedDataFromDownstreamIf, NI -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,734 (10.1.1.100,224.12.12.12)           1  eth1  R3 Assert state transitions to Winner
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,738 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,738 (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPreferedMetric, W -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,740 (10.1.1.100,224.12.12.12)           1  eth1  R3 Assert state transitions to Loser
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:15,745 (10.1.1.100,224.12.12.12)           0  eth0  R3 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:15,745 (10.1.1.100,224.12.12.12)           0  eth0  R3 Upstream state transitions to Pruned
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,748 (10.1.1.100,224.12.12.12)           2  eth2  R1 receivedPruneOrJoinOrGraft, NI -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:15,748 (10.1.1.100,224.12.12.12)           2  eth2  R1 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:15,749 (10.1.1.100,224.12.12.12)           2  eth2  R1 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:15,752 (10.1.1.100,224.12.12.12)           2  eth2  R1 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:15,753 (10.1.1.100,224.12.12.12)           2  eth2  R1 Downstream state transitions to Pruned
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:15,758 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:15,758 (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,763 (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:15,804 (10.1.1.100,224.12.12.12)           0  eth0  R5 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:15,805 (10.1.1.100,224.12.12.12)           0  eth0  R5 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:10:15,805 (10.1.1.100,224.12.12.12)           0  eth0  R5 StateRefresh state transitions to NotOriginator
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:15,807 (10.1.1.100,224.12.12.12)           0  eth0  R6 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:15,807 (10.1.1.100,224.12.12.12)           0  eth0  R6 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:10:15,807 (10.1.1.100,224.12.12.12)           0  eth0  R6 StateRefresh state transitions to NotOriginator
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,835 (10.1.1.100,224.12.12.12)           1  eth1  R2 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:15,836 (10.1.1.100,224.12.12.12)           1  eth1  R2 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,836 (10.1.1.100,224.12.12.12)           2  eth2  R2 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:15,836 (10.1.1.100,224.12.12.12)           2  eth2  R2 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,843 (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedDataFromDownstreamIf, NI -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,843 (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPreferedMetric, NI -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,844 (10.1.1.100,224.12.12.12)           1  eth1  R2 Assert state transitions to Loser
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,849 (10.1.1.100,224.12.12.12)           1  eth1  R2 Assert state transitions to Winner
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,854 (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPreferedMetric, W -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,855 (10.1.1.100,224.12.12.12)           1  eth1  R2 Assert state transitions to Loser
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,858 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,859 (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,863 (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,865 (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPruneOrJoinOrGraft, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,866 (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:15,867 (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:15,867 (10.1.1.100,224.12.12.12)           1  eth1  R3 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,869 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,871 (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:15,871 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedPrune, PP -> PP
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,873 (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:15,875 (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:15,917 (10.1.1.100,224.12.12.12)           0  eth0  R7 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:15,917 (10.1.1.100,224.12.12.12)           0  eth0  R7 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:10:15,917 (10.1.1.100,224.12.12.12)           0  eth0  R7 StateRefresh state transitions to NotOriginator
+[1;32;40mTest1 Success[0m
+Test2: After some time without source sending data... router originator should transition to NO
+tests                                              DEBUG    2020-06-17 19:10:15,918                                              SOURCE kill python3 server.py
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:16,331 (10.1.1.100,224.12.12.12)           1  eth1  R5 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:16,331 (10.1.1.100,224.12.12.12)           1  eth1  R5 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:16,335 (10.1.1.100,224.12.12.12)           0  eth0  R5 receivedPreferedMetric, NI -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:16,336 (10.1.1.100,224.12.12.12)           0  eth0  R5 Assert state transitions to Loser
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:16,340 (10.1.1.100,224.12.12.12)           0  eth0  R5 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,343 (10.1.1.100,224.12.12.12)           0  eth0  R5 seePrune, F -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,343 (10.1.1.100,224.12.12.12)           0  eth0  R5 seePrune, F -> F
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:16,344 (10.1.1.100,224.12.12.12)           0  eth0  R5 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,345 (10.1.1.100,224.12.12.12)           0  eth0  R5 seePrune, F -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,346 (10.1.1.100,224.12.12.12)           0  eth0  R5 seePrune, F -> F
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:16,346 (10.1.1.100,224.12.12.12)           0  eth0  R5 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:16,362 (10.1.1.100,224.12.12.12)           1  eth1  R6 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:16,363 (10.1.1.100,224.12.12.12)           1  eth1  R6 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,363 (10.1.1.100,224.12.12.12)           0  eth0  R6 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,363 (10.1.1.100,224.12.12.12)           0  eth0  R6 Upstream state transitions to Pruned
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:16,364 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedPrune, PP -> PP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,364 (10.1.1.100,224.12.12.12)           0  eth0  R5 seePrune, F -> F
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:16,366 (10.1.1.100,224.12.12.12)           0  eth0  R6 receivedPreferedMetric, NI -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:16,366 (10.1.1.100,224.12.12.12)           0  eth0  R6 Assert state transitions to Loser
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:16,367 (10.1.1.100,224.12.12.12)           0  eth0  R6 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,368 (10.1.1.100,224.12.12.12)           0  eth0  R6 seePrune, P -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,368 (10.1.1.100,224.12.12.12)           0  eth0  R6 seePrune, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:16,369 (10.1.1.100,224.12.12.12)           0  eth0  R6 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,370 (10.1.1.100,224.12.12.12)           0  eth0  R6 seePrune, P -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,370 (10.1.1.100,224.12.12.12)           0  eth0  R6 seePrune, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:10:16,370 (10.1.1.100,224.12.12.12)           0  eth0  R6 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:16,509 (10.1.1.100,224.12.12.12)           1  eth1  R7 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:16,511 (10.1.1.100,224.12.12.12)           1  eth1  R7 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:16,512 (10.1.1.100,224.12.12.12)           2  eth2  R7 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:16,513 (10.1.1.100,224.12.12.12)           2  eth2  R7 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:16,532 (10.1.1.100,224.12.12.12)           2  eth2  R7 receivedDataFromDownstreamIf, NI -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:16,535 (10.1.1.100,224.12.12.12)           2  eth2  R7 Assert state transitions to Winner
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:16,542 (10.1.1.100,224.12.12.12)           2  eth2  R7 receivedDataFromDownstreamIf, W -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:16,543 (10.1.1.100,224.12.12.12)           2  eth2  R2 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, NI -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:16,545 (10.1.1.100,224.12.12.12)           2  eth2  R2 Assert state transitions to Winner
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:16,550 (10.1.1.100,224.12.12.12)           2  eth2  R2 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:16,550 (10.1.1.100,224.12.12.12)           2  eth2  R7 receivedPreferedMetric, W -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:16,551 (10.1.1.100,224.12.12.12)           2  eth2  R7 Assert state transitions to Loser
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:16,555 (10.1.1.100,224.12.12.12)           2  eth2  R2 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:16,555 (10.1.1.100,224.12.12.12)           2  eth2  R2 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:16,556 (10.1.1.100,224.12.12.12)           2  eth2  R7 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:16,558 (10.1.1.100,224.12.12.12)           2  eth2  R2 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:16,558 (10.1.1.100,224.12.12.12)           2  eth2  R2 Downstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,561 (10.1.1.100,224.12.12.12)           0  eth0  R2 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,561 (10.1.1.100,224.12.12.12)           0  eth0  R2 Upstream state transitions to Pruned
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:10:16,563 (10.1.1.100,224.12.12.12)           1  eth1  R1 receivedPruneOrJoinOrGraft, NI -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:16,564 (10.1.1.100,224.12.12.12)           1  eth1  R1 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:16,564 (10.1.1.100,224.12.12.12)           1  eth1  R1 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:16,567 (10.1.1.100,224.12.12.12)           1  eth1  R1 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:16,567 (10.1.1.100,224.12.12.12)           1  eth1  R1 Downstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,596 (10.1.1.100,224.12.12.12)           0  eth0  R6 olistIsNowNotNull, P -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,597 (10.1.1.100,224.12.12.12)           0  eth0  R6 Upstream state transitions to AckPending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:16,599 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedGraft, PP -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:16,600 (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,600 (10.1.1.100,224.12.12.12)           0  eth0  R6 recvGraftAckFromRPFnbr, AP -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:16,600 (10.1.1.100,224.12.12.12)           0  eth0  R6 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:17,801 (10.1.1.100,224.12.12.12)           0  eth0  R5 OTexpires, F -> F
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:17,804 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedJoin, NI -> NI
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:17,804 (10.1.1.100,224.12.12.12)           0  eth0  R6 seeJoinToRPFnbr, F -> F
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:18,871 (10.1.1.100,224.12.12.12)           1  eth1  R3 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:18,872 (10.1.1.100,224.12.12.12)           1  eth1  R3 Downstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:18,876 (10.1.1.100,224.12.12.12)           0  eth0  R6 seePrune, F -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:18,876 (10.1.1.100,224.12.12.12)           0  eth0  R5 seePrune, F -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:19,731 (10.1.1.100,224.12.12.12)           0  eth0  R6 OTexpires, F -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:10:19,735 (10.1.1.100,224.12.12.12)           0  eth0  R5 seeJoinToRPFnbr, F -> F
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:10:19,735 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedJoin, NI -> NI
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:11:14,369 (10.1.1.100,224.12.12.12)           0  eth0  R1 SRT expired, O -> O
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:11:14,377 (10.1.1.100,224.12.12.12)           1  eth1  R1 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:11:14,386 (10.1.1.100,224.12.12.12)           0  eth0  R2 receivedPreferedMetric, NI -> L
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:11:14,392 (10.1.1.100,224.12.12.12)           2  eth2  R1 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:11:14,389 (10.1.1.100,224.12.12.12)           0  eth0  R2 Assert state transitions to Loser
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:11:14,398 (10.1.1.100,224.12.12.12)           0  eth0  R3 receivedPreferedMetric, NI -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:11:14,399 (10.1.1.100,224.12.12.12)           0  eth0  R3 Assert state transitions to Loser
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:11:14,400 (10.1.1.100,224.12.12.12)           0  eth0  R3 stateRefreshArrivesRPFnbr_pruneIs1, P -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:11:14,402 (10.1.1.100,224.12.12.12)           0  eth0  R2 stateRefreshArrivesRPFnbr_pruneIs1, P -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:11:14,405 (10.1.1.100,224.12.12.12)           2  eth2  R2 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:11:14,406 (10.1.1.100,224.12.12.12)           0  eth0  R4 receivedPreferedMetric, NI -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:11:14,406 (10.1.1.100,224.12.12.12)           0  eth0  R4 Assert state transitions to Loser
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:11:14,407 (10.1.1.100,224.12.12.12)           0  eth0  R4 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:11:14,411 (10.1.1.100,224.12.12.12)           0  eth0  R6 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:11:14,411 (10.1.1.100,224.12.12.12)           2  eth2  R7 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:11:14,411 (10.1.1.100,224.12.12.12)           0  eth0  R5 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:11:14,414 (10.1.1.100,224.12.12.12)           0  eth0  R6 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:11:14,417 (10.1.1.100,224.12.12.12)           0  eth0  R7 receivedPreferedMetric, NI -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:11:14,415 (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:11:14,413 (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:11:14,417 (10.1.1.100,224.12.12.12)           0  eth0  R7 Assert state transitions to Loser
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:11:14,421 (10.1.1.100,224.12.12.12)           0  eth0  R7 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:11:14,414 (10.1.1.100,224.12.12.12)           0  eth0  R5 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:12:14,371 (10.1.1.100,224.12.12.12)           0  eth0  R1 SRT expired, O -> O
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:12:14,378 (10.1.1.100,224.12.12.12)           1  eth1  R1 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:12:14,387 (10.1.1.100,224.12.12.12)           0  eth0  R2 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:12:14,390 (10.1.1.100,224.12.12.12)           2  eth2  R1 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:12:14,393 (10.1.1.100,224.12.12.12)           0  eth0  R2 stateRefreshArrivesRPFnbr_pruneIs1, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:12:14,394 (10.1.1.100,224.12.12.12)           0  eth0  R3 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:12:14,395 (10.1.1.100,224.12.12.12)           0  eth0  R3 stateRefreshArrivesRPFnbr_pruneIs1, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:12:14,398 (10.1.1.100,224.12.12.12)           0  eth0  R4 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:12:14,399 (10.1.1.100,224.12.12.12)           0  eth0  R4 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:13:14,372 (10.1.1.100,224.12.12.12)           0  eth0  R1 SRT expired, O -> O
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:13:14,380 (10.1.1.100,224.12.12.12)           1  eth1  R1 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:13:14,390 (10.1.1.100,224.12.12.12)           0  eth0  R2 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:13:14,396 (10.1.1.100,224.12.12.12)           2  eth2  R1 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:13:14,400 (10.1.1.100,224.12.12.12)           0  eth0  R2 stateRefreshArrivesRPFnbr_pruneIs1, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:13:14,404 (10.1.1.100,224.12.12.12)           0  eth0  R3 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:13:14,405 (10.1.1.100,224.12.12.12)           0  eth0  R3 stateRefreshArrivesRPFnbr_pruneIs1, P -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:13:14,405 (10.1.1.100,224.12.12.12)           2  eth2  R2 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:13:14,410 (10.1.1.100,224.12.12.12)           0  eth0  R4 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:13:14,411 (10.1.1.100,224.12.12.12)           0  eth0  R4 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:13:14,411 (10.1.1.100,224.12.12.12)           2  eth2  R7 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:13:14,414 (10.1.1.100,224.12.12.12)           0  eth0  R6 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:13:14,414 (10.1.1.100,224.12.12.12)           0  eth0  R5 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:13:14,416 (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:13:14,416 (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:13:14,419 (10.1.1.100,224.12.12.12)           0  eth0  R5 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:13:14,419 (10.1.1.100,224.12.12.12)           0  eth0  R6 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:13:14,423 (10.1.1.100,224.12.12.12)           0  eth0  R7 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:13:14,424 (10.1.1.100,224.12.12.12)           0  eth0  R7 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:13:15,874 (10.1.1.100,224.12.12.12)           1  eth1  R3 PTexpires, P -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:13:15,874 (10.1.1.100,224.12.12.12)           1  eth1  R3 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:13:45,260 (10.1.1.100,224.12.12.12)           0  eth0  R1 SAT expired, O -> NO
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:13:45,260 (10.1.1.100,224.12.12.12)           0  eth0  R1 StateRefresh state transitions to NotOriginator
+[1;32;40mTest2 Success[0m
+Test3: Source sends data
+Expected: R1 transitions to Originator
+tests                                              DEBUG    2020-06-17 19:13:45,261                                              SOURCE python3 server.py -i eth0 -a
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:13:46,305 (10.1.1.100,224.12.12.12)           0  eth0  R1 new DataMsg from Source, NO -> O
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:13:46,307 (10.1.1.100,224.12.12.12)           0  eth0  R1 StateRefresh state transitions to Originator

@@ -1,6 +1,7 @@
 import socket
 import struct
 import sys
+import argparse
 import netifaces
 import signal
 import sys
@@ -9,6 +10,7 @@ is_running = True
 sock = None
 
 def exit(signal, frame):
+    global is_running
     is_running = False
     sock.close()
     sys.exit(0)
@@ -38,38 +40,45 @@ signal.signal(signal.SIGINT, exit)
 signal.signal(signal.SIGTERM, exit)
 
 
-multicast_group = '224.12.12.12'
 server_address = ('', 10000)
 
 # Create the socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-# Bind to the server address
-sock.bind(server_address)
 
-#interface_name = input("interface name: ")
-interface_name = chooseInterface()
-ip_interface = netifaces.ifaddresses(interface_name)[netifaces.AF_INET][0]['addr']
+def main(interface_name, multicast_group):
+    # Bind to the server address
+    sock.bind(server_address)
+
+    ip_interface = netifaces.ifaddresses(interface_name)[netifaces.AF_INET][0]['addr']
+
+    # Tell the operating system to add the socket to the multicast group
+    # on all interfaces.
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                    socket.inet_aton(multicast_group) + socket.inet_aton(ip_interface))
+
+    # Receive/respond loop
+    while is_running:
+        data, address = sock.recvfrom(10240)
+        print(data.decode("utf-8"))
 
 
-# Tell the operating system to add the socket to the multicast group
-# on all interfaces.
-group = socket.inet_aton(multicast_group)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Multicast receiver')
+    parser.add_argument("-i", "--interface", nargs=1, metavar='INTERFACE_NAME',
+                       help="Set receiver interface")
+    parser.add_argument("-g", "--group", nargs=1, metavar='MULTICAST_GROUP_IP',
+                       help="Set multicast group to receive traffic")
+    args = parser.parse_args()
 
-sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
-                     socket.inet_aton(multicast_group) + socket.inet_aton(ip_interface))
+    if args.interface:
+        interface_name = args.interface[0]
+    else:
+        interface_name = chooseInterface()
 
-#sock.setsockopt(socket.SOL_SOCKET, socket.SO_BINDTODEVICE, str(interface_name + "\0").encode('utf-8'))
+    if args.group:
+        multicast_group = args.group[0]
+    else:
+        multicast_group = '224.12.12.12'
 
-
-# Receive/respond loop
-while is_running:
-    #print >>sys.stderr, '\nwaiting to receive message'
-    data, address = sock.recvfrom(10240)
-    print(data.decode("utf-8"))
-
-    #print >>sys.stderr, 'received %s bytes from %s' % (len(data), address)
-    #print >>sys.stderr, data
-
-    #print >>sys.stderr, 'sending acknowledgement to', address
-    #sock.sendto('ack', address)
+    main(interface_name, multicast_group)

@@ -1,0 +1,540 @@
+Test1: Originator
+Having Client0 and Client1 interested AND source transmitting
+About to start TCP server...
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:33:53,259 (10.1.1.100,224.12.12.12)           2  eth2  R7 winnerLivelinessTimerExpires, L -> NI
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:33:53,259 (10.1.1.100,224.12.12.12)           2  eth2  R7 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:33:53,264 (10.1.1.100,224.12.12.12)           0  eth0  R6 winnerLivelinessTimerExpires, L -> NI
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:33:53,265 (10.1.1.100,224.12.12.12)           0  eth0  R6 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:33:53,269 (10.1.1.100,224.12.12.12)           1  eth1  R3 winnerLivelinessTimerExpires, L -> NI
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:33:53,271 (10.1.1.100,224.12.12.12)           0  eth0  R4 olistIsNowNull, F -> P
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:33:53,269 (10.1.1.100,224.12.12.12)           1  eth1  R3 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:33:53,271 (10.1.1.100,224.12.12.12)           0  eth0  R4 Upstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:33:53,276 (10.1.1.100,224.12.12.12)           0  eth0  R5 winnerLivelinessTimerExpires, L -> NI
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:33:53,276 (10.1.1.100,224.12.12.12)           0  eth0  R5 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:33:53,275 (10.1.1.100,224.12.12.12)           0  eth0  R3 olistIsNowNotNull, P -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:33:53,275 (10.1.1.100,224.12.12.12)           0  eth0  R3 Upstream state transitions to AckPending
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:33:53,282 (10.1.1.100,224.12.12.12)           2  eth2  R1 receivedPruneOrJoinOrGraft, NI -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:33:53,282 (10.1.1.100,224.12.12.12)           2  eth2  R1 receivedGraft, P -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:33:53,282 (10.1.1.100,224.12.12.12)           2  eth2  R1 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:33:53,287 (10.1.1.100,224.12.12.12)           0  eth0  R3 recvGraftAckFromRPFnbr, AP -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:33:53,287 (10.1.1.100,224.12.12.12)           0  eth0  R3 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:33:53,323 (10.1.1.100,224.12.12.12)           0  eth0  R5 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:33:53,327 (10.1.1.100,224.12.12.12)           0  eth0  R7 winnerLivelinessTimerExpires, L -> NI
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:33:53,328 (10.1.1.100,224.12.12.12)           0  eth0  R7 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:33:53,333 (10.1.1.100,224.12.12.12)           0  eth0  R5 Upstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:33:53,345 (10.1.1.100,224.12.12.12)           0  eth0  R3 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:33:53,347 (10.1.1.100,224.12.12.12)           0  eth0  R3 Upstream state transitions to Pruned
+tests                                              DEBUG    2020-06-17 19:33:53,859                                              R4 python3 Run.py -start
+tests                                              DEBUG    2020-06-17 19:33:53,863                                              R2 python3 Run.py -start
+tests                                              DEBUG    2020-06-17 19:33:53,868                                              R1 python3 Run.py -start
+tests                                              DEBUG    2020-06-17 19:33:54,023                                              R5 python3 Run.py -start
+tests                                              DEBUG    2020-06-17 19:33:54,098                                              R7 python3 Run.py -start
+tests                                              DEBUG    2020-06-17 19:33:54,277                                              R2 python3 Run.py -t R2 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,277                                              R2 python3 Run.py -t R2 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,277                                              R2 python3 Run.py -t R2 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,277                                              R2 python3 Run.py -t R2 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,277                                              R2 python3 Run.py -t R2 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,277                                              R2 python3 Run.py -t R2 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,277                                              R2 python3 Run.py -t R2 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,314                                              R3 python3 Run.py -start
+tests                                              DEBUG    2020-06-17 19:33:54,367                                              R6 python3 Run.py -start
+tests                                              DEBUG    2020-06-17 19:33:54,560                                              R4 python3 Run.py -t R4 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,560                                              R4 python3 Run.py -t R4 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,560                                              R4 python3 Run.py -t R4 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,560                                              R4 python3 Run.py -t R4 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,560                                              R4 python3 Run.py -t R4 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,560                                              R4 python3 Run.py -t R4 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,560                                              R4 python3 Run.py -t R4 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,610                                              R5 python3 Run.py -t R5 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,610                                              R5 python3 Run.py -t R5 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,610                                              R5 python3 Run.py -t R5 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,610                                              R5 python3 Run.py -t R5 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,610                                              R5 python3 Run.py -t R5 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,610                                              R5 python3 Run.py -t R5 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,610                                              R5 python3 Run.py -t R5 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,668                                              R1 python3 Run.py -t R1 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,668                                              R1 python3 Run.py -t R1 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,668                                              R1 python3 Run.py -t R1 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,668                                              R1 python3 Run.py -t R1 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,668                                              R1 python3 Run.py -t R1 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,668                                              R1 python3 Run.py -t R1 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,668                                              R1 python3 Run.py -t R1 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,972                                              R7 python3 Run.py -t R7 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,972                                              R7 python3 Run.py -t R7 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,972                                              R7 python3 Run.py -t R7 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,972                                              R7 python3 Run.py -t R7 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,972                                              R7 python3 Run.py -t R7 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,972                                              R7 python3 Run.py -t R7 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:54,972                                              R7 python3 Run.py -t R7 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:55,017                                              R6 python3 Run.py -t R6 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:55,017                                              R6 python3 Run.py -t R6 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:55,017                                              R6 python3 Run.py -t R6 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:55,017                                              R6 python3 Run.py -t R6 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:55,017                                              R6 python3 Run.py -t R6 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:55,017                                              R6 python3 Run.py -t R6 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:55,017                                              R6 python3 Run.py -t R6 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:55,150                                              R3 python3 Run.py -t R3 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:55,150                                              R3 python3 Run.py -t R3 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:55,150                                              R3 python3 Run.py -t R3 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:55,150                                              R3 python3 Run.py -t R3 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:55,150                                              R3 python3 Run.py -t R3 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:55,150                                              R3 python3 Run.py -t R3 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:55,150                                              R3 python3 Run.py -t R3 172.16.1.100
+tests                                              DEBUG    2020-06-17 19:33:55,171                                              R2 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,171                                              R2 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,171                                              R2 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,171                                              R2 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,171                                              R2 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,171                                              R2 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,171                                              R2 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,272                                              R5 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,272                                              R5 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,272                                              R5 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,272                                              R5 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,272                                              R5 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,272                                              R5 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,272                                              R5 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,294                                              R4 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,294                                              R4 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,294                                              R4 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,294                                              R4 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,294                                              R4 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,294                                              R4 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,294                                              R4 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,346                                              R1 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,346                                              R1 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,346                                              R1 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,346                                              R1 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,346                                              R1 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,346                                              R1 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,346                                              R1 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,636                                              R7 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,636                                              R7 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,636                                              R7 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,636                                              R7 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,636                                              R7 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,636                                              R7 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,636                                              R7 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,686                                              R6 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,686                                              R6 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,686                                              R6 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,686                                              R6 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,686                                              R6 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,686                                              R6 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,686                                              R6 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,781                                              R3 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,781                                              R3 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,781                                              R3 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,781                                              R3 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,781                                              R3 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,781                                              R3 python3 Run.py -aisr eth0
+tests                                              DEBUG    2020-06-17 19:33:55,781                                              R3 python3 Run.py -aisr eth0
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:55,826                                              R2 Create virtual interface: eth0 -> 0
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:55,858                                              R5 Create virtual interface: eth0 -> 0
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:55,882                                              R4 Create virtual interface: eth0 -> 0
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:55,884                                              R1 Create virtual interface: eth0 -> 0
+tests                                              DEBUG    2020-06-17 19:33:55,916                                              R5 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:55,916                                              R5 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:55,916                                              R5 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:55,916                                              R5 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:55,916                                              R5 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:55,916                                              R5 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:55,916                                              R5 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:55,981                                              R2 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:55,981                                              R2 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:55,981                                              R2 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:55,981                                              R2 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:55,981                                              R2 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:55,981                                              R2 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:55,981                                              R2 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,006                                              R4 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,006                                              R4 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,006                                              R4 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,006                                              R4 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,006                                              R4 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,006                                              R4 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,006                                              R4 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,011                                              R1 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,011                                              R1 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,011                                              R1 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,011                                              R1 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,011                                              R1 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,011                                              R1 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,011                                              R1 python3 Run.py -aiigmp eth0
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:56,182                                              R3 Create virtual interface: eth0 -> 0
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:56,259                                              R7 Create virtual interface: eth0 -> 0
+tests                                              DEBUG    2020-06-17 19:33:56,332                                              R3 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,332                                              R3 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,332                                              R3 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,332                                              R3 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,332                                              R3 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,332                                              R3 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,332                                              R3 python3 Run.py -aiigmp eth0
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:56,378                                              R6 Create virtual interface: eth0 -> 0
+tests                                              DEBUG    2020-06-17 19:33:56,413                                              R7 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,413                                              R7 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,413                                              R7 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,413                                              R7 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,413                                              R7 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,413                                              R7 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,413                                              R7 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,513                                              R6 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,513                                              R6 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,513                                              R6 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,513                                              R6 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,513                                              R6 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,513                                              R6 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,513                                              R6 python3 Run.py -aiigmp eth0
+tests                                              DEBUG    2020-06-17 19:33:56,586                                              R5 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,586                                              R5 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,586                                              R5 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,586                                              R5 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,586                                              R5 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,586                                              R5 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,586                                              R5 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,634                                              R2 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,634                                              R2 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,634                                              R2 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,634                                              R2 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,634                                              R2 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,634                                              R2 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,634                                              R2 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,639                                              R4 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,639                                              R4 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,639                                              R4 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,639                                              R4 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,639                                              R4 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,639                                              R4 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,639                                              R4 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,714                                              R1 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,714                                              R1 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,714                                              R1 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,714                                              R1 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,714                                              R1 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,714                                              R1 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,714                                              R1 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,825                                              R3 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,825                                              R3 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,825                                              R3 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,825                                              R3 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,825                                              R3 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,825                                              R3 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:56,825                                              R3 python3 Run.py -aisr eth1
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:56,969                                              R5 Create virtual interface: eth1 -> 1
+tests                                              DEBUG    2020-06-17 19:33:57,060                                              R5 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,060                                              R5 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,060                                              R5 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,060                                              R5 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,060                                              R5 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,060                                              R5 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,060                                              R5 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,134                                              R7 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:57,134                                              R7 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:57,134                                              R7 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:57,134                                              R7 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:57,134                                              R7 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:57,134                                              R7 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:57,134                                              R7 python3 Run.py -aisr eth1
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:57,132                                              R1 Create virtual interface: eth1 -> 1
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:57,156                                              R2 Create virtual interface: eth1 -> 1
+tests                                              DEBUG    2020-06-17 19:33:57,224                                              R2 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,224                                              R2 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,224                                              R2 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,224                                              R2 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,224                                              R2 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,224                                              R2 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,224                                              R2 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,248                                              R6 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:57,248                                              R6 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:57,248                                              R6 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:57,248                                              R6 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:57,248                                              R6 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:57,248                                              R6 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:57,248                                              R6 python3 Run.py -aisr eth1
+tests                                              DEBUG    2020-06-17 19:33:57,266                                              R1 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,266                                              R1 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,266                                              R1 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,266                                              R1 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,266                                              R1 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,266                                              R1 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,266                                              R1 python3 Run.py -aiigmp eth1
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:57,314                                              R4 Create virtual interface: eth1 -> 1
+tests                                              DEBUG    2020-06-17 19:33:57,374                                              R4 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,374                                              R4 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,374                                              R4 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,374                                              R4 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,374                                              R4 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,374                                              R4 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,374                                              R4 python3 Run.py -aiigmp eth1
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:57,406                                              R3 Create virtual interface: eth1 -> 1
+tests                                              DEBUG    2020-06-17 19:33:57,522                                              R3 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,522                                              R3 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,522                                              R3 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,522                                              R3 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,522                                              R3 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,522                                              R3 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,522                                              R3 python3 Run.py -aiigmp eth1
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:57,622                                              R7 Create virtual interface: eth1 -> 1
+tests                                              DEBUG    2020-06-17 19:33:57,756                                              R7 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,756                                              R7 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,756                                              R7 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,756                                              R7 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,756                                              R7 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,756                                              R7 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,756                                              R7 python3 Run.py -aiigmp eth1
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:57,795                                              R6 Create virtual interface: eth1 -> 1
+tests                                              DEBUG    2020-06-17 19:33:57,862                                              R6 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,862                                              R6 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,862                                              R6 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,862                                              R6 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,862                                              R6 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,862                                              R6 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,862                                              R6 python3 Run.py -aiigmp eth1
+tests                                              DEBUG    2020-06-17 19:33:57,896                                              R2 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:57,896                                              R2 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:57,896                                              R2 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:57,896                                              R2 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:57,896                                              R2 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:57,896                                              R2 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:57,896                                              R2 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:57,962                                              R1 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:57,962                                              R1 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:57,962                                              R1 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:57,962                                              R1 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:57,962                                              R1 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:57,962                                              R1 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:57,962                                              R1 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:58,204                                              R7 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:58,204                                              R7 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:58,204                                              R7 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:58,204                                              R7 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:58,204                                              R7 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:58,204                                              R7 python3 Run.py -aisr eth2
+tests                                              DEBUG    2020-06-17 19:33:58,204                                              R7 python3 Run.py -aisr eth2
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:58,299                                              R2 Create virtual interface: eth2 -> 2
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:58,303                                              R1 Create virtual interface: eth2 -> 2
+tests                                              DEBUG    2020-06-17 19:33:58,346                                              R1 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,346                                              R1 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,346                                              R1 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,346                                              R1 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,346                                              R1 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,346                                              R1 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,346                                              R1 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,352                                              R2 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,352                                              R2 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,352                                              R2 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,352                                              R2 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,352                                              R2 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,352                                              R2 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,352                                              R2 python3 Run.py -aiigmp eth2
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:58,498                                              R7 Create virtual interface: eth2 -> 2
+tests                                              DEBUG    2020-06-17 19:33:58,549                                              R7 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,549                                              R7 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,549                                              R7 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,549                                              R7 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,549                                              R7 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,549                                              R7 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,549                                              R7 python3 Run.py -aiigmp eth2
+tests                                              DEBUG    2020-06-17 19:33:58,613                                              R1 python3 Run.py -aisr eth3
+tests                                              DEBUG    2020-06-17 19:33:58,613                                              R1 python3 Run.py -aisr eth3
+tests                                              DEBUG    2020-06-17 19:33:58,613                                              R1 python3 Run.py -aisr eth3
+tests                                              DEBUG    2020-06-17 19:33:58,613                                              R1 python3 Run.py -aisr eth3
+tests                                              DEBUG    2020-06-17 19:33:58,613                                              R1 python3 Run.py -aisr eth3
+tests                                              DEBUG    2020-06-17 19:33:58,613                                              R1 python3 Run.py -aisr eth3
+tests                                              DEBUG    2020-06-17 19:33:58,613                                              R1 python3 Run.py -aisr eth3
+pim.KernelInterface                                DEBUG    2020-06-17 19:33:58,813                                              R1 Create virtual interface: eth3 -> 3
+tests                                              DEBUG    2020-06-17 19:33:58,851                                              R1 python3 Run.py -aiigmp eth3
+tests                                              DEBUG    2020-06-17 19:33:58,851                                              R1 python3 Run.py -aiigmp eth3
+tests                                              DEBUG    2020-06-17 19:33:58,851                                              R1 python3 Run.py -aiigmp eth3
+tests                                              DEBUG    2020-06-17 19:33:58,851                                              R1 python3 Run.py -aiigmp eth3
+tests                                              DEBUG    2020-06-17 19:33:58,851                                              R1 python3 Run.py -aiigmp eth3
+tests                                              DEBUG    2020-06-17 19:33:58,851                                              R1 python3 Run.py -aiigmp eth3
+tests                                              DEBUG    2020-06-17 19:33:58,851                                              R1 python3 Run.py -aiigmp eth3
+tests                                              DEBUG    2020-06-17 19:34:02,754                                              SOURCE python3 server.py -i eth0 -a
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:34:03,924 (10.1.1.100,224.12.12.12)           0  eth0  R1 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:03,924 (10.1.1.100,224.12.12.12)           0  eth0  R1 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:34:03,924 (10.1.1.100,224.12.12.12)           0  eth0  R1 StateRefresh state transitions to NotOriginator
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:03,924 (10.1.1.100,224.12.12.12)           0  eth0  R1 sourceIsNowDirectConnect, F -> F
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:34:03,924 (10.1.1.100,224.12.12.12)           0  eth0  R1 new DataMsg from Source, NO -> O
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:34:03,925 (10.1.1.100,224.12.12.12)           0  eth0  R1 StateRefresh state transitions to Originator
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:04,565 (10.1.1.100,224.12.12.12)           1  eth1  R1 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:04,566 (10.1.1.100,224.12.12.12)           1  eth1  R1 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:04,567 (10.1.1.100,224.12.12.12)           2  eth2  R1 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:04,568 (10.1.1.100,224.12.12.12)           2  eth2  R1 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:04,569 (10.1.1.100,224.12.12.12)           3  eth3  R1 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:04,570 (10.1.1.100,224.12.12.12)           3  eth3  R1 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:34:04,659 (10.1.1.100,224.12.12.12)           0  eth0  R4 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:04,659 (10.1.1.100,224.12.12.12)           0  eth0  R4 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:34:04,659 (10.1.1.100,224.12.12.12)           0  eth0  R4 StateRefresh state transitions to NotOriginator
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:34:04,706 (10.1.1.100,224.12.12.12)           0  eth0  R3 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:04,706 (10.1.1.100,224.12.12.12)           0  eth0  R3 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:34:04,706 (10.1.1.100,224.12.12.12)           0  eth0  R3 StateRefresh state transitions to NotOriginator
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:34:04,720 (10.1.1.100,224.12.12.12)           0  eth0  R2 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:04,720 (10.1.1.100,224.12.12.12)           0  eth0  R2 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:34:04,720 (10.1.1.100,224.12.12.12)           0  eth0  R2 StateRefresh state transitions to NotOriginator
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,167 (10.1.1.100,224.12.12.12)           1  eth1  R4 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:05,168 (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,243 (10.1.1.100,224.12.12.12)           1  eth1  R3 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:05,243 (10.1.1.100,224.12.12.12)           1  eth1  R3 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,246 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedDataFromDownstreamIf, NI -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,248 (10.1.1.100,224.12.12.12)           1  eth1  R4 Assert state transitions to Winner
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,251 (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedDataFromDownstreamIf, NI -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,255 (10.1.1.100,224.12.12.12)           1  eth1  R3 Assert state transitions to Winner
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,257 (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPreferedMetric, W -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,259 (10.1.1.100,224.12.12.12)           1  eth1  R3 Assert state transitions to Loser
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,262 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:34:05,263 (10.1.1.100,224.12.12.12)           0  eth0  R6 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:05,264 (10.1.1.100,224.12.12.12)           0  eth0  R6 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:34:05,264 (10.1.1.100,224.12.12.12)           0  eth0  R6 StateRefresh state transitions to NotOriginator
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:05,264 (10.1.1.100,224.12.12.12)           0  eth0  R3 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:05,265 (10.1.1.100,224.12.12.12)           0  eth0  R3 Upstream state transitions to Pruned
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:05,271 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:05,271 (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,273 (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,269 (10.1.1.100,224.12.12.12)           2  eth2  R1 receivedPruneOrJoinOrGraft, NI -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:05,270 (10.1.1.100,224.12.12.12)           2  eth2  R1 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:05,270 (10.1.1.100,224.12.12.12)           2  eth2  R1 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:05,277 (10.1.1.100,224.12.12.12)           2  eth2  R1 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:05,277 (10.1.1.100,224.12.12.12)           2  eth2  R1 Downstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:34:05,279 (10.1.1.100,224.12.12.12)           0  eth0  R5 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:05,280 (10.1.1.100,224.12.12.12)           0  eth0  R5 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:34:05,280 (10.1.1.100,224.12.12.12)           0  eth0  R5 StateRefresh state transitions to NotOriginator
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,330 (10.1.1.100,224.12.12.12)           1  eth1  R2 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:05,331 (10.1.1.100,224.12.12.12)           1  eth1  R2 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,331 (10.1.1.100,224.12.12.12)           2  eth2  R2 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:05,331 (10.1.1.100,224.12.12.12)           2  eth2  R2 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,339 (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPreferedMetric, NI -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,341 (10.1.1.100,224.12.12.12)           1  eth1  R2 Assert state transitions to Loser
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,341 (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedDataFromDownstreamIf, L -> L
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:05,348 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedPrune, PP -> PP
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,351 (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:34:05,423 (10.1.1.100,224.12.12.12)           0  eth0  R7 Assert state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:05,423 (10.1.1.100,224.12.12.12)           0  eth0  R7 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:34:05,423 (10.1.1.100,224.12.12.12)           0  eth0  R7 StateRefresh state transitions to NotOriginator
+[1;32;40mTest1 Success[0m
+Test2: After some time without source sending data... router originator should transition to NO
+tests                                              DEBUG    2020-06-17 19:34:05,424                                              SOURCE kill python3 server.py
+tests                                              DEBUG    2020-06-17 19:34:05,424                                              SOURCE kill python3 server.py
+tests                                              DEBUG    2020-06-17 19:34:05,424                                              SOURCE kill python3 server.py
+tests                                              DEBUG    2020-06-17 19:34:05,424                                              SOURCE kill python3 server.py
+tests                                              DEBUG    2020-06-17 19:34:05,424                                              SOURCE kill python3 server.py
+tests                                              DEBUG    2020-06-17 19:34:05,424                                              SOURCE kill python3 server.py
+tests                                              DEBUG    2020-06-17 19:34:05,424                                              SOURCE kill python3 server.py
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,759 (10.1.1.100,224.12.12.12)           1  eth1  R6 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:05,760 (10.1.1.100,224.12.12.12)           1  eth1  R6 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:05,760 (10.1.1.100,224.12.12.12)           0  eth0  R6 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:05,760 (10.1.1.100,224.12.12.12)           0  eth0  R6 Upstream state transitions to Pruned
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:05,762 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedPrune, PP -> PP
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:34:05,765 (10.1.1.100,224.12.12.12)           0  eth0  R6 receivedPreferedMetric, NI -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:34:05,766 (10.1.1.100,224.12.12.12)           0  eth0  R6 Assert state transitions to Loser
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:34:05,767 (10.1.1.100,224.12.12.12)           0  eth0  R6 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:05,769 (10.1.1.100,224.12.12.12)           0  eth0  R6 seePrune, P -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:05,769 (10.1.1.100,224.12.12.12)           0  eth0  R6 seePrune, P -> P
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:05,795 (10.1.1.100,224.12.12.12)           1  eth1  R5 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:05,795 (10.1.1.100,224.12.12.12)           1  eth1  R5 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:34:05,803 (10.1.1.100,224.12.12.12)           0  eth0  R5 receivedPreferedMetric, NI -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:34:05,810 (10.1.1.100,224.12.12.12)           0  eth0  R5 Assert state transitions to Loser
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:34:05,817 (10.1.1.100,224.12.12.12)           0  eth0  R5 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:05,821 (10.1.1.100,224.12.12.12)           0  eth0  R5 seePrune, F -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:05,822 (10.1.1.100,224.12.12.12)           0  eth0  R5 seePrune, F -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:05,823 (10.1.1.100,224.12.12.12)           0  eth0  R5 seePrune, F -> F
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:06,001 (10.1.1.100,224.12.12.12)           1  eth1  R7 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:06,003 (10.1.1.100,224.12.12.12)           1  eth1  R7 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:06,004 (10.1.1.100,224.12.12.12)           2  eth2  R7 Assert state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:06,005 (10.1.1.100,224.12.12.12)           2  eth2  R7 Downstream state transitions to NoInfo
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:06,017 (10.1.1.100,224.12.12.12)           2  eth2  R7 receivedDataFromDownstreamIf, NI -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:06,019 (10.1.1.100,224.12.12.12)           2  eth2  R7 Assert state transitions to Winner
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:06,023 (10.1.1.100,224.12.12.12)           2  eth2  R7 receivedDataFromDownstreamIf, W -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:06,026 (10.1.1.100,224.12.12.12)           2  eth2  R2 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, NI -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:06,027 (10.1.1.100,224.12.12.12)           2  eth2  R2 Assert state transitions to Winner
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:06,032 (10.1.1.100,224.12.12.12)           2  eth2  R2 receivedInferiorMetricFromNonWinner_couldAssertIsTrue, W -> W
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:06,032 (10.1.1.100,224.12.12.12)           2  eth2  R7 receivedPreferedMetric, W -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:06,032 (10.1.1.100,224.12.12.12)           2  eth2  R7 Assert state transitions to Loser
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:06,037 (10.1.1.100,224.12.12.12)           2  eth2  R2 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:06,037 (10.1.1.100,224.12.12.12)           2  eth2  R2 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:06,038 (10.1.1.100,224.12.12.12)           2  eth2  R7 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:06,039 (10.1.1.100,224.12.12.12)           2  eth2  R2 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:06,039 (10.1.1.100,224.12.12.12)           2  eth2  R2 Downstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:06,042 (10.1.1.100,224.12.12.12)           0  eth0  R2 olistIsNowNull, F -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:06,042 (10.1.1.100,224.12.12.12)           0  eth0  R2 Upstream state transitions to Pruned
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:34:06,044 (10.1.1.100,224.12.12.12)           1  eth1  R1 receivedPruneOrJoinOrGraft, NI -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:06,045 (10.1.1.100,224.12.12.12)           1  eth1  R1 receivedPrune, NI -> PP
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:06,045 (10.1.1.100,224.12.12.12)           1  eth1  R1 Downstream state transitions to PrunePending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:06,048 (10.1.1.100,224.12.12.12)           1  eth1  R1 PPTexpires, PP -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:06,048 (10.1.1.100,224.12.12.12)           1  eth1  R1 Downstream state transitions to Pruned
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:06,103 (10.1.1.100,224.12.12.12)           0  eth0  R6 olistIsNowNotNull, P -> AP
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:06,103 (10.1.1.100,224.12.12.12)           0  eth0  R6 Upstream state transitions to AckPending
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:06,110 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedGraft, PP -> NI
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:06,110 (10.1.1.100,224.12.12.12)           1  eth1  R4 Downstream state transitions to NoInfo
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:06,112 (10.1.1.100,224.12.12.12)           0  eth0  R6 recvGraftAckFromRPFnbr, AP -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:06,112 (10.1.1.100,224.12.12.12)           0  eth0  R6 Upstream state transitions to Forwarding
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:06,428 (10.1.1.100,224.12.12.12)           0  eth0  R5 OTexpires, F -> F
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:34:06,432 (10.1.1.100,224.12.12.12)           1  eth1  R4 receivedJoin, NI -> NI
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:34:06,432 (10.1.1.100,224.12.12.12)           0  eth0  R6 seeJoinToRPFnbr, F -> F
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:35:03,925 (10.1.1.100,224.12.12.12)           0  eth0  R1 SRT expired, O -> O
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:35:03,929 (10.1.1.100,224.12.12.12)           1  eth1  R1 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:35:03,934 (10.1.1.100,224.12.12.12)           0  eth0  R2 receivedPreferedMetric, NI -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:35:03,935 (10.1.1.100,224.12.12.12)           0  eth0  R2 Assert state transitions to Loser
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:35:03,937 (10.1.1.100,224.12.12.12)           2  eth2  R1 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:35:03,942 (10.1.1.100,224.12.12.12)           0  eth0  R3 receivedPreferedMetric, NI -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:35:03,943 (10.1.1.100,224.12.12.12)           0  eth0  R3 Assert state transitions to Loser
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:35:03,946 (10.1.1.100,224.12.12.12)           0  eth0  R2 stateRefreshArrivesRPFnbr_pruneIs1, P -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:35:03,951 (10.1.1.100,224.12.12.12)           2  eth2  R2 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:35:03,951 (10.1.1.100,224.12.12.12)           0  eth0  R4 receivedPreferedMetric, NI -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:35:03,952 (10.1.1.100,224.12.12.12)           0  eth0  R4 Assert state transitions to Loser
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:35:03,953 (10.1.1.100,224.12.12.12)           0  eth0  R4 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:35:03,954 (10.1.1.100,224.12.12.12)           0  eth0  R3 stateRefreshArrivesRPFnbr_pruneIs1, P -> P
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:35:03,958 (10.1.1.100,224.12.12.12)           2  eth2  R7 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:35:03,959 (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:35:03,961 (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:35:03,957 (10.1.1.100,224.12.12.12)           0  eth0  R5 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:35:03,963 (10.1.1.100,224.12.12.12)           0  eth0  R5 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:35:03,957 (10.1.1.100,224.12.12.12)           0  eth0  R6 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:35:03,959 (10.1.1.100,224.12.12.12)           0  eth0  R6 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:35:03,966 (10.1.1.100,224.12.12.12)           0  eth0  R7 receivedPreferedMetric, NI -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:35:03,967 (10.1.1.100,224.12.12.12)           0  eth0  R7 Assert state transitions to Loser
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:35:03,970 (10.1.1.100,224.12.12.12)           0  eth0  R7 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:36:03,926 (10.1.1.100,224.12.12.12)           0  eth0  R1 SRT expired, O -> O
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:36:03,934 (10.1.1.100,224.12.12.12)           1  eth1  R1 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:36:03,942 (10.1.1.100,224.12.12.12)           0  eth0  R2 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:36:03,946 (10.1.1.100,224.12.12.12)           2  eth2  R1 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:36:03,948 (10.1.1.100,224.12.12.12)           0  eth0  R2 stateRefreshArrivesRPFnbr_pruneIs1, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:36:03,953 (10.1.1.100,224.12.12.12)           0  eth0  R3 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:36:03,956 (10.1.1.100,224.12.12.12)           0  eth0  R3 stateRefreshArrivesRPFnbr_pruneIs1, P -> P
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:36:03,958 (10.1.1.100,224.12.12.12)           2  eth2  R2 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:36:03,961 (10.1.1.100,224.12.12.12)           0  eth0  R4 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:36:03,962 (10.1.1.100,224.12.12.12)           0  eth0  R4 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:36:03,963 (10.1.1.100,224.12.12.12)           2  eth2  R7 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:36:03,964 (10.1.1.100,224.12.12.12)           0  eth0  R5 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:36:03,964 (10.1.1.100,224.12.12.12)           0  eth0  R6 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:36:03,966 (10.1.1.100,224.12.12.12)           1  eth1  R3 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:36:03,966 (10.1.1.100,224.12.12.12)           1  eth1  R2 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:36:03,967 (10.1.1.100,224.12.12.12)           0  eth0  R5 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:36:03,970 (10.1.1.100,224.12.12.12)           0  eth0  R7 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:36:03,971 (10.1.1.100,224.12.12.12)           0  eth0  R6 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:36:03,971 (10.1.1.100,224.12.12.12)           0  eth0  R7 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:37:03,928 (10.1.1.100,224.12.12.12)           0  eth0  R1 SRT expired, O -> O
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:37:03,936 (10.1.1.100,224.12.12.12)           1  eth1  R1 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:37:03,945 (10.1.1.100,224.12.12.12)           0  eth0  R2 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:37:03,949 (10.1.1.100,224.12.12.12)           2  eth2  R1 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:37:03,952 (10.1.1.100,224.12.12.12)           0  eth0  R2 stateRefreshArrivesRPFnbr_pruneIs1, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:37:03,955 (10.1.1.100,224.12.12.12)           0  eth0  R3 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:37:03,958 (10.1.1.100,224.12.12.12)           0  eth0  R3 stateRefreshArrivesRPFnbr_pruneIs1, P -> P
+pim.KernelEntry.UpstreamInterface.Assert           DEBUG    2020-06-17 19:37:03,959 (10.1.1.100,224.12.12.12)           0  eth0  R4 receivedPreferedMetric, L -> L
+pim.KernelEntry.DownstreamInterface.JoinPrune      DEBUG    2020-06-17 19:37:03,958 (10.1.1.100,224.12.12.12)           2  eth2  R2 send_state_refresh, P -> P
+pim.KernelEntry.UpstreamInterface.JoinPrune        DEBUG    2020-06-17 19:37:03,960 (10.1.1.100,224.12.12.12)           0  eth0  R4 stateRefreshArrivesRPFnbr_pruneIs0_PLTstoped, F -> F
+pim.KernelEntry.DownstreamInterface.Assert         DEBUG    2020-06-17 19:37:03,964 (10.1.1.100,224.12.12.12)           2  eth2  R7 receivedPreferedMetric, L -> L
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:37:34,832 (10.1.1.100,224.12.12.12)           0  eth0  R1 SAT expired, O -> NO
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:37:34,833 (10.1.1.100,224.12.12.12)           0  eth0  R1 StateRefresh state transitions to NotOriginator
+[1;32;40mTest2 Success[0m
+Test3: Source sends data
+Expected: R1 transitions to Originator
+tests                                              DEBUG    2020-06-17 19:37:34,836                                              SOURCE python3 server.py -i eth0 -a
+tests                                              DEBUG    2020-06-17 19:37:34,836                                              SOURCE python3 server.py -i eth0 -a
+tests                                              DEBUG    2020-06-17 19:37:34,836                                              SOURCE python3 server.py -i eth0 -a
+tests                                              DEBUG    2020-06-17 19:37:34,836                                              SOURCE python3 server.py -i eth0 -a
+tests                                              DEBUG    2020-06-17 19:37:34,836                                              SOURCE python3 server.py -i eth0 -a
+tests                                              DEBUG    2020-06-17 19:37:34,836                                              SOURCE python3 server.py -i eth0 -a
+tests                                              DEBUG    2020-06-17 19:37:34,836                                              SOURCE python3 server.py -i eth0 -a
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:37:35,900 (10.1.1.100,224.12.12.12)           0  eth0  R1 new DataMsg from Source, NO -> O
+pim.KernelEntry.UpstreamInterface.Originator       DEBUG    2020-06-17 19:37:35,903 (10.1.1.100,224.12.12.12)           0  eth0  R1 StateRefresh state transitions to Originator

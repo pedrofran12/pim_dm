@@ -1,9 +1,14 @@
 ip addr add dev eth0 10.6.6.7/24
+ip -6 addr add dev eth0 2001:0:6:6::7/64
 ip link set dev eth0 up
 ip addr add dev eth1 10.8.8.7/24
+ip -6 addr add dev eth1 2001:0:8:8::7/64
 ip link set dev eth1 up
 ip addr add dev eth2 10.9.9.7/24
+ip -6 addr add dev eth2 2001:0:9:9::7/64
 ip link set dev eth2 up
+ip addr add dev eth3 172.16.1.7/24
+ip link set dev eth3 up
 
 
 #default route para obter conectividade internet

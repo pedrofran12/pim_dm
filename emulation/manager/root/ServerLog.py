@@ -4,11 +4,13 @@ import logging.handlers
 import socketserver
 import struct
 from TestStateRefresh import CustomFilter, Test1, Test2, Test3
-from queue import Queue
 import sys
 import threading
+import time
+import os
+from queue import Queue
 
-q = Queue()
+q = Queue(0)
 
 
 def worker():
@@ -23,7 +25,11 @@ def worker():
 
 class TestHandler(logging.StreamHandler):
     currentTest = Test1()
+    currentTest.stop_everything()
+    currentTest.set_initial_settings()
     currentTest.print_test()
+    t = threading.Thread(target=currentTest.set_router_state)
+    t.start()
     nextTests = [Test2(), Test3()]
     main = None
 
@@ -31,8 +37,11 @@ class TestHandler(logging.StreamHandler):
         super().emit(record)
         if TestHandler.currentTest and TestHandler.currentTest.test(record):
             if len(TestHandler.nextTests) > 0:
+                TestHandler.t.join()
                 TestHandler.currentTest = TestHandler.nextTests.pop(0)
                 TestHandler.currentTest.print_test()
+                TestHandler.t = threading.Thread(target=TestHandler.currentTest.set_router_state)
+                TestHandler.t.start()
             else:
                 TestHandler.currentTest = None
                 TestHandler.main.abort = True
@@ -61,7 +70,7 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
                 chunk = chunk + self.connection.recv(slen - len(chunk))
             obj = self.unPickle(chunk)
             record = logging.makeLogRecord(obj)
-            q.put(item=record)
+            q.put(item=record, block=False)
 
     def unPickle(self, data):
         return pickle.loads(data)
@@ -79,12 +88,13 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
                  handler=LogRecordStreamHandler):
         TestHandler.main = self
         socketserver.ThreadingTCPServer.__init__(self, (host, port), handler)
-        self.abort = 0
-        self.timeout = 1
+        self.abort = False
+        self.timeout = 0.0001
+        self.logname = None
 
     def serve_until_stopped(self):
         import select
-        abort = 0
+        abort = False
         while not abort:
             rd, wr, ex = select.select([self.socket.fileno()],
                                        [], [],
@@ -96,17 +106,30 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
 
 def main():
     handler = TestHandler(sys.stdout)
-    formatter = logging.Formatter('%(name)-50s %(levelname)-8s %(asctime)-25s %(tree)-35s %(vif)-2s %(interfacename)-5s %(routername)-2s %(message)s')
+    formatter = logging.Formatter('%(name)-50s %(levelname)-8s %(asctime)-20s %(tree)-35s %(vif)-2s %(interfacename)-5s %(routername)-2s %(message)s')
     handler.setFormatter(formatter)
     logging.getLogger('my_logger').addHandler(handler)
     logging.getLogger('my_logger').addFilter(CustomFilter())
 
-    t = threading.Thread(target=worker)
-    t.start()
-
-    tcpserver = LogRecordSocketReceiver(host='10.5.5.7')
+    t1 = threading.Thread(target=worker, daemon=True)
+    t2 = threading.Thread(target=worker, daemon=True)
+    t3 = threading.Thread(target=worker, daemon=True)
+    t1.start()
+    t2.start()
+    t3.start()
+    tcpserver = LogRecordSocketReceiver(host='172.16.1.100')
     print('About to start TCP server...')
-    tcpserver.serve_until_stopped()
+
+    t11 = threading.Thread(target=tcpserver.serve_until_stopped)
+    t21 = threading.Thread(target=tcpserver.serve_until_stopped)
+    t11.start()
+    t21.start()
+
+    t11.join()
+    t21.join()
+
+    time.sleep(10)
+    os.system('kill -9 %d' % os.getpid())
 
 
 if __name__ == '__main__':
