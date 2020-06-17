@@ -1,11 +1,17 @@
 ip addr add dev eth0 10.1.1.1/24
+ip -6 addr add dev eth0 2001:0:1:1::1/64
 ip link set dev eth0 up
 ip addr add dev eth1 10.2.2.1/24
+ip -6 addr add dev eth1 2001:0:2:2::1/64
 ip link set dev eth1 up
 ip addr add dev eth2 10.3.3.1/24
+ip -6 addr add dev eth2 2001:0:3:3::1/64
 ip link set dev eth2 up
 ip addr add dev eth3 10.4.4.1/24
+ip -6 addr add dev eth3 2001:0:4:4::1/64
 ip link set dev eth3 up
+ip addr add dev eth4 172.16.1.1/24
+ip link set dev eth4 up
 
 
 #NAT for private ip's
