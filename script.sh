@@ -1,33 +1,24 @@
 #!/bin/bash
 
-if [ ! -d "netkit-ng" ]; then
-  # se pasta netkit-ng nao existir descomprimir ficheiros
-  wget -nc https://github.com/netkit-ng/netkit-ng-core/releases/download/3.0.4/netkit-ng-core-32-3.0.4.tar.bz2
-  wget -nc https://web.ist.utl.pt/~ist177956/netkit/netkit-ng-filesystem-i386-F7.0-0.1.3.tar.bz2
-  wget -nc https://github.com/netkit-ng/netkit-ng-build/releases/download/0.1.3/netkit-ng-kernel-i386-K3.2-0.1.3.tar.bz2
-  tar -xjSf netkit-ng-core-32-3.0.4.tar.bz2
-  tar -xjSf netkit-ng-filesystem-i386-F7.0-0.1.3.tar.bz2
-  tar -xjSf netkit-ng-kernel-i386-K3.2-0.1.3.tar.bz2
-fi
-
 if [ ! -d "emulation/shared/root/pim_dm" ]; then
   # if project does not exist, clone it
   git clone https://github.com/pedrofran12/pim_dm.git emulation/shared/root/pim_dm
 fi
 
-export NETKIT_HOME=$(pwd)/netkit-ng
-export MANPATH=:$NETKIT_HOME/man
-export PATH=$NETKIT_HOME/bin:$PATH
+cd emulation/
+sudo kathara lclean
+sudo kathara lstart --privileged
 
-cd netkit-ng
-OUTPUT=$(./check_configuration.sh);
-if echo $OUTPUT | grep -q "failed"; then
-    #erro na instalacao do netkit
-    echo "$OUTPUT"
-    exit
-fi
+# open terminal of all nodes
+for f in *; do
+	if [ -d "$f" -a "$f"=~"shared" ]; then
+          gnome-terminal -- kathara connect "$f";
+	fi
+done
 
-cd ../emulation/
-lstart -p
 
+
+for f in $(ls /sys/devices/virtual/net/ | grep "kt"); do
+	sudo bash -c "echo 0 > /sys/devices/virtual/net/$f/bridge/multicast_snooping"
+done
 
