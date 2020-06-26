@@ -11,7 +11,7 @@ from pimdm import Main
 from pimdm.daemon.Daemon import Daemon
 from pimdm.tree.globals import MULTICAST_TABLE_ID
 
-VERSION = "1.1.1"
+VERSION = "1.1.1.1"
 
 
 def client_socket(data_to_send):
@@ -19,7 +19,7 @@ def client_socket(data_to_send):
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
     # Connect the socket to the port where the server is listening
-    server_address = '/tmp/pim_uds_socket'
+    server_address = '/tmp/pim_uds_socket' + str(MULTICAST_TABLE_ID)
     #print('connecting to %s' % server_address)
     try:
         sock.connect(server_address)
@@ -37,7 +37,7 @@ def client_socket(data_to_send):
 class MyDaemon(Daemon):
     def run(self):
         Main.main()
-        server_address = '/tmp/pim_uds_socket'
+        server_address = '/tmp/pim_uds_socket' + str(MULTICAST_TABLE_ID)
 
         # Make sure the socket does not already exist
         try:
@@ -146,7 +146,7 @@ def main():
     if os.geteuid() != 0:
         sys.exit('PIM-DM must be run as root!')
 
-    daemon = MyDaemon('/tmp/Daemon-pim.pid')
+    daemon = MyDaemon('/tmp/Daemon-pim' + str(MULTICAST_TABLE_ID) + '.pid')
     if args.start:
         print("start")
         daemon.start()
@@ -159,7 +159,7 @@ def main():
         daemon.restart()
         sys.exit(0)
     elif args.verbose:
-        os.system("tail -f /var/log/pimdm/stdout")
+        os.system("tail -f /var/log/pimdm/stdout" + str(MULTICAST_TABLE_ID))
         sys.exit(0)
     elif args.multicast_routes:
         if args.ipv4 or not args.ipv6:
