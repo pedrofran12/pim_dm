@@ -1,3 +1,4 @@
+import os
 import socket
 import struct
 import ipaddress
@@ -8,7 +9,7 @@ from abc import abstractmethod, ABCMeta
 
 from pimdm import UnicastRouting, Main
 from pimdm.rwlock.RWLock import RWLockWrite
-from pimdm.tree.globals import MULTICAST_TABLE_ID
+from pimdm.tree import pim_globals
 
 from pimdm.InterfaceMLD import InterfaceMLD
 from pimdm.InterfaceIGMP import InterfaceIGMP
@@ -278,9 +279,9 @@ class Kernel4(Kernel):
         s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IGMP)
 
         # MRT TABLE
-        if MULTICAST_TABLE_ID != 0:
+        if pim_globals.MULTICAST_TABLE_ID != 0:
             try:
-                s.setsockopt(socket.IPPROTO_IP, self.MRT_TABLE, MULTICAST_TABLE_ID)
+                s.setsockopt(socket.IPPROTO_IP, self.MRT_TABLE, pim_globals.MULTICAST_TABLE_ID)
             except:
                 traceback.print_exc()
 
@@ -313,6 +314,11 @@ class Kernel4(Kernel):
 
         struct_mrt_add_vif = struct.pack("HBBI 4s 4s", index, flags, 1, 0, ip_interface,
                                          socket.inet_aton("0.0.0.0"))
+        os.system("ip mrule del iif {}".format(interface_name))
+        os.system("ip mrule del oif {}".format(interface_name))
+        if pim_globals.MULTICAST_TABLE_ID != 0:
+            os.system("ip mrule add iif {} lookup {}".format(interface_name, pim_globals.MULTICAST_TABLE_ID))
+            os.system("ip mrule add oif {} lookup {}".format(interface_name, pim_globals.MULTICAST_TABLE_ID))
         with self.rwlock.genWlock():
             self.socket.setsockopt(socket.IPPROTO_IP, self.MRT_ADD_VIF, struct_mrt_add_vif)
             self.vif_index_to_name_dic[index] = interface_name
@@ -330,6 +336,8 @@ class Kernel4(Kernel):
         index = self.vif_name_to_index_dic.pop(interface_name, None)
         struct_vifctl = struct.pack("HBBI 4s 4s", index, 0, 0, 0, socket.inet_aton("0.0.0.0"), socket.inet_aton("0.0.0.0"))
 
+        os.system("ip mrule del iif {}".format(interface_name))
+        os.system("ip mrule del oif {}".format(interface_name))
         self.socket.setsockopt(socket.IPPROTO_IP, self.MRT_DEL_VIF, struct_vifctl)
 
         del self.vif_name_to_index_dic[self.vif_index_to_name_dic[index]]
@@ -522,9 +530,9 @@ class Kernel6(Kernel):
         s = socket.socket(socket.AF_INET6, socket.SOCK_RAW, socket.IPPROTO_ICMPV6)
 
         # MRT TABLE
-        if MULTICAST_TABLE_ID != 0:
+        if pim_globals.MULTICAST_TABLE_ID != 0:
             try:
-                s.setsockopt(socket.IPPROTO_IPV6, self.MRT6_TABLE, MULTICAST_TABLE_ID)
+                s.setsockopt(socket.IPPROTO_IPV6, self.MRT6_TABLE, pim_globals.MULTICAST_TABLE_ID)
             except:
                 traceback.print_exc()
 
@@ -550,6 +558,13 @@ class Kernel6(Kernel):
     def create_virtual_interface(self, ip_interface, interface_name: str, index, flags=0x0):
         physical_if_index = if_nametoindex(interface_name)
         struct_mrt_add_vif = struct.pack("HBBHI", index, flags, 1, physical_if_index, 0)
+
+        os.system("ip -6 mrule del iif {}".format(interface_name))
+        os.system("ip -6 mrule del oif {}".format(interface_name))
+        if pim_globals.MULTICAST_TABLE_ID != 0:
+            os.system("ip -6 mrule add iif {} lookup {}".format(interface_name, pim_globals.MULTICAST_TABLE_ID))
+            os.system("ip -6 mrule add oif {} lookup {}".format(interface_name, pim_globals.MULTICAST_TABLE_ID))
+
         with self.rwlock.genWlock():
             self.socket.setsockopt(socket.IPPROTO_IPV6, self.MRT6_ADD_MIF, struct_mrt_add_vif)
             self.vif_index_to_name_dic[index] = interface_name
@@ -570,6 +585,9 @@ class Kernel6(Kernel):
         physical_if_index = if_nametoindex(interface_name)
         struct_vifctl = struct.pack("HBBHI", mif_index, 0, 0, physical_if_index, 0)
         self.socket.setsockopt(socket.IPPROTO_IPV6, self.MRT6_DEL_MIF, struct_vifctl)
+
+        os.system("ip -6 mrule del iif {}".format(interface_name))
+        os.system("ip -6 mrule del oif {}".format(interface_name))
 
         # alterar MFC's para colocar a 0 esta interface
         with self.rwlock.genWlock():

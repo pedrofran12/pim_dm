@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-import pimdm.tree.globals as pim_globals
+from pimdm.tree import pim_globals
 from .metric import AssertMetric
 from pimdm.utils import TYPE_CHECKING
 if TYPE_CHECKING:

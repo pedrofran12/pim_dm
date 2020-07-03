@@ -8,10 +8,10 @@ import traceback
 import _pickle as pickle
 
 from pimdm import Main
+from pimdm.tree import pim_globals
 from pimdm.daemon.Daemon import Daemon
-from pimdm.tree.globals import MULTICAST_TABLE_ID
 
-VERSION = "1.1.1.1"
+VERSION = "1.1.1.2"
 
 
 def client_socket(data_to_send):
@@ -19,7 +19,7 @@ def client_socket(data_to_send):
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
     # Connect the socket to the port where the server is listening
-    server_address = '/tmp/pim_uds_socket' + str(MULTICAST_TABLE_ID)
+    server_address = '/tmp/pim_uds_socket' + str(pim_globals.MULTICAST_TABLE_ID)
     #print('connecting to %s' % server_address)
     try:
         sock.connect(server_address)
@@ -37,7 +37,7 @@ def client_socket(data_to_send):
 class MyDaemon(Daemon):
     def run(self):
         Main.main()
-        server_address = '/tmp/pim_uds_socket' + str(MULTICAST_TABLE_ID)
+        server_address = '/tmp/pim_uds_socket' + str(pim_globals.MULTICAST_TABLE_ID)
 
         # Make sure the socket does not already exist
         try:
@@ -139,6 +139,17 @@ def main():
     group_ipversion = parser.add_mutually_exclusive_group(required=False)
     group_ipversion.add_argument("-4", "--ipv4", action="store_true", default=False, help="Setting for IPv4")
     group_ipversion.add_argument("-6", "--ipv6", action="store_true", default=False, help="Setting for IPv6")
+    group_vrf = parser.add_mutually_exclusive_group(required=False)
+    group_vrf.add_argument("-mvrf", "--multicast_vrf", nargs=1, default=[pim_globals.MULTICAST_TABLE_ID],
+                           metavar='MULTICAST_VRF_NUMBER', type=int,
+                           help="Define multicast table id. This can be used on -start to explicitly start the daemon"
+                                " process on a given vrf. It can also be used with the other commands "
+                                "(for example add, list, ...) for setting/getting information on a given daemon"
+                                " process")
+    group_vrf.add_argument("-uvrf", "--unicast_vrf", nargs=1, default=[pim_globals.UNICAST_TABLE_ID],
+                           metavar='UNICAST_VRF_NUMBER', type=int,
+                           help="Define unicast table id for getting unicast information (RPF checks, RPC costs, ...). "
+                                "This information can only be defined at startup with -start command")
     args = parser.parse_args()
 
     #print(parser.parse_args())
@@ -146,7 +157,10 @@ def main():
     if os.geteuid() != 0:
         sys.exit('PIM-DM must be run as root!')
 
-    daemon = MyDaemon('/tmp/Daemon-pim' + str(MULTICAST_TABLE_ID) + '.pid')
+    pim_globals.MULTICAST_TABLE_ID = args.multicast_vrf[0]
+    pim_globals.UNICAST_TABLE_ID = args.unicast_vrf[0]
+
+    daemon = MyDaemon('/tmp/Daemon-pim' + str(pim_globals.MULTICAST_TABLE_ID) + '.pid')
     if args.start:
         print("start")
         daemon.start()
@@ -159,13 +173,13 @@ def main():
         daemon.restart()
         sys.exit(0)
     elif args.verbose:
-        os.system("tail -f /var/log/pimdm/stdout" + str(MULTICAST_TABLE_ID))
+        os.system("tail -f /var/log/pimdm/stdout" + str(pim_globals.MULTICAST_TABLE_ID))
         sys.exit(0)
     elif args.multicast_routes:
         if args.ipv4 or not args.ipv6:
-            os.system("ip mroute show table " + str(MULTICAST_TABLE_ID))
+            os.system("ip mroute show table " + str(pim_globals.MULTICAST_TABLE_ID))
         elif args.ipv6:
-            os.system("ip -6 mroute show table " + str(MULTICAST_TABLE_ID))
+            os.system("ip -6 mroute show table " + str(pim_globals.MULTICAST_TABLE_ID))
         sys.exit(0)
     elif not daemon.is_running():
         print("PIM-DM is not running")

@@ -3,7 +3,7 @@ import logging
 from threading import Timer
 from threading import Lock, RLock
 
-from pimdm.tree.globals import HELLO_HOLD_TIME_NO_TIMEOUT, HELLO_HOLD_TIME_TIMEOUT
+from pimdm.tree.pim_globals import HELLO_HOLD_TIME_NO_TIMEOUT, HELLO_HOLD_TIME_TIMEOUT
 from pimdm.utils import TYPE_CHECKING
 if TYPE_CHECKING:
     from pimdm.InterfacePIM import InterfacePim

@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from . import globals as pim_globals
+from . import pim_globals as pim_globals
 from pimdm.utils import TYPE_CHECKING
 if TYPE_CHECKING:
     from .tree_if_downstream import TreeInterfaceDownstream

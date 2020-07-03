@@ -13,7 +13,7 @@ from pimdm.packet.PacketPimHelloOptions import *
 from pimdm.packet.PacketPimHello import PacketPimHello
 from pimdm.packet.PacketPimHeader import PacketPimHeader
 from pimdm.packet.Packet import Packet
-from pimdm.tree.globals import HELLO_HOLD_TIME_TIMEOUT, REFRESH_INTERVAL
+from pimdm.tree.pim_globals import HELLO_HOLD_TIME_TIMEOUT, REFRESH_INTERVAL
 
 
 class InterfacePim(Interface):

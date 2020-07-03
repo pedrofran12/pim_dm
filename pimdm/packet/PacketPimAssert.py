@@ -2,7 +2,7 @@ import struct
 import socket
 from .PacketPimEncodedGroupAddress import PacketPimEncodedGroupAddress
 from .PacketPimEncodedUnicastAddress import PacketPimEncodedUnicastAddress
-from pimdm.tree.globals import ASSERT_CANCEL_METRIC
+from pimdm.tree.pim_globals import ASSERT_CANCEL_METRIC
 '''
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1

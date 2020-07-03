@@ -1,7 +1,7 @@
 """Generic linux daemon base class for python 3.x."""
 
 import sys, os, time, atexit, signal
-from pimdm.tree.globals import MULTICAST_TABLE_ID
+from pimdm.tree import pim_globals
 
 
 class Daemon:
@@ -45,8 +45,8 @@ class Daemon:
         sys.stdout.flush()
         sys.stderr.flush()
         si = open(os.devnull, 'r')
-        so = open('stdout' + str(MULTICAST_TABLE_ID), 'a+')
-        se = open('stderror' + str(MULTICAST_TABLE_ID), 'a+')
+        so = open('stdout' + str(pim_globals.MULTICAST_TABLE_ID), 'a+')
+        se = open('stderror' + str(pim_globals.MULTICAST_TABLE_ID), 'a+')
 
         os.dup2(si.fileno(), sys.stdin.fileno())
         os.dup2(so.fileno(), sys.stdout.fileno())

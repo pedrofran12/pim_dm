@@ -23,7 +23,7 @@ Additionally, IGMPv2 and MLDv1 are implemented alongside with PIM-DM to detect i
 # Installation
 
   ```
-  pip3 install pim-dm
+  pip3 install pim-dm 
   ```
 
 
@@ -41,10 +41,18 @@ To interact with the protocol you need to execute the `pim-dm` command. You may 
 
 In order to start the protocol you first need to explicitly start it. This will start a daemon process, which will be running in the background. The command is the following:
   ```
-  sudo pim-dm -start
+  sudo pim-dm -start [-mvrf MULTICAST_TABLE_ID] [-uvrf UNICAST_TABLE_ID]
   ```
 
 IPv4 and IPv6 multicast is supported. By default all commands will be executed on IPv4 daemon. To execute a command on the IPv6 daemon use `-6`. 
+
+We support multiple tables. Each daemon process will be bind to a given multicast and unicast table id, with can be defined at startup with `-mvrf` and `-uvrf`.
+
+If `-mvrf` is not defined, the default multicast table id will be used (table id 0).
+
+If `-uvrf` is not defined, the default unicast table id will be used (table id 254).
+
+After starting the protocol process, if the default multicast table is not used, the following commands (for adding interfaces and listing state) need to have the argument `-mvrf` defined to specify the corresponding daemon process.
 
 
 #### Add interface
@@ -54,25 +62,25 @@ After starting the protocol process you can enable the protocol in specific inte
 - To enable PIM-DM without State-Refresh, in a given interface, you need to run the following command:
 
    ```
-   sudo pim-dm -ai INTERFACE_NAME [-4 | -6]
+   sudo pim-dm -ai INTERFACE_NAME [-4 | -6] [-mvrf MULTICAST_TABLE_ID]
    ```
 
 - To enable PIM-DM with State-Refresh, in a given interface, you need to run the following command:
 
    ```
-   sudo pim-dm -aisf INTERFACE_NAME [-4 | -6]
+   sudo pim-dm -aisf INTERFACE_NAME [-4 | -6] [-mvrf MULTICAST_TABLE_ID]
    ```
 
 - To enable IGMP/MLD in a given interface, you need to run the following command:
 
    - IGMP:
    ```
-   sudo pim-dm -aiigmp INTERFACE_NAME
+   sudo pim-dm -aiigmp INTERFACE_NAME [-mvrf MULTICAST_TABLE_ID]
    ```
 
    - MLD:
    ```
-   sudo pim-dm -aimld INTERFACE_NAME
+   sudo pim-dm -aimld INTERFACE_NAME [-mvrf MULTICAST_TABLE_ID]
    ```
 
 #### Remove interface
@@ -82,18 +90,18 @@ To remove a previously added interface, you need run the following commands:
 - To remove a previously added PIM-DM interface:
 
    ```
-   sudo pim-dm -ri INTERFACE_NAME [-4 | -6]
+   sudo pim-dm -ri INTERFACE_NAME [-4 | -6] [-mvrf MULTICAST_TABLE_ID]
    ```
 
 - To remove a previously added IGMP/MLD interface:
    - IGMP:
    ```
-   sudo pim-dm -riigmp INTERFACE_NAME
+   sudo pim-dm -riigmp INTERFACE_NAME [-mvrf MULTICAST_TABLE_ID]
    ```
 
    - MLD:
    ```
-   sudo pim-dm -rimld INTERFACE_NAME
+   sudo pim-dm -rimld INTERFACE_NAME [-mvrf MULTICAST_TABLE_ID]
    ```
 
 
@@ -101,8 +109,10 @@ To remove a previously added interface, you need run the following commands:
 
 If you want to stop the protocol process, and stop the daemon process, you need to explicitly run this command:
 
+If a specific multicast table id was defined on startup, you need to define the daemon by its multicast table id.
+
    ```
-   sudo pim-dm -stop
+   sudo pim-dm -stop [-mvrf MULTICAST_TABLE_ID]
    ```
 
 
@@ -115,28 +125,28 @@ We have built some list commands that can be used to check the "internals" of th
 	 Show all router interfaces and which ones have PIM-DM and IGMP/MLD enabled. For IGMP/MLD enabled interfaces you can check the Querier state.
 
    ```
-   sudo pim-dm -li [-4 | -6]
+   sudo pim-dm -li [-4 | -6] [-mvrf MULTICAST_TABLE_ID]
    ```
 
  - #### List neighbors
 	 Verify neighbors that have established a neighborhood relationship.
 
    ```
-   sudo pim-dm -ln [-4 | -6]
+   sudo pim-dm -ln [-4 | -6] [-mvrf MULTICAST_TABLE_ID]
    ```
 
  - #### List state
     List all state machines and corresponding state of all trees that are being monitored. Also list IGMP state for each group being monitored.
 
    ```
-   sudo pim-dm -ls [-4 | -6]
+   sudo pim-dm -ls [-4 | -6] [-mvrf MULTICAST_TABLE_ID]
    ```
 
  - #### Multicast Routing Table
    List Linux Multicast Routing Table (equivalent to `ip mroute show`)
 
    ```
-   sudo pim-dm -mr [-4 | -6]
+   sudo pim-dm -mr [-4 | -6] [-mvrf MULTICAST_TABLE_ID]
    ```
 
 
@@ -150,7 +160,7 @@ In order to determine which commands and corresponding arguments are available y
 
 ## Change settings
 
-Files tree/globals.py, igmp/igmp_globals.py and mld/mld_globals.py store all timer values and some configurations regarding PIM-DM, IGMP and MLD. If you want to tune the implementation, you can change the values of these files. These configurations are used by all interfaces, meaning that there is no tuning per interface.
+Files tree/pim_globals.py, igmp/igmp_globals.py and mld/mld_globals.py store all timer values and some configurations regarding PIM-DM, IGMP and MLD. If you want to tune the implementation, you can change the values of these files. These configurations are used by all interfaces, meaning that there is no tuning per interface.
 
 
 ## Tests

@@ -2,7 +2,7 @@ from .tree_interface import TreeInterface
 from .upstream_prune import UpstreamState
 from threading import Timer
 from pimdm.custom_timer.RemainingTimer import RemainingTimer
-from .globals import *
+from .pim_globals import *
 import random
 from .metric import AssertMetric
 from .originator import OriginatorState, OriginatorStateABC

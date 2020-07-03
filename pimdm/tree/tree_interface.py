@@ -17,7 +17,7 @@ from pimdm.packet.PacketPimStateRefresh import PacketPimStateRefresh
 from .metric import AssertMetric
 from threading import Timer
 from .local_membership import LocalMembership
-from .globals import T_LIMIT
+from .pim_globals import T_LIMIT
 import logging
 
 
