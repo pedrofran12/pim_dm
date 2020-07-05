@@ -114,6 +114,7 @@ class TreeInterfaceDownstream(TreeInterface):
     # Send messages
     ######################################
     def send_state_refresh(self, state_refresh_msg_received):
+        print("send state refresh")
         if state_refresh_msg_received is None:
             return
 

@@ -149,7 +149,7 @@ class KernelEntry:
             return
         # refresh limit
         timestamp = time()
-        if (timestamp - self.timestamp_of_last_state_refresh_message_received) < interval:
+        if (timestamp - self.timestamp_of_last_state_refresh_message_received) < interval - 5:
             return
         self.timestamp_of_last_state_refresh_message_received = timestamp
         if ttl == 0:

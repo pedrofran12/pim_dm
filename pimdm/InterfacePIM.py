@@ -228,15 +228,14 @@ class InterfacePim(Interface):
         """
         Check StateRefresh capability of interface neighbors
         """
-        with self.neighbors_lock.genWlock():
-            if len(self.neighbors) == 0:
-                return False
+        if len(self.neighbors) == 0:
+            return False
 
-            state_refresh_capable = True
-            for neighbor in list(self.neighbors.values()):
-                state_refresh_capable &= neighbor.state_refresh_capable
+        state_refresh_capable = True
+        for neighbor in list(self.neighbors.values()):
+            state_refresh_capable &= neighbor.state_refresh_capable
 
-            return state_refresh_capable
+        return state_refresh_capable
 
     '''
     def change_interface(self):

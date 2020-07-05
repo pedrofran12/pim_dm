@@ -4,6 +4,7 @@ import netifaces
 import logging
 import logging.handlers
 from prettytable import PrettyTable
+from pimdm.tree import pim_globals
 
 from pimdm import UnicastRouting
 from pimdm.TestLogger import RootFilter
@@ -158,7 +159,7 @@ def list_routing_state(ipv4=False, ipv6=False):
         for b in list(a.values()):
             routing_entries.append(b)
 
-    t = PrettyTable(['SourceIP', 'GroupIP', 'Interface', 'PruneState', 'AssertState', 'LocalMembership', "Is Forwarding?"])
+    t = PrettyTable(['SourceIP', 'GroupIP', 'Interface', 'OriginatorState', 'PruneState', 'AssertState', 'LocalMembership', "Is Forwarding?"])
     for entry in routing_entries:
         ip = entry.source_ip
         group = entry.group_ip
@@ -172,16 +173,29 @@ def list_routing_state(ipv4=False, ipv6=False):
                 assert_state = type(interface_state._assert_state).__name__
                 if index != upstream_if_index:
                     prune_state = type(interface_state._prune_state).__name__
+                    originator_state = "-"
                     is_forwarding = interface_state.is_forwarding()
                 else:
                     prune_state = type(interface_state._graft_prune_state).__name__
                     is_forwarding = "upstream"
+                    originator_state = type(interface_state._originator_state).__name__
             except:
+                originator_state = "-"
                 prune_state = "-"
                 assert_state = "-"
                 is_forwarding = "-"
 
-            t.add_row([ip, group, interface_name, prune_state, assert_state, local_membership, is_forwarding])
+            t.add_row([ip, group, interface_name, originator_state, prune_state, assert_state, local_membership, is_forwarding])
+    return str(t)
+
+
+def list_instances():
+    """
+    List instance information
+    """
+    t = PrettyTable(['Instance PID', 'Multicast VRF', 'Unicast VRF'])
+    import os
+    t.add_row([os.getpid(), pim_globals.MULTICAST_TABLE_ID, pim_globals.UNICAST_TABLE_ID])
     return str(t)
 
 

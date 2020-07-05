@@ -46,7 +46,7 @@ In order to start the protocol you first need to explicitly start it. This will 
 
 IPv4 and IPv6 multicast is supported. By default all commands will be executed on IPv4 daemon. To execute a command on the IPv6 daemon use `-6`. 
 
-We support multiple tables. Each daemon process will be bind to a given multicast and unicast table id, with can be defined at startup with `-mvrf` and `-uvrf`.
+We support multiple tables. Each daemon process will be bind to a given multicast and unicast table id, which can be defined at startup with `-mvrf` and `-uvrf`.
 
 If `-mvrf` is not defined, the default multicast table id will be used (table id 0).
 
