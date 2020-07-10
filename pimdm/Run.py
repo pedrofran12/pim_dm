@@ -13,7 +13,7 @@ from pimdm import Main
 from pimdm.tree import pim_globals
 from pimdm.daemon.Daemon import Daemon
 
-VERSION = "1.1.1.3"
+VERSION = "1.1.1.4"
 
 
 def client_socket(data_to_send, print_output=True):
@@ -177,7 +177,7 @@ def main():
                 continue
 
             t_new = client_socket(args, print_output=False)
-            t.add_row(t_new.replace(" ", "").split("\n")[3].split("|")[1:4])
+            t.add_row(t_new.split("|"))
         print(t)
         return
 

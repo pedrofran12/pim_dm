@@ -1,3 +1,4 @@
+import os
 import sys
 import time
 import netifaces
@@ -193,10 +194,8 @@ def list_instances():
     """
     List instance information
     """
-    t = PrettyTable(['Instance PID', 'Multicast VRF', 'Unicast VRF'])
-    import os
-    t.add_row([os.getpid(), pim_globals.MULTICAST_TABLE_ID, pim_globals.UNICAST_TABLE_ID])
-    return str(t)
+    t = "{}|{}|{}"
+    return t.format(os.getpid(), pim_globals.MULTICAST_TABLE_ID, pim_globals.UNICAST_TABLE_ID)
 
 
 def stop():

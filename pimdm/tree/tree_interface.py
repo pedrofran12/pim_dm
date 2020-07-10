@@ -112,8 +112,7 @@ class TreeInterface(metaclass=ABCMeta):
         elif self.my_assert_metric().is_better_than(received_metric) and self.could_assert():
             # received inferior assert from non assert winner and could_assert
             self._assert_state.receivedInferiorMetricFromNonWinner_couldAssertIsTrue(self)
-        elif received_metric.is_better_than(self._assert_winner_metric) or \
-                received_metric.equal_metric(self._assert_winner_metric):
+        elif self._assert_state.is_preferred_assert(self, received_metric):
             #received preferred assert
             equal_metric = received_metric.equal_metric(self._assert_winner_metric)
             self._assert_state.receivedPreferedMetric(self, received_metric, equal_metric)

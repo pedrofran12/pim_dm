@@ -116,6 +116,11 @@ class AssertStateABC(metaclass=ABCMeta):
         interface.set_assert_timer(pim_globals.ASSERT_TIME)
         interface.send_assert()
 
+    @staticmethod
+    @abstractmethod
+    def is_preferred_assert(interface: "TreeInterfaceDownstream", received_metric):
+        raise NotImplementedError()
+
     # Override
     def __str__(self) -> str:
         return "AssertSM:" + self.__class__.__name__
@@ -126,6 +131,10 @@ class NoInfoState(AssertStateABC):
     NoInfoState (NI)
     This router has no (S,G) Assert state on interface I.
     '''
+
+    @staticmethod
+    def is_preferred_assert(interface: "TreeInterfaceDownstream", received_metric):
+        return received_metric.is_better_than(interface._assert_winner_metric)
 
     @staticmethod
     def receivedDataFromDownstreamIf(interface: "TreeInterfaceDownstream"):
@@ -213,6 +222,10 @@ class WinnerState(AssertStateABC):
     '''
 
     @staticmethod
+    def is_preferred_assert(interface: "TreeInterfaceDownstream", received_metric):
+        return received_metric.is_better_than(interface.my_assert_metric())
+
+    @staticmethod
     def receivedDataFromDownstreamIf(interface: "TreeInterfaceDownstream"):
         """
         @type interface: TreeInterface
@@ -293,6 +306,11 @@ class LoserState(AssertStateABC):
     This router has lost an (S,G) Assert on interface I. It must not
     forward packets from S destined for G onto interface I.
     '''
+
+    @staticmethod
+    def is_preferred_assert(interface: "TreeInterfaceDownstream", received_metric):
+        return received_metric.is_better_than(interface._assert_winner_metric) or \
+               received_metric.equal_metric(interface._assert_winner_metric)
 
     @staticmethod
     def receivedDataFromDownstreamIf(interface: "TreeInterfaceDownstream"):
