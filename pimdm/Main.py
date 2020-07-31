@@ -217,6 +217,33 @@ def test(router_name, server_logger_ip):
     logger.addHandler(socketHandler)
 
 
+def get_config():
+    """
+    Get live configuration of PIM-DM process
+    """
+    try:
+        from . import Config
+        return Config.get_yaml_file()
+    except ModuleNotFoundError:
+        return "PYYAML needs to be installed. Execute \"pip3 install pyyaml\""
+
+
+def set_config(file_path):
+    """
+    Set configuration of PIM-DM process
+    """
+    from . import Config
+    try:
+        Config.parse_config_file(file_path)
+    except:
+        import traceback
+        traceback.print_exc()
+
+
+def drop(interface_name, packet_type):
+    interfaces.get(interface_name).drop_packet_type = packet_type
+
+
 def enable_ipv6_kernel():
     """
     Function to explicitly enable IPv6 Multicast Routing stack.

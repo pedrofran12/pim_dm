@@ -1,3 +1,9 @@
+# Protocol files
+DAEMON_PROCESS_FILE = '/tmp/Daemon-pim{}.pid'
+DAEMON_SOCKET = '/tmp/pim_uds_socket{}'
+DAEMON_LOG_FOLDER = '/var/log/pimdm/'
+DAEMON_LOG_STDOUT_FILE = DAEMON_LOG_FOLDER + 'stdout{}'
+
 # PIM-DM TIMER VARIABLES
 ASSERT_TIME = 180
 GRAFT_RETRY_PERIOD = 3

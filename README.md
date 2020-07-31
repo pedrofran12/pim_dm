@@ -55,6 +55,20 @@ If `-uvrf` is not defined, the default unicast table id will be used (table id 2
 After starting the protocol process, if the default multicast table is not used, the following commands (for adding interfaces and listing state) need to have the argument `-mvrf` defined to specify the corresponding daemon process.
 
 
+
+#### Multi daemon support
+
+Multiple daemons are supported, each bind to a given multicast routing table id.
+
+To perform configurations on one of these daemons use `-mvrf` command and define the daemon by its multicast table id.
+
+
+To see all daemons that are currently running:
+
+   ```
+   sudo pim-dm -instances
+   ```
+
 #### Add interface
 
 After starting the protocol process you can enable the protocol in specific interfaces. You need to specify which interfaces will have IGMP enabled and which interfaces will have PIM-DM enabled.
@@ -149,6 +163,26 @@ We have built some list commands that can be used to check the "internals" of th
    sudo pim-dm -mr [-4 | -6] [-mvrf MULTICAST_TABLE_ID]
    ```
 
+## Config File
+
+It is possible to configure the protocol using a YAML file. This configuration file can be used to set all interfaces that will have PIM-DM/IGMP/MLD enabled, as well to fine tune these protocols by setting their timers. Currently the settings are shared by all interfaces. In a future release it will be possible to set timers per interface.
+
+To use this feature you need to manually install PyYaml. PyYaml is not automatically installed with `pim-dm` to support older Python versions (as of now PyYaml requires at least Python v3.5).
+
+[This YAML file](https://github.com/pedrofran12/pim_dm/tree/master/config/config_example.yml) is a configuration file example.
+
+It it also possible to get an YAML configuration file from the current settings of the daemon. This will output an YAML template that can be used later for enabling the daemon with the same settings (enabled interfaces and timers). The command for this matter is the following:
+
+   ```
+   sudo pim-dm -get_config [-mvrf MULTICAST_TABLE_ID]
+   ```
+
+To input an YAML configuration file to the daemon:
+
+   ```
+   sudo pim-dm -config CONFIGURATION_FILE_PATH
+   ```
+
 
 ## Help command
 In order to determine which commands and corresponding arguments are available you can call the help command:
@@ -156,11 +190,6 @@ In order to determine which commands and corresponding arguments are available y
    ```
    pim-dm -h
    ```
-
-
-## Change settings
-
-Files tree/pim_globals.py, igmp/igmp_globals.py and mld/mld_globals.py store all timer values and some configurations regarding PIM-DM, IGMP and MLD. If you want to tune the implementation, you can change the values of these files. These configurations are used by all interfaces, meaning that there is no tuning per interface.
 
 
 ## Tests

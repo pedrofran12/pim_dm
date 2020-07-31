@@ -1,0 +1,72 @@
+MulticastVRF: 0
+UnicastVRF: 254
+
+PIM-DM:
+  DefaultTimers:
+    ASSERT_TIME: 180
+    GRAFT_RETRY_PERIOD: 3
+    JP_OVERRIDE_INTERVAL: 3.0
+    OVERRIDE_INTERVAL: 2.5
+    PROPAGATION_DELAY: 0.5
+    REFRESH_INTERVAL: 60
+    SOURCE_LIFETIME: 210
+    T_LIMIT: 210
+  Interfaces:
+    eth0:
+      ipv4:
+        enabled: true
+      ipv6:
+        enabled: true
+    eth1:
+      ipv4:
+        enabled: true
+      ipv6:
+        enabled: true
+    eth2:
+      ipv4:
+        enabled: true
+      ipv6:
+        enabled: true
+
+IGMP:
+  Settings:
+    GROUP_MEMBERSHIP_INTERVAL: 260
+    LAST_MEMBER_QUERY_COUNT: 2
+    LAST_MEMBER_QUERY_INTERVAL: 1
+    MAX_RESPONSE_TIME_LAST_MEMBER_QUERY_INTERVAL: 10
+    MAX_RESPONSE_TIME_QUERY_RESPONSE_INTERVAL: 100
+    OTHER_QUERIER_PRESENT_INTERVAL: 255.0
+    QUERY_INTERVAL: 125
+    QUERY_RESPONSE_INTERVAL: 10
+    ROBUSTNESS_VARIABLE: 2
+    STARTUP_QUERY_COUNT: 2
+    STARTUP_QUERY_INTERVAL: 31.25
+    UNSOLICITED_REPORT_INTERVAL: 10
+    VERSION_1_ROUTER_PRESENT_TIMEOUT: 400
+  Interfaces:
+    eth0:
+      enabled: true
+    eth1:
+      enabled: true
+    eth2:
+      enabled: true
+
+MLD:
+  Settings:
+    LAST_LISTENER_QUERY_COUNT: 2
+    LAST_LISTENER_QUERY_INTERVAL: 1
+    MULTICAST_LISTENER_INTERVAL: 260
+    OTHER_QUERIER_PRESENT_INTERVAL: 255.0
+    QUERY_INTERVAL: 125
+    QUERY_RESPONSE_INTERVAL: 10
+    ROBUSTNESS_VARIABLE: 2
+    STARTUP_QUERY_COUNT: 2
+    STARTUP_QUERY_INTERVAL: 31.25
+    UNSOLICITED_REPORT_INTERVAL: 10
+  Interfaces:
+    eth0:
+      enabled: true
+    eth1:
+      enabled: true
+    eth2:
+      enabled: true

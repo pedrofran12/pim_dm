@@ -78,6 +78,8 @@ class InterfacePim(Interface):
         # don't receive outgoing packets
         s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 0)
 
+        #self.drop_packet_type = None
+
         super().__init__(interface_name, s, s, vif_index)
         super()._enable()
         self.force_send_hello()
@@ -107,6 +109,10 @@ class InterfacePim(Interface):
         """
         Send a new packet destined to group_ip IP
         """
+        #if self.drop_packet_type is not None and data.payload.get_pim_type() == self.drop_packet_type:
+        #    self.drop_packet_type = None
+        #    return
+
         super().send(data=data, group_ip=group_ip)
 
     #Random interval for initial Hello message on bootup or triggered Hello message to a rebooting neighbor
