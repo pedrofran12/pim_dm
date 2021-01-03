@@ -1,7 +1,7 @@
 import yaml
 from pimdm.tree import pim_globals
-from pimdm.igmp import igmp_globals
-from pimdm.mld import mld_globals
+from igmp.igmp2 import igmp_globals
+from mld.mld1 import mld_globals
 from pimdm import Main
 
 

@@ -78,7 +78,7 @@ class InterfacePim(Interface):
         # don't receive outgoing packets
         s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 0)
 
-        #self.drop_packet_type = None
+        self.drop_packet_type = None
 
         super().__init__(interface_name, s, s, vif_index)
         super()._enable()
@@ -109,9 +109,11 @@ class InterfacePim(Interface):
         """
         Send a new packet destined to group_ip IP
         """
-        #if self.drop_packet_type is not None and data.payload.get_pim_type() == self.drop_packet_type:
-        #    self.drop_packet_type = None
-        #    return
+        packet = PacketPimHeader.parse_bytes(data)
+        if self.drop_packet_type is not None:
+            if packet.get_pim_type() == self.drop_packet_type:
+                self.drop_packet_type = None
+                return
 
         super().send(data=data, group_ip=group_ip)
 
@@ -199,15 +201,13 @@ class InterfacePim(Interface):
         """
         Get list of known neighbors
         """
-        with self.neighbors_lock.genRlock():
-            return self.neighbors.values()
+        return list(self.neighbors.values())
 
     def get_neighbor(self, ip):
         """
         Get specific neighbor by its IP
         """
-        with self.neighbors_lock.genRlock():
-            return self.neighbors.get(ip)
+        return self.neighbors.get(ip)
 
     def remove_neighbor(self, ip):
         """

@@ -1,8 +1,6 @@
 import socket
 from .Packet import Packet
 from .PacketPimHeader import PacketPimHeader
-from .PacketMLDHeader import PacketMLDHeader
-from .PacketIGMPHeader import PacketIGMPHeader
 from .PacketIpHeader import PacketIpv4Header, PacketIpv6Header
 from pimdm.utils import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -11,7 +9,7 @@ if TYPE_CHECKING:
 
 class ReceivedPacket(Packet):
     # choose payload protocol class based on ip protocol number
-    payload_protocol = {2: PacketIGMPHeader, 103: PacketPimHeader}
+    payload_protocol = {103: PacketPimHeader}
 
     def __init__(self, raw_packet: bytes, interface: 'Interface'):
         self.interface = interface
@@ -28,7 +26,7 @@ class ReceivedPacket(Packet):
 
 class ReceivedPacket_v6(Packet):
     # choose payload protocol class based on ip protocol number
-    payload_protocol_v6 = {58: PacketMLDHeader, 103: PacketPimHeader}
+    payload_protocol_v6 = {103: PacketPimHeader}
 
     def __init__(self, raw_packet: bytes, ancdata: list, src_addr: str, next_header: int, interface: 'Interface'):
         self.interface = interface

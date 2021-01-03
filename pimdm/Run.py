@@ -15,7 +15,7 @@ from pimdm import Main
 from pimdm.tree import pim_globals
 from pimdm.daemon.Daemon import Daemon
 
-VERSION = "1.2"
+VERSION = "1.3"
 
 
 def client_socket(data_to_send, print_output=True):
@@ -156,7 +156,7 @@ def main():
     group.add_argument("-v", "--verbose", action="store_true", default=False, help="Verbose (print all debug messages)")
     group.add_argument("-t", "--test", nargs=2, metavar=('ROUTER_NAME', 'SERVER_LOG_IP'), help="Tester... send log information to SERVER_LOG_IP. Set the router name to ROUTER_NAME")
     group.add_argument("-config", "--config", nargs=1, metavar='CONFIG_FILE_PATH', type=str,
-                       help="File path for configuration file. This command should only be used with -start")
+                       help="File path for configuration file.")
     group.add_argument("-get_config", "--get_config", action="store_true", default=False,
                        help="Get configuration file of live daemon.")
     #group.add_argument("-drop", "--drop", nargs=2, metavar=('INTERFACE_NAME', 'PACKET_TYPE'), type=str)
@@ -227,6 +227,9 @@ def main():
             while not daemon.is_running():
                 time.sleep(1)
         except ModuleNotFoundError:
+            print("PYYAML needs to be installed. Execute \"pip3 install pyyaml\"")
+            sys.exit(0)
+        except ImportError:
             print("PYYAML needs to be installed. Execute \"pip3 install pyyaml\"")
             sys.exit(0)
     elif args.verbose:

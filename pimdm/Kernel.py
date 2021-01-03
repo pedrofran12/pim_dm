@@ -11,8 +11,8 @@ from pimdm import UnicastRouting, Main
 from pimdm.rwlock.RWLock import RWLockWrite
 from pimdm.tree import pim_globals
 
-from pimdm.InterfaceMLD import InterfaceMLD
-from pimdm.InterfaceIGMP import InterfaceIGMP
+from mld.InterfaceMLD import InterfaceMLD
+from igmp.InterfaceIGMP import InterfaceIGMP
 from pimdm.InterfacePIM import InterfacePim
 from pimdm.InterfacePIM6 import InterfacePim6
 from pimdm.tree.KernelEntry import KernelEntry
@@ -113,14 +113,14 @@ class Kernel(metaclass=ABCMeta):
             else:
                 index = list(range(0, self.MAXVIFS) - self.vif_index_to_name_dic.keys())[0]
 
-            ip_interface = None
             if interface_name not in self.membership_interface:
-                igmp_interface = self._create_membership_interface_object(interface_name, index)
-                self.membership_interface[interface_name] = igmp_interface
-                ip_interface = igmp_interface.ip_interface
+                membership_interface = self._create_membership_interface_object(interface_name, index)
+                self.membership_interface[interface_name] = membership_interface
+                ip_interface = membership_interface.ip_interface
 
-            if not vif_already_exists:
-                self.create_virtual_interface(ip_interface=ip_interface, interface_name=interface_name, index=index)
+                if not vif_already_exists:
+                    self.create_virtual_interface(ip_interface=ip_interface, interface_name=interface_name, index=index)
+                membership_interface.enable()
 
     @abstractmethod
     def _create_membership_interface_object(self, interface_name, index):
