@@ -82,7 +82,7 @@ After starting the protocol process you can enable the protocol in specific inte
 - To enable PIM-DM with State-Refresh, in a given interface, you need to run the following command:
 
    ```
-   sudo pim-dm -aisf INTERFACE_NAME [-4 | -6] [-mvrf MULTICAST_TABLE_ID]
+   sudo pim-dm -aisr INTERFACE_NAME [-4 | -6] [-mvrf MULTICAST_TABLE_ID]
    ```
 
 - To enable IGMP/MLD in a given interface, you need to run the following command:
