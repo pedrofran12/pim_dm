@@ -115,7 +115,8 @@ class MyDaemon(Daemon):
                     connection.sendall(pickle.dumps(Main.get_config()))
                 elif 'drop' in args and args.drop:
                     Main.drop(args.drop[0], int(args.drop[1]))
-            except Exception:
+            except Exception as e:
+                connection.sendall(pickle.dumps(e))
                 connection.shutdown(socket.SHUT_RDWR)
                 traceback.print_exc()
             finally:
