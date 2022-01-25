@@ -2,5 +2,5 @@ PrettyTable
 netifaces
 ipaddress
 pyroute2
-py-mld==1.0
+py-mld==1.0.2
 igmp==1.0.2
