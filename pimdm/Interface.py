@@ -18,6 +18,8 @@ class Interface(metaclass=ABCMeta):
         self._recv_socket = recv_socket
         self.interface_enabled = False
 
+        self.drop_packet_type = None
+
     def _enable(self):
         """
         Enable this interface

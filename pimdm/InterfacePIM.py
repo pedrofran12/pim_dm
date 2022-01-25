@@ -78,8 +78,6 @@ class InterfacePim(Interface):
         # don't receive outgoing packets
         s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 0)
 
-        self.drop_packet_type = None
-
         super().__init__(interface_name, s, s, vif_index)
         super()._enable()
         self.force_send_hello()
