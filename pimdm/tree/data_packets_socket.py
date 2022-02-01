@@ -12,7 +12,7 @@ SO_RCVBUFFORCE = 33
 
 def get_s_g_bpf_filter_code(source, group, interface_name):
     ip_source_version = ipaddress.ip_address(source).version
-    ip_group_version = ipaddress.ip_address(source).version
+    ip_group_version = ipaddress.ip_address(group).version
     if ip_source_version == ip_group_version == 4:
         # cmd = "tcpdump -ddd \"(udp or icmp) and host %s and dst %s\"" % (source, group)
         cmd = "tcpdump -ddd \"(ip proto not 2) and host %s and dst %s\"" % (source, group)
