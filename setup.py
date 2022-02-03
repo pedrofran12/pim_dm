@@ -1,5 +1,5 @@
 import sys
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Extension
 
 # we only support Python 3 version >= 3.3
 if len(sys.argv) >= 2 and sys.argv[1] == "install" and sys.version_info < (3, 3):
@@ -20,6 +20,11 @@ setup(
     license="MIT",
     install_requires=dependencies,
     packages=find_packages(exclude=["docs"]),
+    ext_modules = [Extension(
+        name="pcap_wrapper",
+        sources = ["pcap.c"],
+        libraries=["pcap"],
+    )],
     entry_points={
         "console_scripts": [
             "pim-dm = pimdm.Run:main",

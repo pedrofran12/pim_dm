@@ -17,7 +17,8 @@ Additionally, IGMPv2 and MLDv1 are implemented alongside with PIM-DM to detect i
  - Unicast routing protocol
  - Python3 (we have written all code to be compatible with at least Python v3.3)
  - pip (to install all dependencies)
- - tcpdump
+ - libpcap-dev
+ - python3-dev
 
 
 # Installation
