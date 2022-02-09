@@ -40,12 +40,12 @@ def parse_config_file(file_path):
                 if if_value.get("ipv4", False):
                     if_ipv4 = if_value["ipv4"]
                     if if_ipv4.get("enabled", False):
-                        Main.add_pim_interface(interface_name=if_name, ipv4=True, ipv6=False)
+                        Main.add_pim_interface(interface_name=if_name, state_refresh_capable=if_ipv4.get("state_refresh", False), ipv4=True, ipv6=False)
 
                 if if_value.get("ipv6", False):
                     if_ipv6 = if_value["ipv6"]
                     if if_ipv6.get("enabled", False):
-                        Main.add_pim_interface(interface_name=if_name, ipv4=False, ipv6=True)
+                        Main.add_pim_interface(interface_name=if_name, state_refresh_capable=if_ipv6.get("state_refresh", False), ipv4=False, ipv6=True)
 
 
         ##### IGMP config #######
