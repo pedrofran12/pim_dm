@@ -15,18 +15,24 @@ PIM-DM:
     eth0:
       ipv4:
         enabled: true
+        state_refresh: true
       ipv6:
         enabled: true
+        state_refresh: true
     eth1:
       ipv4:
         enabled: true
+        state_refresh: true
       ipv6:
         enabled: true
+        state_refresh: true
     eth2:
       ipv4:
         enabled: true
+        state_refresh: true
       ipv6:
         enabled: true
+        state_refresh: true
 
 IGMP:
   Settings:
