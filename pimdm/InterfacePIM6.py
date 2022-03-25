@@ -46,12 +46,16 @@ class InterfacePim6(InterfacePim):
         s = socket.socket(socket.AF_INET6, socket.SOCK_RAW, socket.IPPROTO_PIM)
 
         ip_interface = ""
-        for if_addr in netifaces.ifaddresses(interface_name)[netifaces.AF_INET6]:
-            ip_interface = if_addr["addr"]
-            if ipaddress.IPv6Address(if_addr['addr'].split("%")[0]).is_link_local:
-                ip_interface = if_addr['addr'].split("%")[0]
+        if_addr_dict = netifaces.ifaddresses(interface_name)
+        if not netifaces.AF_INET6 in if_addr_dict:
+            raise Exception("Adding PIM interface failed because %s does not "
+                            "have any ipv6 address" % interface_name)
+        for network_dict in if_addr_dict[netifaces.AF_INET6]:
+            full_ip_interface = network_dict["addr"]
+            ip_interface = full_ip_interface.split("%")[0]
+            if ipaddress.IPv6Address(ip_interface).is_link_local:
                 # bind to interface
-                s.bind(socket.getaddrinfo(if_addr['addr'], None, 0, socket.SOCK_RAW, 0, socket.AI_PASSIVE)[0][4])
+                s.bind(socket.getaddrinfo(full_ip_interface, None, 0, socket.SOCK_RAW, 0, socket.AI_PASSIVE)[0][4])
                 break
 
         self.ip_interface = ip_interface

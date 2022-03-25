@@ -1,4 +1,5 @@
-import yaml
+import sys, yaml
+from functools import partial
 from pimdm.tree import pim_globals
 from igmp.igmp2 import igmp_globals
 from mld.mld1 import mld_globals
@@ -34,18 +35,22 @@ def parse_config_file(file_path):
             pim_globals.T_LIMIT = pim_config["DefaultTimers"].get("T_LIMIT", pim_globals.T_LIMIT)
 
         if "Interfaces" in pim_config:
-            interfaces = pim_config["Interfaces"]  # type: dict
+            interface_dict = pim_config["Interfaces"]
+            add_pim_interface_dict = {
+                'ipv4': partial(Main.add_pim_interface, ipv4=True, ipv6=False),
+                'ipv6': partial(Main.add_pim_interface, ipv4=False, ipv6=True),
+            }
 
-            for if_name, if_value in interfaces.items():
-                if if_value.get("ipv4", False):
-                    if_ipv4 = if_value["ipv4"]
-                    if if_ipv4.get("enabled", False):
-                        Main.add_pim_interface(interface_name=if_name, state_refresh_capable=if_ipv4.get("state_refresh", False), ipv4=True, ipv6=False)
-
-                if if_value.get("ipv6", False):
-                    if_ipv6 = if_value["ipv6"]
-                    if if_ipv6.get("enabled", False):
-                        Main.add_pim_interface(interface_name=if_name, state_refresh_capable=if_ipv6.get("state_refresh", False), ipv4=False, ipv6=True)
+            for if_name, ip_family_dict in interface_dict.items():
+                for ip_family, if_dict in ip_family_dict.items():
+                    if if_dict.get("enabled", False):
+                        try:
+                            add_pim_interface_dict[ip_family](
+                                interface_name=if_name,
+                                state_refresh_capable=if_dict.get("state_refresh", False),
+                            )
+                        except Exception as e:
+                            print(e, file=sys.stderr)
 
 
         ##### IGMP config #######
@@ -65,11 +70,14 @@ def parse_config_file(file_path):
             igmp_globals.VERSION_1_ROUTER_PRESENT_TIMEOUT = igmp_config["Settings"].get("VERSION_1_ROUTER_PRESENT_TIMEOUT", igmp_globals.VERSION_1_ROUTER_PRESENT_TIMEOUT)
 
         if "Interfaces" in igmp_config:
-            interfaces = igmp_config["Interfaces"]  # type: dict
+            interface_dict = igmp_config["Interfaces"]
 
-            for if_name, if_value in interfaces.items():
-                if if_value.get("enabled", False):
-                    Main.add_membership_interface(interface_name=if_name, ipv4=True, ipv6=False)
+            for if_name, if_value in interface_dict.items():
+                try:
+                    if if_value.get("enabled", False):
+                        Main.add_membership_interface(interface_name=if_name, ipv4=True, ipv6=False)
+                except Exception as e:
+                    print(e, file=sys.stderr)
 
         ##### MLD config #######
         if "Settings" in mld_config:
@@ -85,11 +93,14 @@ def parse_config_file(file_path):
             mld_globals.UNSOLICITED_REPORT_INTERVAL = mld_config["Settings"].get("UNSOLICITED_REPORT_INTERVAL", mld_globals.UNSOLICITED_REPORT_INTERVAL)
 
         if "Interfaces" in mld_config:
-            interfaces = mld_config["Interfaces"]  # type: dict
+            interface_dict = mld_config["Interfaces"]
 
-            for if_name, if_value in interfaces.items():
-                if if_value.get("enabled", False):
-                    Main.add_membership_interface(interface_name=if_name, ipv4=False, ipv6=True)
+            for if_name, if_value in interface_dict.items():
+                try:
+                    if if_value.get("enabled", False):
+                        Main.add_membership_interface(interface_name=if_name, ipv4=False, ipv6=True)
+                except Exception as e:
+                    print(e, file=sys.stderr)
 
 
 def get_yaml_file():
