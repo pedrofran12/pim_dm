@@ -6,7 +6,6 @@ if len(sys.argv) >= 2 and sys.argv[1] == "install" and sys.version_info < (3, 3)
     raise SystemExit("Python 3.3 or higher is required")
 
 
-dependencies = open("requirements.txt", "r").read().splitlines()
 setup(
     name="pim-dm",
     description="PIM-DM protocol",
@@ -18,7 +17,14 @@ setup(
     author="Pedro Oliveira",
     author_email="pedro.francisco.oliveira@tecnico.ulisboa.pt",
     license="MIT",
-    install_requires=dependencies,
+    install_requires=[
+        'PrettyTable',
+        'netifaces',
+        'ipaddress',
+        'pyroute2',
+        'py-mld==1.0.2',
+        'igmp==1.0.2',
+    ],
     packages=find_packages(exclude=["docs"]),
     entry_points={
         "console_scripts": [
