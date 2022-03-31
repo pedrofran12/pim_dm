@@ -85,7 +85,7 @@ class Kernel(metaclass=ABCMeta):
             elif membership_interface:
                 index = membership_interface.vif_index
             else:
-                index = list(range(0, self.MAXVIFS) - self.vif_index_to_name_dic.keys())[0]
+                index = (range(0, self.MAXVIFS) - self.vif_index_to_name_dic.keys()).pop()
 
             ip_interface = None
             if interface_name not in self.pim_interface:
@@ -111,7 +111,7 @@ class Kernel(metaclass=ABCMeta):
             elif pim_interface:
                 index = pim_interface.vif_index
             else:
-                index = list(range(0, self.MAXVIFS) - self.vif_index_to_name_dic.keys())[0]
+                index = (range(0, self.MAXVIFS) - self.vif_index_to_name_dic.keys()).pop()
 
             if interface_name not in self.membership_interface:
                 membership_interface = self._create_membership_interface_object(interface_name, index)
@@ -128,23 +128,38 @@ class Kernel(metaclass=ABCMeta):
 
     def remove_interface(self, interface_name, membership: bool = False, pim: bool = False):
         with self.interface_lock:
-            pim_interface = self.pim_interface.get(interface_name)
-            membership_interface = self.membership_interface.get(interface_name)
-            if (membership and not membership_interface) or (pim and not pim_interface) or (not membership and not pim):
-                return
-            if pim:
-                pim_interface = self.pim_interface.pop(interface_name)
-                pim_interface.remove()
-            elif membership:
-                membership_interface = self.membership_interface.pop(interface_name)
-                membership_interface.remove()
+            if pim and interface_name in self.pim_interface:
+                self.pim_interface.pop(interface_name).remove()
+            if membership and interface_name in self.membership_interface:
+                self.membership_interface.pop(interface_name).remove()
 
-            if not self.membership_interface.get(interface_name) and not self.pim_interface.get(interface_name):
+            if ((pim and not interface_name in self.membership_interface) or
+                (membership and not interface_name in self.pim_interface)):
                 self.remove_virtual_interface(interface_name)
 
     @abstractmethod
     def remove_virtual_interface(self, interface_name):
         raise NotImplementedError
+
+    def start_forwarding(self, index):
+        for new_interface in (kernel_entry.new_interface
+            for source_dict in self.routing.values()
+            for kernel_entry in source_dict.values()
+        ):
+            new_interface(index)
+
+
+    def stop_forwarding(self, index):
+        # change MFC's to not forward traffic by this interface (set OIL to 0 for this interface)
+        with self.rwlock.genWlock():
+            for remove_interface in (kernel_entry.remove_interface
+                    for source_dict in self.routing.values()
+                    for kernel_entry in source_dict.values()
+            ):
+                remove_interface(index)
+
+        interface_name = self.vif_index_to_name_dic.pop(index) 
+        self.interface_logger.debug('Remove virtual interface: %s -> %d', interface_name, index)
 
     #############################################
     # Manipulate multicast routing table
@@ -199,12 +214,12 @@ class Kernel(metaclass=ABCMeta):
     # notify KernelEntries about changes at the unicast routing table
     def notify_unicast_changes(self, subnet):
         with self.rwlock.genWlock():
-            for source_ip in list(self.routing.keys()):
-                source_ip_obj = ipaddress.ip_address(source_ip)
-                if source_ip_obj not in subnet:
-                    continue
-                for group_ip in list(self.routing[source_ip].keys()):
-                    self.routing[source_ip][group_ip].network_update()
+            for network_update in (kernel_entry.network_update
+                    for kernel_entry in group_ip_dict
+                    for source_ip, group_ip_dict in self.routing.items()
+                    if ipaddress.ip_address(source_ip) in subnet
+            ):
+                network_update()
 
 
     # notify about changes at the interface (IP)
@@ -324,33 +339,22 @@ class Kernel4(Kernel):
             self.vif_index_to_name_dic[index] = interface_name
             self.vif_name_to_index_dic[interface_name] = index
 
-            for source_dict in list(self.routing.values()):
-                for kernel_entry in list(source_dict.values()):
-                    kernel_entry.new_interface(index)
+            self.start_forwarding(index)
 
         self.interface_logger.debug('Create virtual interface: %s -> %d', interface_name, index)
         return index
 
     def remove_virtual_interface(self, interface_name):
         #with self.interface_lock:
-        index = self.vif_name_to_index_dic.pop(interface_name, None)
-        struct_vifctl = struct.pack("HBBI 4s 4s", index, 0, 0, 0, socket.inet_aton("0.0.0.0"), socket.inet_aton("0.0.0.0"))
+        if interface_name in self.vif_name_to_index_dic:
+            index = self.vif_name_to_index_dic.pop(interface_name)
+            struct_vifctl = struct.pack("HBBI 4s 4s", index, 0, 0, 0, socket.inet_aton("0.0.0.0"), socket.inet_aton("0.0.0.0"))
 
-        os.system("ip mrule del iif {}".format(interface_name))
-        os.system("ip mrule del oif {}".format(interface_name))
-        self.socket.setsockopt(socket.IPPROTO_IP, self.MRT_DEL_VIF, struct_vifctl)
+            os.system("ip mrule del iif {}".format(interface_name))
+            os.system("ip mrule del oif {}".format(interface_name))
+            self.socket.setsockopt(socket.IPPROTO_IP, self.MRT_DEL_VIF, struct_vifctl)
 
-        del self.vif_name_to_index_dic[self.vif_index_to_name_dic[index]]
-        interface_name = self.vif_index_to_name_dic.pop(index)
-
-        # change MFC's to not forward traffic by this interface (set OIL to 0 for this interface)
-        with self.rwlock.genWlock():
-            for source_dict in list(self.routing.values()):
-                for kernel_entry in list(source_dict.values()):
-                    kernel_entry.remove_interface(index)
-
-        self.interface_logger.debug('Remove virtual interface: %s -> %d', interface_name, index)
-
+            self.stop_forwarding(index)
 
 
     '''
@@ -570,32 +574,24 @@ class Kernel6(Kernel):
             self.vif_index_to_name_dic[index] = interface_name
             self.vif_name_to_index_dic[interface_name] = index
 
-            for source_dict in list(self.routing.values()):
-                for kernel_entry in list(source_dict.values()):
-                    kernel_entry.new_interface(index)
+            self.start_forwarding(index)
 
         self.interface_logger.debug('Create virtual interface: %s -> %d', interface_name, index)
         return index
 
     def remove_virtual_interface(self, interface_name):
         # with self.interface_lock:
-        mif_index = self.vif_name_to_index_dic.pop(interface_name, None)
-        interface_name = self.vif_index_to_name_dic.pop(mif_index)
+        if interface_name in self.vif_name_to_index_dic:
+            mif_index = self.vif_name_to_index_dic.pop(interface_name)
+            physical_if_index = if_nametoindex(interface_name)
 
-        physical_if_index = if_nametoindex(interface_name)
-        struct_vifctl = struct.pack("HBBHI", mif_index, 0, 0, physical_if_index, 0)
-        self.socket.setsockopt(socket.IPPROTO_IPV6, self.MRT6_DEL_MIF, struct_vifctl)
+            struct_vifctl = struct.pack("HBBHI", mif_index, 0, 0, physical_if_index, 0)
+            self.socket.setsockopt(socket.IPPROTO_IPV6, self.MRT6_DEL_MIF, struct_vifctl)
 
-        os.system("ip -6 mrule del iif {}".format(interface_name))
-        os.system("ip -6 mrule del oif {}".format(interface_name))
+            os.system("ip -6 mrule del iif {}".format(interface_name))
+            os.system("ip -6 mrule del oif {}".format(interface_name))
 
-        # alterar MFC's para colocar a 0 esta interface
-        with self.rwlock.genWlock():
-            for source_dict in list(self.routing.values()):
-                for kernel_entry in list(source_dict.values()):
-                    kernel_entry.remove_interface(mif_index)
-
-        self.interface_logger.debug('Remove virtual interface: %s -> %d', interface_name, mif_index)
+            self.stop_forwarding(mif_index)
 
     '''
     /* Cache manipulation structures for mrouted and PIMd */
