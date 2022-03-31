@@ -51,9 +51,9 @@ class Kernel(metaclass=ABCMeta):
         self.tree_logger = Main.logger.getChild('KernelTree')
 
         # receive signals from kernel with a background thread
-        handler_thread = Thread(target=self.handler)
-        handler_thread.daemon = True
-        handler_thread.start()
+        self.handler_thread = Thread(target=self.handler)
+        self.handler_thread.daemon = True
+        self.handler_thread.start()
 
     '''
     Structure to create/remove virtual interfaces
@@ -177,8 +177,13 @@ class Kernel(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def exit(self):
+    def close_socket(self):
         raise NotImplementedError
+
+    def exit(self):
+        self.running = False
+        self.close_socket()
+        self.handler_thread.join()
 
     @abstractmethod
     def handler(self):
@@ -412,12 +417,15 @@ class Kernel4(Kernel):
         if len(self.routing[kernel_entry.source_ip]) == 0:
             self.routing.pop(kernel_entry.source_ip)
 
-    def exit(self):
-        self.running = False
+    def close_socket(self):
+        with socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IGMP) as s:
+            s.sendto(b'', ('', 0))
+        self.socket.close()
 
+    def exit(self):
         # MRT DONE
         self.socket.setsockopt(socket.IPPROTO_IP, self.MRT_DONE, 1)
-        self.socket.close()
+        super().exit()
 
 
     '''
@@ -660,12 +668,15 @@ class Kernel6(Kernel):
         if len(self.routing[kernel_entry.source_ip]) == 0:
             self.routing.pop(kernel_entry.source_ip)
 
-    def exit(self):
-        self.running = False
+    def close_socket(self):
+        with socket.socket(socket.AF_INET6, socket.SOCK_RAW, socket.IPPROTO_ICMPV6) as s:
+            s.sendto(b'0000', ('', 0))
+        self.socket.close()
 
+    def exit(self):
         # MRT DONE
         self.socket.setsockopt(socket.IPPROTO_IPV6, self.MRT6_DONE, 1)
-        self.socket.close()
+        super().exit()
 
     '''
     /*
