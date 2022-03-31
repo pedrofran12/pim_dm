@@ -65,6 +65,15 @@ To start pim-dm process in background, one can use
   ```
 or run it with a daemonizing tool (systemd, supervisord, OpenRC ...).
 
+For systemd you can simply run
+  ```
+  sudo systemd-run pim-dm -start
+  ```
+or copy [pim-dm.service](daemon/pim-dm.service) to `/usr/lib/systemd/system/pim-dm.service` and then start pim-dm process with command:
+  ```
+  sudo systemctl start pim-dm
+  ```
+
 
 #### Multi daemon support
 
