@@ -1,29 +1,33 @@
 #!/usr/bin/env python3
 
-import os
-import sys
-import time
-import glob
-import socket
-import argparse
-import threading
-import traceback
+import argparse, glob, os, signal, socket, sys, traceback
 import _pickle as pickle
 from prettytable import PrettyTable
 
 from pimdm import Main
 from pimdm.tree import pim_globals
-from pimdm.daemon.Daemon import Daemon
+from pimdm.utils import exit
+
 
 VERSION = "1.4.0"
+PROCESS_DIRECTORY = '/var/run/pim-dm'
+PROCESS_SOCKET = os.path.join(PROCESS_DIRECTORY, 'pim_uds_socket{}')
+PROCESS_LOG_FOLDER = '/var/log/pimdm'
+PROCESS_LOG_STDOUT_FILE = os.path.join(PROCESS_LOG_FOLDER, 'stdout{}')
+PROCESS_LOG_STDERR_FILE = os.path.join(PROCESS_LOG_FOLDER, 'stderror{}')
 
+def clean_process_dir():
+    os.remove(process_file_path())
+    os.remove(process_socket_path())
+    if not os.listdir(PROCESS_DIRECTORY):
+        os.rmdir(PROCESS_DIRECTORY)
 
 def client_socket(data_to_send, print_output=True):
     # Create a UDS socket
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
     # Connect the socket to the port where the server is listening
-    server_address = pim_globals.DAEMON_SOCKET.format(pim_globals.MULTICAST_TABLE_ID)
+    server_address = PROCESS_SOCKET.format(pim_globals.MULTICAST_TABLE_ID)
     #print('connecting to %s' % server_address)
     try:
         sock.connect(server_address)
@@ -40,95 +44,70 @@ def client_socket(data_to_send, print_output=True):
         #print('closing socket')
         sock.close()
 
+def is_running():
+    return os.path.exists(process_file_path())
 
-class MyDaemon(Daemon):
-    def run(self):
-        Main.main()
-        server_address = pim_globals.DAEMON_SOCKET.format(pim_globals.MULTICAST_TABLE_ID)
-
-        # Make sure the socket does not already exist
+def main_loop(sock):
+    while True:
         try:
-            os.unlink(server_address)
-        except OSError:
-            if os.path.exists(server_address):
-                raise
+            connection, client_address = sock.accept()
+            data = connection.recv(256 * 1024)
+            print(sys.stderr, 'sending data back to the client')
+            print(pickle.loads(data))
+            args = pickle.loads(data)
+            if 'ipv4' not in args and 'ipv6' not in args or not (args.ipv4 or args.ipv6):
+                args.ipv4 = True
+                args.ipv6 = False
 
-        # Create a UDS socket
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-
-        # Bind the socket to the port
-        sock.bind(server_address)
-
-        # Listen for incoming connections
-        sock.listen(1)
-        while True:
-            try:
-                connection, client_address = sock.accept()
-                data = connection.recv(256 * 1024)
-                print(sys.stderr, 'sending data back to the client')
-                print(pickle.loads(data))
-                args = pickle.loads(data)
-                if 'ipv4' not in args and 'ipv6' not in args or not (args.ipv4 or args.ipv6):
-                    args.ipv4 = True
-                    args.ipv6 = False
-
-                if 'list_interfaces' in args and args.list_interfaces:
-                    connection.sendall(pickle.dumps(Main.list_enabled_interfaces(ipv4=args.ipv4, ipv6=args.ipv6)))
-                elif 'list_neighbors' in args and args.list_neighbors:
-                    connection.sendall(pickle.dumps(Main.list_neighbors(ipv4=args.ipv4, ipv6=args.ipv6)))
-                elif 'list_state' in args and args.list_state:
-                    connection.sendall(pickle.dumps(Main.list_state(ipv4=args.ipv4, ipv6=args.ipv6)))
-                elif 'add_interface' in args and args.add_interface:
-                    Main.add_pim_interface(args.add_interface[0], False, ipv4=args.ipv4, ipv6=args.ipv6)
-                    connection.shutdown(socket.SHUT_RDWR)
-                elif 'add_interface_sr' in args and args.add_interface_sr:
-                    Main.add_pim_interface(args.add_interface_sr[0], True, ipv4=args.ipv4, ipv6=args.ipv6)
-                    connection.shutdown(socket.SHUT_RDWR)
-                elif 'add_interface_igmp' in args and args.add_interface_igmp:
-                    Main.add_membership_interface(interface_name=args.add_interface_igmp[0], ipv4=True, ipv6=False)
-                    connection.shutdown(socket.SHUT_RDWR)
-                elif 'add_interface_mld' in args and args.add_interface_mld:
-                    Main.add_membership_interface(interface_name=args.add_interface_mld[0], ipv4=False, ipv6=True)
-                    connection.shutdown(socket.SHUT_RDWR)
-                elif 'remove_interface' in args and args.remove_interface:
-                    Main.remove_interface(args.remove_interface[0], pim=True, ipv4=args.ipv4, ipv6=args.ipv6)
-                    connection.shutdown(socket.SHUT_RDWR)
-                elif 'remove_interface_igmp' in args and args.remove_interface_igmp:
-                    Main.remove_interface(args.remove_interface_igmp[0], membership=True, ipv4=True, ipv6=False)
-                    connection.shutdown(socket.SHUT_RDWR)
-                elif 'remove_interface_mld' in args and args.remove_interface_mld:
-                    Main.remove_interface(args.remove_interface_mld[0], membership=True, ipv4=False, ipv6=True)
-                    connection.shutdown(socket.SHUT_RDWR)
-                elif 'list_instances' in args and args.list_instances:
-                    connection.sendall(pickle.dumps(Main.list_instances()))
-                elif 'stop' in args and args.stop:
-                    Main.stop()
-                    connection.shutdown(socket.SHUT_RDWR)
-                    break
-                elif 'test' in args and args.test:
-                    Main.test(args.test[0], args.test[1])
-                    connection.shutdown(socket.SHUT_RDWR)
-                elif 'config' in args and args.config:
-                    Main.set_config(args.config[0])
-                    connection.shutdown(socket.SHUT_RDWR)
-                elif 'get_config' in args and args.get_config:
-                    connection.sendall(pickle.dumps(Main.get_config()))
-                elif 'drop' in args and args.drop:
-                    Main.drop(args.drop[0], int(args.drop[1]))
-            except Exception as e:
-                connection.sendall(pickle.dumps(e))
+            if 'list_interfaces' in args and args.list_interfaces:
+                connection.sendall(pickle.dumps(Main.list_enabled_interfaces(ipv4=args.ipv4, ipv6=args.ipv6)))
+            elif 'list_neighbors' in args and args.list_neighbors:
+                connection.sendall(pickle.dumps(Main.list_neighbors(ipv4=args.ipv4, ipv6=args.ipv6)))
+            elif 'list_state' in args and args.list_state:
+                connection.sendall(pickle.dumps(Main.list_state(ipv4=args.ipv4, ipv6=args.ipv6)))
+            elif 'add_interface' in args and args.add_interface:
+                Main.add_pim_interface(args.add_interface[0], False, ipv4=args.ipv4, ipv6=args.ipv6)
                 connection.shutdown(socket.SHUT_RDWR)
-                traceback.print_exc()
-            finally:
-                # Clean up the connection
+            elif 'add_interface_sr' in args and args.add_interface_sr:
+                Main.add_pim_interface(args.add_interface_sr[0], True, ipv4=args.ipv4, ipv6=args.ipv6)
+                connection.shutdown(socket.SHUT_RDWR)
+            elif 'add_interface_igmp' in args and args.add_interface_igmp:
+                Main.add_membership_interface(interface_name=args.add_interface_igmp[0], ipv4=True, ipv6=False)
+                connection.shutdown(socket.SHUT_RDWR)
+            elif 'add_interface_mld' in args and args.add_interface_mld:
+                Main.add_membership_interface(interface_name=args.add_interface_mld[0], ipv4=False, ipv6=True)
+                connection.shutdown(socket.SHUT_RDWR)
+            elif 'remove_interface' in args and args.remove_interface:
+                Main.remove_interface(args.remove_interface[0], pim=True, ipv4=args.ipv4, ipv6=args.ipv6)
+                connection.shutdown(socket.SHUT_RDWR)
+            elif 'remove_interface_igmp' in args and args.remove_interface_igmp:
+                Main.remove_interface(args.remove_interface_igmp[0], membership=True, ipv4=True, ipv6=False)
+                connection.shutdown(socket.SHUT_RDWR)
+            elif 'remove_interface_mld' in args and args.remove_interface_mld:
+                Main.remove_interface(args.remove_interface_mld[0], membership=True, ipv4=False, ipv6=True)
+                connection.shutdown(socket.SHUT_RDWR)
+            elif 'list_instances' in args and args.list_instances:
+                connection.sendall(pickle.dumps(Main.list_instances()))
+            elif 'stop' in args and args.stop:
+                connection.shutdown(socket.SHUT_RDWR)
+                break                
+            elif 'test' in args and args.test:
+                Main.test(args.test[0], args.test[1])
+                connection.shutdown(socket.SHUT_RDWR)
+            elif 'get_config' in args and args.get_config:
+                connection.sendall(pickle.dumps(Main.get_config()))
+            elif 'drop' in args and args.drop:
+                Main.drop(args.drop[0], int(args.drop[1]))
+        except Exception as e:
+            connection.sendall(pickle.dumps(e))
+            connection.shutdown(socket.SHUT_RDWR)
+            traceback.print_exc()
+        finally:
+            # Clean up the connection
+            if 'connection' in locals():
                 connection.close()
-        sock.close()
 
-
-def main():
-    """
-    Entry point for PIM-DM
-    """
+def args_parser():
     parser = argparse.ArgumentParser(description='PIM-DM protocol', prog='pim-dm')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-start", "--start", action="store_true", default=False, help="Start PIM")
@@ -175,76 +154,146 @@ def main():
                            metavar='UNICAST_VRF_NUMBER', type=int,
                            help="Define unicast table id for getting unicast information (RPF checks, RPC costs, ...). "
                                 "This information can only be defined at startup with -start command")
+    return parser
+
+def list_instances(args):
+    t = PrettyTable(['Instance PID', 'Multicast VRF', 'Unicast VRF'])
+
+    for multicast_table_id in glob.glob(os.path.join(PROCESS_DIRECTORY, '*')):
+        pim_globals.MULTICAST_TABLE_ID = multicast_table_id
+
+        t_new = client_socket(args, print_output=False)
+        t.add_row(t_new.split("|"))
+    print(t)
+
+def run_config(conf_file_path):
+    try:
+        from pimdm import Config
+        pim_globals.MULTICAST_TABLE_ID, pim_globals.UNICAST_TABLE_ID = Config.get_vrfs(conf_file_path)
+        start(conf_file_path)
+    except ModuleNotFoundError:
+        print("PYYAML needs to be installed. Execute \"pip3 install pyyaml\"")
+        sys.exit(0)
+    except ImportError:
+        print("PYYAML needs to be installed. Execute \"pip3 install pyyaml\"")
+        sys.exit(0)
+
+def print_multicast_routes(args):
+    if args.ipv4 or not args.ipv6:
+        os.system("ip mroute show table " + str(pim_globals.MULTICAST_TABLE_ID))
+    elif args.ipv6:
+        os.system("ip -6 mroute show table " + str(pim_globals.MULTICAST_TABLE_ID))
+
+def main():
+    """
+    Entry point for PIM-DM
+    """
+    parser = args_parser()
     args = parser.parse_args()
 
-    #print(parser.parse_args())
     # This script must be run as root!
     if os.geteuid() != 0:
         sys.exit('PIM-DM must be run as root!')
 
     if args.list_instances:
-        pid_files = glob.glob("/tmp/Daemon-pim*.pid")
-        t = PrettyTable(['Instance PID', 'Multicast VRF', 'Unicast VRF'])
-
-        for pid_file in pid_files:
-            d = MyDaemon(pid_file)
-            pim_globals.MULTICAST_TABLE_ID = pid_file[15:-4]
-            if not d.is_running():
-                continue
-
-            t_new = client_socket(args, print_output=False)
-            t.add_row(t_new.split("|"))
-        print(t)
+        list_instances(args)
         return
 
     pim_globals.MULTICAST_TABLE_ID = args.multicast_vrf[0]
     pim_globals.UNICAST_TABLE_ID = args.unicast_vrf[0]
 
-    daemon = MyDaemon(pim_globals.DAEMON_PROCESS_FILE.format(pim_globals.MULTICAST_TABLE_ID))
     if args.start:
-        print("start")
-        daemon.start()
+        start()
         sys.exit(0)
     elif args.stop:
         client_socket(args)
-        daemon.stop()
         sys.exit(0)
     elif args.config:
-        try:
-            from pimdm import Config
-            args.config[0] = os.path.abspath(args.config[0])
-            pim_globals.MULTICAST_TABLE_ID, pim_globals.UNICAST_TABLE_ID = Config.get_vrfs(args.config[0])
-            daemon = MyDaemon(pim_globals.DAEMON_PROCESS_FILE.format(pim_globals.MULTICAST_TABLE_ID))
-
-            if not daemon.is_running():
-                x = threading.Thread(target=daemon.start, args=())
-                x.start()
-                x.join()
-
-            while not daemon.is_running():
-                time.sleep(1)
-        except ModuleNotFoundError:
-            print("PYYAML needs to be installed. Execute \"pip3 install pyyaml\"")
-            sys.exit(0)
-        except ImportError:
-            print("PYYAML needs to be installed. Execute \"pip3 install pyyaml\"")
-            sys.exit(0)
+        run_config(os.path.abspath(args.config[0]))
     elif args.verbose:
-        os.system("tail -f {}".format(pim_globals.DAEMON_LOG_STDOUT_FILE.format(pim_globals.MULTICAST_TABLE_ID)))
+        os.system("tail -f {}".format(PROCESS_LOG_STDOUT_FILE.format(pim_globals.MULTICAST_TABLE_ID)))
         sys.exit(0)
     elif args.multicast_routes:
-        if args.ipv4 or not args.ipv6:
-            os.system("ip mroute show table " + str(pim_globals.MULTICAST_TABLE_ID))
-        elif args.ipv6:
-            os.system("ip -6 mroute show table " + str(pim_globals.MULTICAST_TABLE_ID))
+        print_multicast_routes(args)
         sys.exit(0)
-    elif not daemon.is_running():
+    elif not is_running():
         print("PIM-DM is not running")
         parser.print_usage()
         sys.exit(0)
 
     client_socket(args)
 
+def process_file_path():
+    return os.path.join(PROCESS_DIRECTORY, str(pim_globals.MULTICAST_TABLE_ID))
+
+def process_socket_path():
+    return PROCESS_SOCKET.format(pim_globals.MULTICAST_TABLE_ID)
+
+def get_server_address():
+    server_address = process_socket_path()
+
+    # Make sure the socket does not already exist
+    if os.path.exists(server_address):
+        raise Exception(server_address + ' already exists !')
+    return server_address
+
+def exit_main(cleanup):
+    exit.acquire(0)
+    while cleanup:
+        try:
+            cleanup.pop()()
+        except Exception:
+            traceback.print_exc()
+    exit.release()
+
+def start(conf_file_path=None):
+    exit.signal(0, signal.SIGINT, signal.SIGTERM)
+
+    process_file = process_file_path()
+    if is_running():
+        sys.stderr.write(process_file + ' exists. Process already running ?\n')
+        sys.exit(1)
+
+    cleanup = [clean_process_dir]
+    try:
+        os.makedirs(PROCESS_DIRECTORY, exist_ok=True)
+        os.mknod(process_file)
+
+        os.makedirs(PROCESS_LOG_FOLDER, exist_ok=True)
+        os.chdir(PROCESS_LOG_FOLDER)
+        os.umask(0)
+
+        # redirect standard file descriptors
+
+        sys.stdout.flush()
+        sys.stderr.flush()
+        so = open(PROCESS_LOG_STDOUT_FILE.format(pim_globals.MULTICAST_TABLE_ID), 'a+')
+        cleanup.append(so.close)
+        se = open(PROCESS_LOG_STDERR_FILE.format(pim_globals.MULTICAST_TABLE_ID), 'a+')
+        cleanup.append(se.close)
+
+        os.dup2(so.fileno(), sys.stdout.fileno())
+        os.dup2(se.fileno(), sys.stderr.fileno())
+
+        print("start")
+        cleanup.insert(0, Main.stop)
+        Main.main()
+        if conf_file_path:
+            Main.set_config(conf_file_path)
+
+        # Create a UDS socket
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        cleanup.insert(0, sock.close)
+
+        # Bind the socket to the port
+        sock.bind(get_server_address())
+
+        # Listen for incoming connections
+        sock.listen(1)
+
+        main_loop(sock)
+    finally:
+        exit_main(cleanup)
 
 if __name__ == "__main__":
     main()
