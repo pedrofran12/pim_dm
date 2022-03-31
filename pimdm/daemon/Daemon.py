@@ -107,11 +107,6 @@ class Daemon:
                 print(str(err.args))
                 sys.exit(1)
 
-    def restart(self):
-        """Restart the Daemon."""
-        self.stop()
-        self.start()
-
     def run(self):
         """You should override this method when you subclass Daemon.
 
