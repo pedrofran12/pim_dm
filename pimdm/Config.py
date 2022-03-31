@@ -194,4 +194,4 @@ def get_vrfs(file_path):
         data = yaml.load(f, Loader=yaml.FullLoader)
         multicast_vrf = data.get("MulticastVRF", 0)
         unicast_vrf = data.get("UnicastVRF", 254)
-        return [multicast_vrf, unicast_vrf]
+        return multicast_vrf, unicast_vrf

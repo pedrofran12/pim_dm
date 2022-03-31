@@ -217,7 +217,7 @@ def main():
         try:
             from pimdm import Config
             args.config[0] = os.path.abspath(args.config[0])
-            [pim_globals.MULTICAST_TABLE_ID, pim_globals.UNICAST_TABLE_ID] = Config.get_vrfs(args.config[0])
+            pim_globals.MULTICAST_TABLE_ID, pim_globals.UNICAST_TABLE_ID = Config.get_vrfs(args.config[0])
             daemon = MyDaemon(pim_globals.DAEMON_PROCESS_FILE.format(pim_globals.MULTICAST_TABLE_ID))
 
             if not daemon.is_running():
