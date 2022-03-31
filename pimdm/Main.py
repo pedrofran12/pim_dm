@@ -231,9 +231,7 @@ def get_config():
     try:
         from . import Config
         return Config.get_yaml_file()
-    except ModuleNotFoundError:
-        return "PYYAML needs to be installed. Execute \"pip3 install pyyaml\""
-    except ImportError:
+    except (ImportError, ModuleNotFoundError):
         return "PYYAML needs to be installed. Execute \"pip3 install pyyaml\""
 
 

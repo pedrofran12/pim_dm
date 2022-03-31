@@ -171,12 +171,8 @@ def run_config(conf_file_path):
         from pimdm import Config
         pim_globals.MULTICAST_TABLE_ID, pim_globals.UNICAST_TABLE_ID = Config.get_vrfs(conf_file_path)
         start(conf_file_path)
-    except ModuleNotFoundError:
-        print("PYYAML needs to be installed. Execute \"pip3 install pyyaml\"")
-        sys.exit(0)
-    except ImportError:
-        print("PYYAML needs to be installed. Execute \"pip3 install pyyaml\"")
-        sys.exit(0)
+    except (ImportError, ModuleNotFoundError):
+        sys.exit("PYYAML needs to be installed. Execute \"pip3 install pyyaml\"")
 
 def print_multicast_routes(args):
     if args.ipv4 or not args.ipv6:
