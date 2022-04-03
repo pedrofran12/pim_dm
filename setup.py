@@ -12,7 +12,7 @@ setup(
     long_description=open("README.md", "r").read(),
     long_description_content_type="text/markdown",
     keywords="PIM-DM Multicast Routing Protocol PIM Dense-Mode Router RFC3973 IPv4 IPv6",
-    version="1.3.4",
+    version="1.3.5",
     url="http://github.com/pedrofran12/pim_dm",
     author="Pedro Oliveira",
     author_email="pedro.francisco.oliveira@tecnico.ulisboa.pt",
