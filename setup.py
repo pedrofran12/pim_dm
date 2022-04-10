@@ -12,7 +12,7 @@ setup(
     long_description=open("README.md", "r").read(),
     long_description_content_type="text/markdown",
     keywords="PIM-DM Multicast Routing Protocol PIM Dense-Mode Router RFC3973 IPv4 IPv6",
-    version="1.3.5",
+    version="1.4.0",
     url="http://github.com/pedrofran12/pim_dm",
     author="Pedro Oliveira",
     author_email="pedro.francisco.oliveira@tecnico.ulisboa.pt",
@@ -22,8 +22,8 @@ setup(
         'netifaces',
         'ipaddress',
         'pyroute2',
-        'py-mld==1.0.2',
-        'igmp==1.0.2',
+        'py-mld==1.0.3',
+        'igmp==1.0.4',
     ],
     packages=find_packages(exclude=["docs"]),
     ext_modules = [Extension(
@@ -56,6 +56,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     python_requires=">=3.3",
 )
