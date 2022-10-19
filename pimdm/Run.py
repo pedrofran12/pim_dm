@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import argparse, glob, os, signal, socket, sys, traceback
+import argparse, glob, logging, os, signal, socket, sys
 import _pickle as pickle
 from prettytable import PrettyTable
 
@@ -15,6 +15,55 @@ PROCESS_SOCKET = os.path.join(PROCESS_DIRECTORY, 'pim_uds_socket{}')
 PROCESS_LOG_FOLDER = '/var/log/pimdm'
 PROCESS_LOG_STDOUT_FILE = os.path.join(PROCESS_LOG_FOLDER, 'stdout{}')
 PROCESS_LOG_STDERR_FILE = os.path.join(PROCESS_LOG_FOLDER, 'stderror{}')
+
+LOG_CONFIG = {
+    'version': 1,
+    'formatters': {
+        'detailed': {
+            'class': 'logging.Formatter',
+            'format': '%(asctime)-20s %(name)-50s %(tree)-35s %(vif)-2s %(interfacename)-5s %(routername)-2s %(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://sys.stdout',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+        },
+        'errors': {
+            'class': 'logging.FileHandler',
+            'level': 'ERROR',
+        },
+        'console_detailed': {
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://sys.stdout',
+            'formatter': 'detailed',
+        },
+        'file_detailed': {
+            'class': 'logging.FileHandler',
+            'formatter': 'detailed',
+        },
+    },
+    'loggers': {
+        'pim': {
+            'handlers': ['console_detailed', 'file_detailed'],
+            'propagate': False,
+        },
+        'mld': {
+            'handlers': ['console_detailed', 'file_detailed'],
+            'propagate': False,
+        },
+        'igmp': {
+            'handlers': ['console_detailed', 'file_detailed'],
+            'propagate': False,
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file', 'errors'],
+    },
+}
 
 def clean_process_dir():
     os.remove(process_file_path())
@@ -52,8 +101,8 @@ def main_loop(sock):
         try:
             connection, client_address = sock.accept()
             data = connection.recv(256 * 1024)
-            print(sys.stderr, 'sending data back to the client')
-            print(pickle.loads(data))
+            logging.debug('sending data back to the client')
+            logging.debug(pickle.loads(data))
             args = pickle.loads(data)
             if 'ipv4' not in args and 'ipv6' not in args or not (args.ipv4 or args.ipv6):
                 args.ipv4 = True
@@ -101,7 +150,7 @@ def main_loop(sock):
         except Exception as e:
             connection.sendall(pickle.dumps(e))
             connection.shutdown(socket.SHUT_RDWR)
-            traceback.print_exc()
+            logging.error(e, exc_info=True)
         finally:
             # Clean up the connection
             if 'connection' in locals():
@@ -109,6 +158,7 @@ def main_loop(sock):
 
 def args_parser():
     parser = argparse.ArgumentParser(description='PIM-DM protocol', prog='pim-dm')
+    parser.add_argument("-v", "--verbose", action="store_true", default=False, help="Verbose (print all debug messages)")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-start", "--start", action="store_true", default=False, help="Start PIM")
     group.add_argument("-stop", "--stop", action="store_true", default=False, help="Stop PIM")
@@ -132,7 +182,6 @@ def args_parser():
                                                                                             "Use -4 or -6 to specify IPv4 or IPv6 interface.")
     group.add_argument("-riigmp", "--remove_interface_igmp", nargs=1, metavar='INTERFACE_NAME', help="Remove IGMP interface")
     group.add_argument("-rimld", "--remove_interface_mld", nargs=1, metavar='INTERFACE_NAME', help="Remove MLD interface")
-    group.add_argument("-v", "--verbose", action="store_true", default=False, help="Verbose (print all debug messages)")
     group.add_argument("-t", "--test", nargs=2, metavar=('ROUTER_NAME', 'SERVER_LOG_IP'), help="Tester... send log information to SERVER_LOG_IP. Set the router name to ROUTER_NAME")
     group.add_argument("-config", "--config", nargs=1, metavar='CONFIG_FILE_PATH', type=str,
                        help="File path for configuration file.")
@@ -164,9 +213,9 @@ def list_instances(args):
 
         t_new = client_socket(args, print_output=False)
         t.add_row(t_new.split("|"))
-    print(t)
+    logging.info(t)
 
-def run_config(conf_file_path):
+def run_config(log_level, conf_file_path):
     try:
         from pimdm import Config
         pim_globals.MULTICAST_TABLE_ID, pim_globals.UNICAST_TABLE_ID = Config.get_vrfs(conf_file_path)
@@ -184,6 +233,7 @@ def main():
     """
     Entry point for PIM-DM
     """
+    log_level = logging.INFO
     parser = args_parser()
     args = parser.parse_args()
 
@@ -198,18 +248,19 @@ def main():
     pim_globals.MULTICAST_TABLE_ID = args.multicast_vrf[0]
     pim_globals.UNICAST_TABLE_ID = args.unicast_vrf[0]
 
+    if args.verbose:
+        log_level = logging.DEBUG
+
     if args.start:
-        start()
+        start(log_level)
     elif args.stop:
         client_socket(args)
     elif args.config:
-        run_config(os.path.abspath(args.config[0]))
-    elif args.verbose:
-        os.system("tail -f {}".format(PROCESS_LOG_STDOUT_FILE.format(pim_globals.MULTICAST_TABLE_ID)))
+        run_config(log_level, os.path.abspath(args.config[0]))
     elif args.multicast_routes:
         print_multicast_routes(args)
     elif not is_running():
-        print("PIM-DM is not running")
+        logging.error("PIM-DM is not running")
         parser.print_usage()
 
     client_socket(args)
@@ -219,6 +270,23 @@ def process_file_path():
 
 def process_socket_path():
     return PROCESS_SOCKET.format(pim_globals.MULTICAST_TABLE_ID)
+
+def configure_logging(log_level):
+    os.makedirs(PROCESS_LOG_FOLDER, exist_ok=True)
+    os.chdir(PROCESS_LOG_FOLDER)
+
+    log_file = PROCESS_LOG_STDOUT_FILE.format(pim_globals.MULTICAST_TABLE_ID)
+    config = LOG_CONFIG.copy()
+    config['handlers']['console']['level'] = log_level
+    config['handlers']['file']['filename'] = log_file
+    config['handlers']['file']['level'] = log_level
+    config['handlers']['errors']['filename'] = PROCESS_LOG_STDERR_FILE.format(pim_globals.MULTICAST_TABLE_ID)
+    config['handlers']['console_detailed']['level'] = log_level
+    config['handlers']['file_detailed']['filename'] = log_file
+    config['handlers']['file_detailed']['level'] = log_level
+    config['root']['level'] = log_level
+
+    logging.config.dictConfig(config)
 
 def get_server_address():
     server_address = process_socket_path()
@@ -233,11 +301,11 @@ def exit_main(cleanup):
     while cleanup:
         try:
             cleanup.pop()()
-        except Exception:
-            traceback.print_exc()
+        except Exception as e:
+            logging.error(e, exc_info=True)
     exit.release()
 
-def start(conf_file_path=None):
+def start(log_level, conf_file_path=None):
     exit.signal(0, signal.SIGINT, signal.SIGTERM)
 
     process_file = process_file_path()
@@ -250,23 +318,11 @@ def start(conf_file_path=None):
         os.makedirs(PROCESS_DIRECTORY, exist_ok=True)
         os.mknod(process_file)
 
-        os.makedirs(PROCESS_LOG_FOLDER, exist_ok=True)
-        os.chdir(PROCESS_LOG_FOLDER)
+        configure_logging(log_level)
+
         os.umask(0)
 
-        # redirect standard file descriptors
-
-        sys.stdout.flush()
-        sys.stderr.flush()
-        so = open(PROCESS_LOG_STDOUT_FILE.format(pim_globals.MULTICAST_TABLE_ID), 'a+')
-        cleanup.append(so.close)
-        se = open(PROCESS_LOG_STDERR_FILE.format(pim_globals.MULTICAST_TABLE_ID), 'a+')
-        cleanup.append(se.close)
-
-        os.dup2(so.fileno(), sys.stdout.fileno())
-        os.dup2(se.fileno(), sys.stderr.fileno())
-
-        print("start")
+        logging.info("start")
         cleanup.insert(0, Main.stop)
         Main.main()
         if conf_file_path:

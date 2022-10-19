@@ -19,9 +19,10 @@ class Neighbor:
         logger_info = dict(contact_interface.interface_logger.extra)
         logger_info['neighbor_ip'] = ip
         self.neighbor_logger = logging.LoggerAdapter(self.LOGGER, logger_info)
-        self.neighbor_logger.debug('Monitoring new neighbor ' + ip + ' with GenerationID: ' + str(generation_id) +
-                                   '; HelloHoldTime: ' + str(hello_hold_time) + '; StateRefreshCapable: ' +
-                                   str(state_refresh_capable))
+        self.neighbor_logger.debug(
+            'Monitoring new neighbor %s with GenerationID: %s; HelloHoldTime: %s; StateRefreshCapable: %s',
+            ip, generation_id, hello_hold_time, state_refresh_capable
+        )
         self.contact_interface = contact_interface
         self.ip = ip
         self.generation_id = generation_id
@@ -45,9 +46,9 @@ class Neighbor:
 
         if hello_hold_time == HELLO_HOLD_TIME_TIMEOUT:
             self.remove()
-            self.neighbor_logger.debug('Detected neighbor removal of ' + self.ip)
+            self.neighbor_logger.debug('Detected neighbor removal of %s', self.ip)
         elif hello_hold_time != HELLO_HOLD_TIME_NO_TIMEOUT:
-            self.neighbor_logger.debug('Neighbor Liveness Timer reseted of ' + self.ip)
+            self.neighbor_logger.debug('Neighbor Liveness Timer reseted of %s', self.ip)
             self.neighbor_liveness_timer = Timer(hello_hold_time, self.remove)
             self.neighbor_liveness_timer.start()
         else:
@@ -74,7 +75,7 @@ class Neighbor:
     """
 
     def remove(self):
-        print('HELLO TIMER EXPIRED... remove neighbor')
+        logging.debug('HELLO TIMER EXPIRED... remove neighbor')
         if self.neighbor_liveness_timer is not None:
             self.neighbor_liveness_timer.cancel()
         self.neighbor_logger.debug('Neighbor Liveness Timer expired of ' + self.ip)

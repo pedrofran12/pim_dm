@@ -1,5 +1,6 @@
 import socket
 import ipaddress
+import logging
 from threading import RLock
 from socket import if_indextoname
 from pyroute2 import IPDB
@@ -64,9 +65,9 @@ class UnicastRouting(object):
             for mask_len in range(full_mask, 0, -1):
                 dst_network = str(ipaddress.ip_interface(ip_dst + "/" + str(mask_len)).network)
 
-                print(dst_network)
+                logging.debug(dst_network)
                 if dst_network in ipdb.routes.tables[pim_globals.UNICAST_TABLE_ID]:
-                    print(info)
+                    logging.debug(info)
                     if ipdb.routes[{'dst': dst_network, 'family': family,
                                     'table': pim_globals.UNICAST_TABLE_ID}]['ipdb_scope'] != 'gc':
                         info = ipdb.routes[{'dst': dst_network, 'family': family, 'table': pim_globals.UNICAST_TABLE_ID}]
@@ -74,10 +75,10 @@ class UnicastRouting(object):
                 else:
                     continue
             if not info:
-                print("0.0.0.0/0 or ::/0")
+                logging.debug("0.0.0.0/0 or ::/0")
                 if "default" in ipdb.routes.tables[pim_globals.UNICAST_TABLE_ID]:
                     info = ipdb.routes[{'dst': 'default', 'family': family, 'table': pim_globals.UNICAST_TABLE_ID}]
-            print(info)
+            logging.debug(info)
             return info
 
     @staticmethod
@@ -130,18 +131,18 @@ class UnicastRouting(object):
         Kernel notified about a change
         Verify the type of change and recheck all trees if necessary
         """
-        print("unicast change?")
-        print(action)
+        logging.debug("unicast change?")
+        logging.debug(action)
         UnicastRouting.lock.acquire()
         family = msg['family']
         if action == "RTM_NEWROUTE" or action == "RTM_DELROUTE":
-            print(ipdb.routes)
+            logging.debug(ipdb.routes)
             mask_len = msg["dst_len"]
             network_address = None
             attrs = msg["attrs"]
-            print(attrs)
+            logging.debug(attrs)
             for (key, value) in attrs:
-                print((key, value))
+                logging.debug((key, value))
                 if key == "RTA_DST":
                     network_address = value
                     break
@@ -149,11 +150,11 @@ class UnicastRouting(object):
                 network_address = "0.0.0.0"
             elif network_address is None and family == socket.AF_INET6:
                 network_address = "::"
-            print(network_address)
-            print(mask_len)
-            print(network_address + "/" + str(mask_len))
+            logging.debug(network_address)
+            logging.debug(mask_len)
+            logging.debug(network_address + "/" + str(mask_len))
             subnet = ipaddress.ip_network(network_address + "/" + str(mask_len))
-            print(str(subnet))
+            logging.debug(str(subnet))
             UnicastRouting.lock.release()
             from pimdm import Main
             if family == socket.AF_INET:

@@ -1,5 +1,6 @@
 import struct
 import socket
+import logging
 
 
 class PacketIpHeader:
@@ -24,7 +25,7 @@ class PacketIpHeader:
     def parse_bytes(data: bytes):
         (verhlen, ) = struct.unpack(PacketIpHeader.IP_HDR, data[:PacketIpHeader.IP_HDR_LEN])
         ver = (verhlen & 0xF0) >> 4
-        print("ver:", ver)
+        logging.debug("ver:%s", ver)
         return PACKET_HEADER.get(ver).parse_bytes(data)
 
 

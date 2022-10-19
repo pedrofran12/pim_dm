@@ -2,7 +2,7 @@ import os
 import socket
 import struct
 import ipaddress
-import traceback
+import logging
 from socket import if_nametoindex
 from threading import RLock, Thread
 from abc import abstractmethod, ABCMeta
@@ -47,8 +47,11 @@ class Kernel(metaclass=ABCMeta):
         self.membership_interface = {}  # name: interface_igmp or interface_mld
 
         # logs
-        self.interface_logger = Main.logger.getChild('KernelInterface')
-        self.tree_logger = Main.logger.getChild('KernelTree')
+        self.interface_logger = logging.LoggerAdapter(
+          logging.getLogger('pim.KernelInterface'),
+          {'tree': None, 'vif': None, 'interfacename': None, 'routername': None},
+        )
+        self.tree_logger = logging.getLogger('pim.KernelTree')
 
         # receive signals from kernel with a background thread
         self.handler_thread = Thread(target=self.handler)
@@ -302,8 +305,8 @@ class Kernel4(Kernel):
         if pim_globals.MULTICAST_TABLE_ID != 0:
             try:
                 s.setsockopt(socket.IPPROTO_IP, self.MRT_TABLE, pim_globals.MULTICAST_TABLE_ID)
-            except:
-                traceback.print_exc()
+            except Exception as e:
+                logging.error(e, exc_info=True)
 
         # MRT INIT
         s.setsockopt(socket.IPPROTO_IP, self.MRT_INIT, 1)
@@ -446,35 +449,34 @@ class Kernel4(Kernel):
             try:
                 msg = self.socket.recv(20)
                 (_, _, im_msgtype, im_mbz, im_vif, _, im_src, im_dst) = struct.unpack("II B B B B 4s 4s", msg[:20])
-                print((im_msgtype, im_mbz, socket.inet_ntoa(im_src), socket.inet_ntoa(im_dst)))
+                logging.debug((im_msgtype, im_mbz, socket.inet_ntoa(im_src), socket.inet_ntoa(im_dst)))
 
                 if im_mbz != 0:
                     continue
 
-                print(im_msgtype)
-                print(im_mbz)
-                print(im_vif)
-                print(socket.inet_ntoa(im_src))
-                print(socket.inet_ntoa(im_dst))
+                logging.debug(im_msgtype)
+                logging.debug(im_mbz)
+                logging.debug(im_vif)
+                logging.debug(socket.inet_ntoa(im_src))
+                logging.debug(socket.inet_ntoa(im_dst))
                 #print((im_msgtype, im_mbz, socket.inet_ntoa(im_src), socket.inet_ntoa(im_dst)))
 
                 ip_src = socket.inet_ntoa(im_src)
                 ip_dst = socket.inet_ntoa(im_dst)
 
                 if im_msgtype == self.IGMPMSG_NOCACHE:
-                    print("IGMP NO CACHE")
+                    logging.debug("IGMP NO CACHE")
                     self.igmpmsg_nocache_handler(ip_src, ip_dst, im_vif)
                 elif im_msgtype == self.IGMPMSG_WRONGVIF:
-                    print("WRONG VIF HANDLER")
+                    logging.debug("WRONG VIF HANDLER")
                     self.igmpmsg_wrongvif_handler(ip_src, ip_dst, im_vif)
                 #elif im_msgtype == Kernel.IGMPMSG_WHOLEPKT:
                 #    print("IGMP_WHOLEPKT")
                 #    self.igmpmsg_wholepacket_handler(ip_src, ip_dst)
                 else:
                     raise Exception
-            except Exception:
-                traceback.print_exc()
-                continue
+            except Exception as e:
+                logging.error(e, exc_info=True)
 
     # receive multicast (S,G) packet and multicast routing table has no (S,G) entry
     def igmpmsg_nocache_handler(self, ip_src, ip_dst, iif):
@@ -545,8 +547,8 @@ class Kernel6(Kernel):
         if pim_globals.MULTICAST_TABLE_ID != 0:
             try:
                 s.setsockopt(socket.IPPROTO_IPV6, self.MRT6_TABLE, pim_globals.MULTICAST_TABLE_ID)
-            except:
-                traceback.print_exc()
+            except Exception as e:
+                logging.error(e, exc_info=True)
 
         # MRT INIT
         s.setsockopt(socket.IPPROTO_IPV6, self.MRT6_INIT, 1)
@@ -718,30 +720,29 @@ class Kernel6(Kernel):
                 if im6_mbz != 0:
                     continue
 
-                print(im6_mbz)
-                print(im6_msgtype)
-                print(im6_mif)
-                print(socket.inet_ntop(socket.AF_INET6, im6_src))
-                print(socket.inet_ntop(socket.AF_INET6, im6_dst))
+                logging.debug(im6_mbz)
+                logging.debug(im6_msgtype)
+                logging.debug(im6_mif)
+                logging.debug(socket.inet_ntop(socket.AF_INET6, im6_src))
+                logging.debug(socket.inet_ntop(socket.AF_INET6, im6_dst))
                 # print((im_msgtype, im_mbz, socket.inet_ntoa(im_src), socket.inet_ntoa(im_dst)))
 
                 ip_src = socket.inet_ntop(socket.AF_INET6, im6_src)
                 ip_dst = socket.inet_ntop(socket.AF_INET6, im6_dst)
 
                 if im6_msgtype == self.MRT6MSG_NOCACHE:
-                    print("MRT6 NO CACHE")
+                    logging.debug("MRT6 NO CACHE")
                     self.msg_nocache_handler(ip_src, ip_dst, im6_mif)
                 elif im6_msgtype == self.MRT6MSG_WRONGMIF:
-                    print("WRONG MIF HANDLER")
+                    logging.debug("WRONG MIF HANDLER")
                     self.msg_wrongvif_handler(ip_src, ip_dst, im6_mif)
                 # elif im_msgtype == Kernel.IGMPMSG_WHOLEPKT:
                 #    print("IGMP_WHOLEPKT")
                 #    self.igmpmsg_wholepacket_handler(ip_src, ip_dst)
                 else:
                     raise Exception
-            except Exception:
-                traceback.print_exc()
-                continue
+            except Exception as e:
+                logging.error(e, exc_info=True)
 
     # receive multicast (S,G) packet and multicast routing table has no (S,G) entry
     def msg_nocache_handler(self, ip_src, ip_dst, iif):

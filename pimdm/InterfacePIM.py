@@ -2,7 +2,6 @@ import socket
 import random
 import logging
 import netifaces
-import traceback
 from threading import Timer
 
 from pimdm.Interface import Interface
@@ -51,7 +50,10 @@ class InterfacePim(Interface):
         self._had_neighbors = False
         self.neighbors = {}
         self.neighbors_lock = RWLockWrite()
-        self.interface_logger = logging.LoggerAdapter(InterfacePim.LOGGER, {'vif': vif_index, 'interfacename': interface_name})
+        self.interface_logger = logging.LoggerAdapter(
+          InterfacePim.LOGGER,
+          {'tree': None, 'vif': vif_index, 'interfacename': interface_name, 'routername': None},
+        )
 
         # SOCKET
         if_addr_dict = netifaces.ifaddresses(interface_name)
@@ -272,7 +274,7 @@ class InterfacePim(Interface):
         Receive an Hello packet
         """
         ip = packet.ip_header.ip_src
-        print("ip = ", ip)
+        logging.debug("ip = %s", ip)
         options = packet.payload.payload.get_options()
 
         if (1 in options) and (20 in options):
@@ -287,7 +289,7 @@ class InterfacePim(Interface):
             if ip not in self.neighbors:
                 if hello_hold_time == 0:
                     return
-                print("ADD NEIGHBOR")
+                logging.debug("ADD NEIGHBOR")
                 from pimdm.Neighbor import Neighbor
                 self.neighbors[ip] = Neighbor(self, ip, generation_id, hello_hold_time, state_refresh_capable)
                 self.force_send_hello()
@@ -310,8 +312,8 @@ class InterfacePim(Interface):
 
         try:
             self.get_kernel().get_routing_entry(source_group).recv_assert_msg(self.vif_index, packet)
-        except:
-            traceback.print_exc()
+        except Exception as e:
+            logging.error(e, exc_info=True)
 
     def receive_join_prune(self, packet):
         """
@@ -329,17 +331,15 @@ class InterfacePim(Interface):
                 source_group = (source_address, multicast_group)
                 try:
                     self.get_kernel().get_routing_entry(source_group).recv_join_msg(self.vif_index, packet)
-                except:
-                    traceback.print_exc()
-                    continue
+                except Exception as e:
+                    logging.error(e, exc_info=True)
 
             for source_address in pruned_src_addresses:
                 source_group = (source_address, multicast_group)
                 try:
                     self.get_kernel().get_routing_entry(source_group).recv_prune_msg(self.vif_index, packet)
-                except:
-                    traceback.print_exc()
-                    continue
+                except Exception as e:
+                    logging.error(e, exc_info=True)
 
     def receive_graft(self, packet):
         """
@@ -356,9 +356,8 @@ class InterfacePim(Interface):
                 source_group = (source_address, multicast_group)
                 try:
                     self.get_kernel().get_routing_entry(source_group).recv_graft_msg(self.vif_index, packet)
-                except:
-                    traceback.print_exc()
-                    continue
+                except Exception as e:
+                    logging.error(e, exc_info=True)
 
     def receive_graft_ack(self, packet):
         """
@@ -375,9 +374,8 @@ class InterfacePim(Interface):
                 source_group = (source_address, multicast_group)
                 try:
                     self.get_kernel().get_routing_entry(source_group).recv_graft_ack_msg(self.vif_index, packet)
-                except:
-                    traceback.print_exc()
-                    continue
+                except Exception as e:
+                    logging.error(e, exc_info=True)
 
     def receive_state_refresh(self, packet):
         """
@@ -392,8 +390,8 @@ class InterfacePim(Interface):
         source_group = (source, group)
         try:
             self.get_kernel().get_routing_entry(source_group).recv_state_refresh_msg(self.vif_index, packet)
-        except:
-            traceback.print_exc()
+        except Exception as e:
+            logging.error(e, exc_info=True)
 
     def receive_unknown(self, packet):
         """

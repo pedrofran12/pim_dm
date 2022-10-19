@@ -48,15 +48,13 @@ class KernelEntry:
                         self.interface_state[i] = TreeInterfaceUpstream(self, i)
                     else:
                         self.interface_state[i] = TreeInterfaceDownstream(self, i)
-                except:
-                    import traceback
-                    print(traceback.print_exc())
-                    continue
+                except Exception as e:
+                    logging.error(e, exc_info=True)
 
         self.change()
         self.evaluate_olist_change()
         self.timestamp_of_last_state_refresh_message_received = 0
-        print('Tree created')
+        logging.debug('Tree created')
 
     def get_inbound_interface_index(self):
         """
@@ -77,14 +75,14 @@ class KernelEntry:
         """
         Receive data packet regarding this tree in interface with VIF index
         """
-        print("recv data")
+        logging.debug("recv data")
         self.interface_state[index].recv_data_msg()
 
     def recv_assert_msg(self, index, packet):
         """
         Receive assert packet regarding this tree in interface with VIF index
         """
-        print("recv assert")
+        logging.debug("recv assert")
         pkt_assert = packet.payload.payload
         metric = pkt_assert.metric
         metric_preference = pkt_assert.metric_preference
@@ -97,7 +95,7 @@ class KernelEntry:
         """
         Receive Prune packet regarding this tree in interface with VIF index
         """
-        print("recv prune msg")
+        logging.debug("recv prune msg")
         holdtime = packet.payload.payload.hold_time
         upstream_neighbor_address = packet.payload.payload.upstream_neighbor_address
         self.interface_state[index].recv_prune_msg(upstream_neighbor_address=upstream_neighbor_address, holdtime=holdtime)
@@ -106,7 +104,7 @@ class KernelEntry:
         """
         Receive Join packet regarding this tree in interface with VIF index
         """
-        print("recv join msg")
+        logging.debug("recv join msg")
         upstream_neighbor_address = packet.payload.payload.upstream_neighbor_address
         self.interface_state[index].recv_join_msg(upstream_neighbor_address)
 
@@ -114,7 +112,7 @@ class KernelEntry:
         """
         Receive Graft packet regarding this tree in interface with VIF index
         """
-        print("recv graft msg")
+        logging.debug("recv graft msg")
         upstream_neighbor_address = packet.payload.payload.upstream_neighbor_address
         source_ip = packet.ip_header.ip_src
         self.interface_state[index].recv_graft_msg(upstream_neighbor_address, source_ip)
@@ -123,7 +121,7 @@ class KernelEntry:
         """
         Receive GraftAck packet regarding this tree in interface with VIF index
         """
-        print("recv graft ack msg")
+        logging.debug("recv graft ack msg")
         source_ip = packet.ip_header.ip_src
         self.interface_state[index].recv_graft_ack_msg(source_ip)
 
@@ -131,7 +129,7 @@ class KernelEntry:
         """
         Receive StateRefresh packet regarding this tree in interface with VIF index
         """
-        print("recv state refresh msg")
+        logging.debug("recv state refresh msg")
         source_of_state_refresh = packet.ip_header.ip_src
 
         metric_preference = packet.payload.payload.metric_preference

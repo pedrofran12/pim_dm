@@ -1,3 +1,4 @@
+import logging
 import struct
 
 from .PacketPimHello import PacketPimHello
@@ -51,24 +52,24 @@ class PacketPimHeader(PacketPayload):
 
     @staticmethod
     def parse_bytes(data: bytes):
-        print("parsePimHdr: ", data)
+        logging.debug("parsePimHdr: %s", data)
 
         pim_hdr = data[0:PacketPimHeader.PIM_HDR_LEN]
         (pim_ver_type, reserved, rcv_checksum) = struct.unpack(PacketPimHeader.PIM_HDR, pim_hdr)
 
-        print(pim_ver_type, reserved, rcv_checksum)
+        logging.debug("%s %s %s", pim_ver_type, reserved, rcv_checksum)
         pim_version = (pim_ver_type & 0xF0) >> 4
         pim_type = pim_ver_type & 0x0F
 
         if pim_version != PacketPimHeader.PIM_VERSION:
-            print("Version of PIM packet received not known (!=2)")
+            logging.error("Version of PIM packet received not known (!=2)")
             raise Exception
 
         msg_to_checksum = data[0:2] + b'\x00\x00' + data[4:]
         if checksum(msg_to_checksum) != rcv_checksum:
-            print("wrong checksum")
-            print("checksum calculated: " + str(checksum(msg_to_checksum)))
-            print("checksum recv: " + str(rcv_checksum))
+            logging.error("wrong checksum")
+            logging.error("checksum calculated: %s", checksum(msg_to_checksum))
+            logging.error("checksum recv: %s", rcv_checksum)
             raise Exception
 
         pim_payload = data[PacketPimHeader.PIM_HDR_LEN:]
