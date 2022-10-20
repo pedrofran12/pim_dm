@@ -30,11 +30,13 @@ LOG_CONFIG = {
             'stream': 'ext://sys.stdout',
         },
         'file': {
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'when': 'D',
         },
         'errors': {
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'level': 'ERROR',
+            'when': 'D',
         },
         'console_detailed': {
             'class': 'logging.StreamHandler',
