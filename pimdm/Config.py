@@ -167,13 +167,13 @@ def get_yaml_file():
     """
     dict_file = BASE_CONFIG.copy()
 
-    for if_name, if_value in Main.interfaces.items():
+    for if_name, _ in Main.interfaces.items():
         dict_file["PIM-DM"]["Interfaces"][if_name] = {}
         dict_file["PIM-DM"]["Interfaces"][if_name]["ipv4"] = {
             "enabled": True,
         }
 
-    for if_name, if_value in Main.interfaces_v6.items():
+    for if_name, _ in Main.interfaces_v6.items():
         if if_name not in dict_file["PIM-DM"]["Interfaces"]:
             dict_file["PIM-DM"]["Interfaces"][if_name] = {}
 

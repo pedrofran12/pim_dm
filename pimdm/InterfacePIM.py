@@ -8,7 +8,7 @@ from pimdm.Interface import Interface
 from pimdm.packet.ReceivedPacket import ReceivedPacket
 from pimdm import Main
 from pimdm.rwlock.RWLock import RWLockWrite
-from pimdm.packet.PacketPimHelloOptions import *
+from pimdm.packet.PacketPimHelloOptions import PacketPimHelloHoldtime, PacketPimHelloGenerationID, PacketPimHelloStateRefreshCapable
 from pimdm.packet.PacketPimHello import PacketPimHello
 from pimdm.packet.PacketPimHeader import PacketPimHeader
 from pimdm.packet.Packet import Packet
