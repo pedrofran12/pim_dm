@@ -387,6 +387,8 @@ class Kernel4(Kernel):
             struct_vifctl = struct.pack("HBBI 4s 4s", index, 0, 0, 0, socket.inet_aton("0.0.0.0"), socket.inet_aton("0.0.0.0"))
 
             self.delete_mrule(interface_name, 0)
+            if pim_globals.MULTICAST_TABLE_ID != 0:
+                self.delete_mrule(interface_name, pim_globals.MULTICAST_TABLE_ID)
             self.socket.setsockopt(socket.IPPROTO_IP, self.MRT_DEL_VIF, struct_vifctl)
 
             self.stop_forwarding(index)
@@ -621,7 +623,8 @@ class Kernel6(Kernel):
             struct_vifctl = struct.pack("HBBHI", mif_index, 0, 0, physical_if_index, 0)
             self.socket.setsockopt(socket.IPPROTO_IPV6, self.MRT6_DEL_MIF, struct_vifctl)
 
-            self.delete_mrule(interface_name, 0)
+            if pim_globals.MULTICAST_TABLE_ID != 0:
+                self.delete_mrule(interface_name, pim_globals.MULTICAST_TABLE_ID, AF_INET6)
 
             self.stop_forwarding(mif_index)
 
