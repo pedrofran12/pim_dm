@@ -19,6 +19,7 @@ Additionally, IGMPv2 and MLDv1 are implemented alongside with PIM-DM to detect i
  - pip (to install all dependencies)
  - libpcap-dev
  - python3-dev
+ - Cython (it can be installed with pip)
 
 
 # Installation
