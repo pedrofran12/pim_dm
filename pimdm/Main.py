@@ -38,10 +38,17 @@ def add_membership_interface(interface_name, ipv4=True, ipv6=False):
             add_membership_interface(interface_name, ipv4, ipv6)
         return
 
-    if ipv4 and kernel is not None:
-        kernel.create_membership_interface(interface_name=interface_name)
-    if ipv6 and kernel_v6 is not None:
-        kernel_v6.create_membership_interface(interface_name=interface_name)
+    try:
+        if ipv4 and kernel is not None:
+            kernel.create_membership_interface(interface_name=interface_name)
+        if ipv6 and kernel_v6 is not None:
+            kernel_v6.create_membership_interface(interface_name=interface_name)
+    except Exception as e:
+        e.args = (
+            'Failed to create membership interface for %s\n%s' % (interface_name, e.args[0]),
+            *e.args[1:],
+        )
+        raise e
 
 
 def remove_interface(interface_name, pim=False, membership=False, ipv4=True, ipv6=False):
