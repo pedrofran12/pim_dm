@@ -1,6 +1,12 @@
 import sys
 from setuptools import setup, find_packages, Extension
 
+try:
+    from Cython.Build import cythonize
+except ModuleNotFoundError:
+    raise SystemExit("Cython is required. You can install it with pip.")
+
+
 # we only support Python 3 version >= 3.3
 if len(sys.argv) >= 2 and sys.argv[1] == "install" and sys.version_info < (3, 3):
     raise SystemExit("Python 3.3 or higher is required")
@@ -26,11 +32,10 @@ setup(
         'igmp==1.0.4',
     ],
     packages=find_packages(exclude=["docs"]),
-    ext_modules = [Extension(
-        name="pcap_wrapper",
-        sources = ["pcap.c"],
-        libraries=["pcap"],
-    )],
+    ext_modules = cythonize([
+        Extension("pcap_wrapper", ["pcap.pyx"],
+            libraries=["pcap"]),
+    ], language_level=3),
     entry_points={
         "console_scripts": [
             "pim-dm = pimdm.Run:main",
