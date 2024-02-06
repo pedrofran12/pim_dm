@@ -40,7 +40,10 @@ class InterfacePim6(InterfacePim):
         self._had_neighbors = False
         self.neighbors = {}
         self.neighbors_lock = RWLockWrite()
-        self.interface_logger = logging.LoggerAdapter(InterfacePim.LOGGER, {'vif': vif_index, 'interfacename': interface_name})
+        self.interface_logger = logging.LoggerAdapter(
+          InterfacePim.LOGGER,
+          {'tree': None, 'vif': vif_index, 'interfacename': interface_name, 'routername': None},
+        )
 
         # SOCKET
         s = socket.socket(socket.AF_INET6, socket.SOCK_RAW, socket.IPPROTO_PIM)

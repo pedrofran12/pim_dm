@@ -1,6 +1,5 @@
 from abc import ABCMeta, abstractmethod
 from threading import RLock
-import traceback
 
 from .downstream_prune import DownstreamState
 from .assert_state import AssertState, AssertStateABC
@@ -78,8 +77,8 @@ class TreeInterface(metaclass=ABCMeta):
                     old_neighbor.unsubscribe_nlt_expiration(self)
                 if new_neighbor is not None:
                     new_neighbor.subscribe_nlt_expiration(self)
-            except:
-                traceback.print_exc()
+            except Exception as e:
+                logging.error(e, exc_info=True)
             finally:
                 self._assert_winner_metric = new_assert_metric
 
@@ -139,7 +138,7 @@ class TreeInterface(metaclass=ABCMeta):
     # Send messages
     ######################################
     def send_graft(self):
-        print("send graft")
+        logging.debug("send graft")
         try:
             (source, group) = self.get_tree_id()
 
@@ -148,12 +147,11 @@ class TreeInterface(metaclass=ABCMeta):
             ph.add_multicast_group(PacketPimJoinPruneMulticastGroup(group,  joined_src_addresses=[source]))
             pckt = Packet(payload=PacketPimHeader(ph))
             self.get_interface().send(pckt.bytes(), ip_dst)
-        except:
-            traceback.print_exc()
-            return
+        except Exception as e:
+            logging.error(e, exc_info=True)
 
     def send_graft_ack(self, ip_sender):
-        print("send graft ack")
+        logging.debug("send graft ack")
         try:
             (source, group) = self.get_tree_id()
 
@@ -161,15 +159,14 @@ class TreeInterface(metaclass=ABCMeta):
             ph.add_multicast_group(PacketPimJoinPruneMulticastGroup(group,  joined_src_addresses=[source]))
             pckt = Packet(payload=PacketPimHeader(ph))
             self.get_interface().send(pckt.bytes(), ip_sender)
-        except:
-            traceback.print_exc()
-            return
+        except Exception as e:
+            logging.error(e, exc_info=True)
 
     def send_prune(self, holdtime=None):
         if holdtime is None:
             holdtime = T_LIMIT
 
-        print("send prune")
+        logging.debug("send prune")
         try:
             (source, group) = self.get_tree_id()
             ph = PacketPimJoinPrune(self.get_neighbor_RPF(), holdtime)
@@ -177,10 +174,9 @@ class TreeInterface(metaclass=ABCMeta):
             pckt = Packet(payload=PacketPimHeader(ph))
 
             self.get_interface().send(pckt.bytes())
-            print('sent prune msg')
-        except:
-            traceback.print_exc()
-            return
+            logging.debug('sent prune msg')
+        except Exception as e:
+            logging.error(e, exc_info=True)
 
     def send_pruneecho(self):
         holdtime = T_LIMIT
@@ -191,13 +187,12 @@ class TreeInterface(metaclass=ABCMeta):
             pckt = Packet(payload=PacketPimHeader(ph))
 
             self.get_interface().send(pckt.bytes())
-            print("send prune echo")
-        except:
-            traceback.print_exc()
-            return
+            logging.debug("send prune echo")
+        except Exception as e:
+            logging.error(e, exc_info=True)
 
     def send_join(self):
-        print("send join")
+        logging.debug("send join")
 
         try:
             (source, group) = self.get_tree_id()
@@ -206,12 +201,11 @@ class TreeInterface(metaclass=ABCMeta):
             pckt = Packet(payload=PacketPimHeader(ph))
 
             self.get_interface().send(pckt.bytes())
-        except:
-            traceback.print_exc()
-            return
+        except Exception as e:
+            logging.error(e, exc_info=True)
 
     def send_assert(self):
-        print("send assert")
+        logging.debug("send assert")
 
         try:
             (source, group) = self.get_tree_id()
@@ -220,12 +214,11 @@ class TreeInterface(metaclass=ABCMeta):
             pckt = Packet(payload=PacketPimHeader(ph))
 
             self.get_interface().send(pckt.bytes())
-        except:
-            traceback.print_exc()
-            return
+        except Exception as e:
+            logging.error(e, exc_info=True)
 
     def send_assert_cancel(self):
-        print("send assert cancel")
+        logging.debug("send assert cancel")
 
         try:
             (source, group) = self.get_tree_id()
@@ -233,9 +226,8 @@ class TreeInterface(metaclass=ABCMeta):
             pckt = Packet(payload=PacketPimHeader(ph))
 
             self.get_interface().send(pckt.bytes())
-        except:
-            traceback.print_exc()
-            return
+        except Exception as e:
+            logging.error(e, exc_info=True)
 
     def send_state_refresh(self, state_refresh_msg_received: PacketPimStateRefresh):
         pass
@@ -279,7 +271,7 @@ class TreeInterface(metaclass=ABCMeta):
         self._assert_winner_metric = None
         self.clear_assert_timer()
 
-        print('Tree Interface deleted')
+        logging.debug('Tree Interface deleted')
 
     def is_olist_null(self):
         return self._kernel_entry.is_olist_null()

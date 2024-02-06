@@ -1,0 +1,10 @@
+[Unit]
+Description=Multicast routing daemon
+#ConditionPathExists=/etc/pim-dm/conf.yaml
+
+[Service]
+#WorkingDirectory=/etc/pim-dm
+#ExecStart=/usr/local/bin/pim-dm -config conf.yaml
+ExecStart=/usr/local/bin/pim-dm -start
+ExecStop=/usr/local/bin/pim-dm -stop
+

@@ -7,7 +7,6 @@ import random
 from .metric import AssertMetric
 from .originator import OriginatorState, OriginatorStateABC
 from pimdm.packet.PacketPimStateRefresh import PacketPimStateRefresh
-import traceback
 from . import data_packets_socket
 import threading
 import logging
@@ -63,11 +62,10 @@ class TreeInterfaceUpstream(TreeInterface):
         while self.socket_is_enabled:
             try:
                 self.socket_pkt.recvfrom(0)
-                print("DATA RECEIVED")
+                logging.debug("DATA RECEIVED")
                 self.recv_data_msg()
-            except:
-                traceback.print_exc()
-                continue
+            except Exception as e:
+                logging.error(e, exc_info=True)
 
     ##########################################
     # Set state
@@ -191,7 +189,7 @@ class TreeInterfaceUpstream(TreeInterface):
         self._graft_prune_state.seePrune(self)
 
     def recv_graft_ack_msg(self, source_ip_of_graft_ack):
-        print("GRAFT ACK!!!")
+        logging.debug("GRAFT ACK!!!")
         if source_ip_of_graft_ack == self.get_neighbor_RPF():
             self._graft_prune_state.recvGraftAckFromRPFnbr(self)
 

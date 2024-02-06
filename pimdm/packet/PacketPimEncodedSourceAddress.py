@@ -1,6 +1,7 @@
 import ipaddress
 import struct
 import socket
+import logging
 '''
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -84,7 +85,7 @@ class PacketPimEncodedSourceAddress:
             raise Exception("Unknown address family")
 
         if encoding != 0:
-            print("unknown encoding")
+            logging.error("unknown encoding")
             raise Exception
 
         return PacketPimEncodedSourceAddress(ip, mask_len)

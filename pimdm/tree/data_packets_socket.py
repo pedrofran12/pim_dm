@@ -1,6 +1,7 @@
 import struct
 import socket
 import ipaddress
+import logging
 from ctypes import create_string_buffer, addressof
 from pcap_wrapper import bpf
 
@@ -25,7 +26,7 @@ def get_s_g_bpf_filter_code(source, group, interface_name):
         raise Exception("Unknown IP family")
 
     num, bpf_filter = bpf(bpf_filter_str.encode()).compiled_filter()
-    print(num)
+    logging.debug(num)
 
     # defined in linux/filter.h.
     b = create_string_buffer(bpf_filter)

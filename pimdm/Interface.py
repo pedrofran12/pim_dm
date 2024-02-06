@@ -1,3 +1,4 @@
+import logging
 import socket
 from abc import ABCMeta, abstractmethod
 import threading
@@ -40,9 +41,8 @@ class Interface(metaclass=ABCMeta):
                 (raw_bytes, ancdata, _, src_addr) = self._recv_socket.recvmsg(256 * 1024, 500)
                 if raw_bytes:
                     self._receive(raw_bytes, ancdata, src_addr)
-            except Exception:
-                traceback.print_exc()
-                continue
+            except Exception as e:
+                logging.error(e, exc_info=True)
 
     @abstractmethod
     def _receive(self, raw_bytes, ancdata, src_addr):

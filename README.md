@@ -41,7 +41,7 @@ To interact with the protocol you need to execute the `pim-dm` command. You may 
 
 #### Start protocol process
 
-In order to start the protocol you first need to explicitly start it. This will start a daemon process, which will be running in the background. The command is the following:
+In order to start the protocol you first need to explicitly start it. This will start pim-dm process, which will be running in foreground. The command is the following:
   ```
   sudo pim-dm -start [-mvrf MULTICAST_TABLE_ID] [-uvrf UNICAST_TABLE_ID]
   ```
@@ -56,6 +56,23 @@ If `-uvrf` is not defined, the default unicast table id will be used (table id 2
 
 After starting the protocol process, if the default multicast table is not used, the following commands (for adding interfaces and listing state) need to have the argument `-mvrf` defined to specify the corresponding daemon process.
 
+
+#### Run in background
+
+To start pim-dm process in background, one can use
+  ```
+  sudo setsid pim-dm -start [-mvrf MULTICAST_TABLE_ID] [-uvrf UNICAST_TABLE_ID] &
+  ```
+or run it with a daemonizing tool (systemd, supervisord, OpenRC ...).
+
+For systemd you can simply run
+  ```
+  sudo systemd-run pim-dm -start
+  ```
+or copy [pim-dm.service](daemon/pim-dm.service) to `/usr/lib/systemd/system/pim-dm.service` and then start pim-dm process with command:
+  ```
+  sudo systemctl start pim-dm
+  ```
 
 
 #### Multi daemon support

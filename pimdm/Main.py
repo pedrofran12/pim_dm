@@ -3,7 +3,7 @@ import sys
 import time
 import netifaces
 import logging
-import logging.handlers
+import logging.config
 from prettytable import PrettyTable
 from pimdm.tree import pim_globals
 
@@ -17,7 +17,6 @@ mld_interfaces = {}  # mld interfaces
 kernel = None
 kernel_v6 = None
 unicast_routing = None
-logger = None
 
 
 def add_pim_interface(interface_name, state_refresh_capable: bool = False, ipv4=True, ipv6=False):
@@ -80,7 +79,7 @@ def list_neighbors(ipv4=False, ipv6=False):
 
             t.add_row(
                 [interface.interface_name, neighbor.ip, neighbor.hello_hold_time, neighbor.generation_id, time.strftime("%H:%M:%S", time.gmtime(uptime))])
-    print(t)
+    logging.info(t)
     return str(t)
 
 
@@ -114,7 +113,7 @@ def list_enabled_interfaces(ipv4=False, ipv6=False):
             t.add_row([interface, ip, enabled, state_refresh_enabled, membership_state])
         except Exception:
             continue
-    print(t)
+    logging.info(t)
     return str(t)
 
 
@@ -141,10 +140,10 @@ def list_membership_state(ipv4=True, ipv6=False):
     for (interface_name, interface_obj) in list(membership_interfaces.items()):
         interface_state = interface_obj.interface_state
         state_txt = interface_state.print_state()
-        print(interface_state.group_state.items())
+        logging.info(interface_state.group_state.items())
 
         for (group_addr, group_state) in list(interface_state.group_state.items()):
-            print(group_addr)
+            logging.info(group_addr)
             group_state_txt = group_state.print_state()
             t.add_row([interface_name, state_txt, group_addr, group_state_txt])
     return str(t)
@@ -231,9 +230,7 @@ def get_config():
     try:
         from . import Config
         return Config.get_yaml_file()
-    except ModuleNotFoundError:
-        return "PYYAML needs to be installed. Execute \"pip3 install pyyaml\""
-    except ImportError:
+    except (ImportError, ModuleNotFoundError):
         return "PYYAML needs to be installed. Execute \"pip3 install pyyaml\""
 
 
@@ -244,9 +241,8 @@ def set_config(file_path):
     from . import Config
     try:
         Config.parse_config_file(file_path)
-    except:
-        import traceback
-        traceback.print_exc()
+    except Exception as e:
+        logging.error(e, exc_info=True)
 
 
 def drop(interface_name, packet_type):
@@ -270,23 +266,6 @@ def enable_ipv6_kernel():
 
 
 def main():
-    # logging
-    global logger
-    logger = logging.getLogger('pim')
-    mld_logger = logging.getLogger('mld')
-    igmp_logger = logging.getLogger('igmp')
-    logger.setLevel(logging.DEBUG)
-    igmp_logger.setLevel(logging.DEBUG)
-    mld_logger.setLevel(logging.DEBUG)
-    handler = logging.StreamHandler(sys.stdout)
-    handler.addFilter(RootFilter(""))
-    handler.setLevel(logging.DEBUG)
-    handler.setFormatter(logging.Formatter('%(asctime)-20s %(name)-50s %(tree)-35s %(vif)-2s %(interfacename)-5s '
-                                           '%(routername)-2s %(message)s'))
-    logger.addHandler(handler)
-    igmp_logger.addHandler(handler)
-    mld_logger.addHandler(handler)
-
     global kernel
     from pimdm.Kernel import Kernel4
     kernel = Kernel4()

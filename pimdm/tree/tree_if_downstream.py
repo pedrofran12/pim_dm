@@ -6,7 +6,6 @@ from .tree_interface import TreeInterface
 from pimdm.packet.PacketPimStateRefresh import PacketPimStateRefresh
 from pimdm.packet.Packet import Packet
 from pimdm.packet.PacketPimHeader import PacketPimHeader
-import traceback
 import logging
 
 
@@ -103,7 +102,7 @@ class TreeInterfaceDownstream(TreeInterface):
 
     # Override
     def recv_graft_msg(self, upstream_neighbor_address, source_ip):
-        print("GRAFT!!!")
+        logging.debug("GRAFT!!!")
         super().recv_graft_msg(upstream_neighbor_address, source_ip)
 
         if upstream_neighbor_address == self.get_ip():
@@ -114,7 +113,7 @@ class TreeInterfaceDownstream(TreeInterface):
     # Send messages
     ######################################
     def send_state_refresh(self, state_refresh_msg_received):
-        print("send state refresh")
+        logging.debug("send state refresh")
         if state_refresh_msg_received is None:
             return
 
@@ -151,9 +150,8 @@ class TreeInterfaceDownstream(TreeInterface):
             pckt = Packet(payload=PacketPimHeader(ph))
 
             self.get_interface().send(pckt.bytes())
-        except:
-            traceback.print_exc()
-            return
+        except Exception as e:
+            logging.error(e, exc_info=True)
 
 
     ##########################################################
