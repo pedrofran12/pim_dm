@@ -3,9 +3,11 @@ import socket
 import struct
 import ipaddress
 import traceback
-from socket import if_nametoindex
+from socket import if_nametoindex, AF_INET, AF_INET6
 from threading import RLock, Thread
 from abc import abstractmethod, ABCMeta
+from functools import partial
+from pyroute2 import IPRoute
 
 from pimdm import UnicastRouting, Main
 from pimdm.rwlock.RWLock import RWLockWrite
@@ -22,6 +24,10 @@ from pimdm.tree.KernelEntryInterface import KernelEntry4Interface, KernelEntry6I
 class Kernel(metaclass=ABCMeta):
     # Max Number of Virtual Interfaces
     MAXVIFS = 32
+
+    # Rtnetlink flags
+    RTNL_FAMILY_IPMR  = 128
+    RTNL_FAMILY_IP6MR = RTNL_FAMILY_IPMR + 1
 
     def __init__(self, kernel_socket):
         # Kernel is running
@@ -49,6 +55,12 @@ class Kernel(metaclass=ABCMeta):
         # logs
         self.interface_logger = Main.logger.getChild('KernelInterface')
         self.tree_logger = Main.logger.getChild('KernelTree')
+
+        # netlink interfacing
+        self.ipr = IPRoute()
+
+        # unformatted mrule command
+        self.to_format_mrule = "ip {ip_version} mrule {cmd} {selector} {interface_name} lookup {table_id}".format
 
         # receive signals from kernel with a background thread
         handler_thread = Thread(target=self.handler)
@@ -85,7 +97,7 @@ class Kernel(metaclass=ABCMeta):
             elif membership_interface:
                 index = membership_interface.vif_index
             else:
-                index = list(range(0, self.MAXVIFS) - self.vif_index_to_name_dic.keys())[0]
+                index = (range(0, self.MAXVIFS) - self.vif_index_to_name_dic.keys()).pop()
 
             ip_interface = None
             if interface_name not in self.pim_interface:
@@ -111,7 +123,7 @@ class Kernel(metaclass=ABCMeta):
             elif pim_interface:
                 index = pim_interface.vif_index
             else:
-                index = list(range(0, self.MAXVIFS) - self.vif_index_to_name_dic.keys())[0]
+                index = (range(0, self.MAXVIFS) - self.vif_index_to_name_dic.keys()).pop()
 
             if interface_name not in self.membership_interface:
                 membership_interface = self._create_membership_interface_object(interface_name, index)
@@ -128,23 +140,38 @@ class Kernel(metaclass=ABCMeta):
 
     def remove_interface(self, interface_name, membership: bool = False, pim: bool = False):
         with self.interface_lock:
-            pim_interface = self.pim_interface.get(interface_name)
-            membership_interface = self.membership_interface.get(interface_name)
-            if (membership and not membership_interface) or (pim and not pim_interface) or (not membership and not pim):
-                return
-            if pim:
-                pim_interface = self.pim_interface.pop(interface_name)
-                pim_interface.remove()
-            elif membership:
-                membership_interface = self.membership_interface.pop(interface_name)
-                membership_interface.remove()
+            if pim and interface_name in self.pim_interface:
+                self.pim_interface.pop(interface_name).remove()
+            if membership and interface_name in self.membership_interface:
+                self.membership_interface.pop(interface_name).remove()
 
-            if not self.membership_interface.get(interface_name) and not self.pim_interface.get(interface_name):
+            if ((pim and not interface_name in self.membership_interface) or
+                (membership and not interface_name in self.pim_interface)):
                 self.remove_virtual_interface(interface_name)
 
     @abstractmethod
     def remove_virtual_interface(self, interface_name):
         raise NotImplementedError
+
+    def start_forwarding(self, index):
+        for new_interface in (kernel_entry.new_interface
+            for source_dict in self.routing.values()
+            for kernel_entry in source_dict.values()
+        ):
+            new_interface(index)
+
+
+    def stop_forwarding(self, index):
+        # change MFC's to not forward traffic by this interface (set OIL to 0 for this interface)
+        with self.rwlock.genWlock():
+            for remove_interface in (kernel_entry.remove_interface
+                    for source_dict in self.routing.values()
+                    for kernel_entry in source_dict.values()
+            ):
+                remove_interface(index)
+
+        interface_name = self.vif_index_to_name_dic.pop(index) 
+        self.interface_logger.debug('Remove virtual interface: %s -> %d', interface_name, index)
 
     #############################################
     # Manipulate multicast routing table
@@ -199,12 +226,12 @@ class Kernel(metaclass=ABCMeta):
     # notify KernelEntries about changes at the unicast routing table
     def notify_unicast_changes(self, subnet):
         with self.rwlock.genWlock():
-            for source_ip in list(self.routing.keys()):
-                source_ip_obj = ipaddress.ip_address(source_ip)
-                if source_ip_obj not in subnet:
-                    continue
-                for group_ip in list(self.routing[source_ip].keys()):
-                    self.routing[source_ip][group_ip].network_update()
+            for network_update in (kernel_entry.network_update
+                    for kernel_entry in group_ip_dict
+                    for source_ip, group_ip_dict in self.routing.items()
+                    if ipaddress.ip_address(source_ip) in subnet
+            ):
+                network_update()
 
 
     # notify about changes at the interface (IP)
@@ -242,6 +269,32 @@ class Kernel(metaclass=ABCMeta):
             for groups_dict in self.routing.values():
                 for entry in groups_dict.values():
                     entry.new_or_reset_neighbor(vif_index, neighbor_ip)
+
+    def ex_partial_mrule(self, partial_mrule: partial, ip_family: int):
+        os.system(partial_mrule(ip_version='-6' if ip_family ==  AF_INET6 else ''))
+
+    def add_mrule(self, interface_name: str, table_id: int, ip_family=AF_INET):
+        partial_mrule = partial(self.to_format_mrule, cmd='add', interface_name=interface_name, table_id=table_id)
+        self.ex_partial_mrule(partial(partial_mrule, selector='iif'), ip_family)
+        self.ex_partial_mrule(partial(partial_mrule, selector='oif'), ip_family)
+
+    def delete_mrule(self, interface_name: str, table_id: int, ip_family=AF_INET):
+        partial_mrule = partial(self.to_format_mrule, cmd='del', interface_name=interface_name, table_id=table_id)
+        for rule in self.ipr.get_rules(
+            family=self.RTNL_FAMILY_IP6MR if ip_family == AF_INET6 else self.RTNL_FAMILY_IPMR,
+            table=table_id
+        ):
+            for k,v in rule['attrs']:
+                if k == 'FRA_IIFNAME':
+                    if v == interface_name:
+                        self.ex_partial_mrule(partial(partial_mrule, selector='iif'), ip_family)
+                    else:
+                        break
+                elif k == 'FRA_OIFNAME':
+                    if v == interface_name:
+                        self.ex_partial_mrule(partial(partial_mrule, selector='oif'), ip_family)
+                    else:
+                        break
 
 
 class Kernel4(Kernel):
@@ -314,43 +367,31 @@ class Kernel4(Kernel):
 
         struct_mrt_add_vif = struct.pack("HBBI 4s 4s", index, flags, 1, 0, ip_interface,
                                          socket.inet_aton("0.0.0.0"))
-        os.system("ip mrule del iif {}".format(interface_name))
-        os.system("ip mrule del oif {}".format(interface_name))
+        self.delete_mrule(interface_name, 0)
         if pim_globals.MULTICAST_TABLE_ID != 0:
-            os.system("ip mrule add iif {} lookup {}".format(interface_name, pim_globals.MULTICAST_TABLE_ID))
-            os.system("ip mrule add oif {} lookup {}".format(interface_name, pim_globals.MULTICAST_TABLE_ID))
+            self.add_mrule(interface_name, pim_globals.MULTICAST_TABLE_ID)
         with self.rwlock.genWlock():
             self.socket.setsockopt(socket.IPPROTO_IP, self.MRT_ADD_VIF, struct_mrt_add_vif)
             self.vif_index_to_name_dic[index] = interface_name
             self.vif_name_to_index_dic[interface_name] = index
 
-            for source_dict in list(self.routing.values()):
-                for kernel_entry in list(source_dict.values()):
-                    kernel_entry.new_interface(index)
+            self.start_forwarding(index)
 
         self.interface_logger.debug('Create virtual interface: %s -> %d', interface_name, index)
         return index
 
     def remove_virtual_interface(self, interface_name):
         #with self.interface_lock:
-        index = self.vif_name_to_index_dic.pop(interface_name, None)
-        struct_vifctl = struct.pack("HBBI 4s 4s", index, 0, 0, 0, socket.inet_aton("0.0.0.0"), socket.inet_aton("0.0.0.0"))
+        if interface_name in self.vif_name_to_index_dic:
+            index = self.vif_name_to_index_dic.pop(interface_name)
+            struct_vifctl = struct.pack("HBBI 4s 4s", index, 0, 0, 0, socket.inet_aton("0.0.0.0"), socket.inet_aton("0.0.0.0"))
 
-        os.system("ip mrule del iif {}".format(interface_name))
-        os.system("ip mrule del oif {}".format(interface_name))
-        self.socket.setsockopt(socket.IPPROTO_IP, self.MRT_DEL_VIF, struct_vifctl)
+            self.delete_mrule(interface_name, 0)
+            if pim_globals.MULTICAST_TABLE_ID != 0:
+                self.delete_mrule(interface_name, pim_globals.MULTICAST_TABLE_ID)
+            self.socket.setsockopt(socket.IPPROTO_IP, self.MRT_DEL_VIF, struct_vifctl)
 
-        del self.vif_name_to_index_dic[self.vif_index_to_name_dic[index]]
-        interface_name = self.vif_index_to_name_dic.pop(index)
-
-        # change MFC's to not forward traffic by this interface (set OIL to 0 for this interface)
-        with self.rwlock.genWlock():
-            for source_dict in list(self.routing.values()):
-                for kernel_entry in list(source_dict.values()):
-                    kernel_entry.remove_interface(index)
-
-        self.interface_logger.debug('Remove virtual interface: %s -> %d', interface_name, index)
-
+            self.stop_forwarding(index)
 
 
     '''
@@ -559,43 +600,33 @@ class Kernel6(Kernel):
         physical_if_index = if_nametoindex(interface_name)
         struct_mrt_add_vif = struct.pack("HBBHI", index, flags, 1, physical_if_index, 0)
 
-        os.system("ip -6 mrule del iif {}".format(interface_name))
-        os.system("ip -6 mrule del oif {}".format(interface_name))
+        self.delete_mrule(interface_name, 0, AF_INET6)
         if pim_globals.MULTICAST_TABLE_ID != 0:
-            os.system("ip -6 mrule add iif {} lookup {}".format(interface_name, pim_globals.MULTICAST_TABLE_ID))
-            os.system("ip -6 mrule add oif {} lookup {}".format(interface_name, pim_globals.MULTICAST_TABLE_ID))
+            self.add_mrule(interface_name, pim_globals.MULTICAST_TABLE_ID, AF_INET6)
 
         with self.rwlock.genWlock():
             self.socket.setsockopt(socket.IPPROTO_IPV6, self.MRT6_ADD_MIF, struct_mrt_add_vif)
             self.vif_index_to_name_dic[index] = interface_name
             self.vif_name_to_index_dic[interface_name] = index
 
-            for source_dict in list(self.routing.values()):
-                for kernel_entry in list(source_dict.values()):
-                    kernel_entry.new_interface(index)
+            self.start_forwarding(index)
 
         self.interface_logger.debug('Create virtual interface: %s -> %d', interface_name, index)
         return index
 
     def remove_virtual_interface(self, interface_name):
         # with self.interface_lock:
-        mif_index = self.vif_name_to_index_dic.pop(interface_name, None)
-        interface_name = self.vif_index_to_name_dic.pop(mif_index)
+        if interface_name in self.vif_name_to_index_dic:
+            mif_index = self.vif_name_to_index_dic.pop(interface_name)
+            physical_if_index = if_nametoindex(interface_name)
 
-        physical_if_index = if_nametoindex(interface_name)
-        struct_vifctl = struct.pack("HBBHI", mif_index, 0, 0, physical_if_index, 0)
-        self.socket.setsockopt(socket.IPPROTO_IPV6, self.MRT6_DEL_MIF, struct_vifctl)
+            struct_vifctl = struct.pack("HBBHI", mif_index, 0, 0, physical_if_index, 0)
+            self.socket.setsockopt(socket.IPPROTO_IPV6, self.MRT6_DEL_MIF, struct_vifctl)
 
-        os.system("ip -6 mrule del iif {}".format(interface_name))
-        os.system("ip -6 mrule del oif {}".format(interface_name))
+            if pim_globals.MULTICAST_TABLE_ID != 0:
+                self.delete_mrule(interface_name, pim_globals.MULTICAST_TABLE_ID, AF_INET6)
 
-        # alterar MFC's para colocar a 0 esta interface
-        with self.rwlock.genWlock():
-            for source_dict in list(self.routing.values()):
-                for kernel_entry in list(source_dict.values()):
-                    kernel_entry.remove_interface(mif_index)
-
-        self.interface_logger.debug('Remove virtual interface: %s -> %d', interface_name, mif_index)
+            self.stop_forwarding(mif_index)
 
     '''
     /* Cache manipulation structures for mrouted and PIMd */
